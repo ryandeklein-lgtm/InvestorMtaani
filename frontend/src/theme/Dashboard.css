@@ -1,0 +1,176 @@
+/* ==========================================
+   Dashboard Statistics
+========================================== */
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin: 30px 0;
+}
+
+/* ==========================================
+   Hero Banner
+========================================== */
+
+.hero-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+
+  background: linear-gradient(
+    135deg,
+    #071529 0%,
+    #0b1f3a 55%,
+    #16345c 100%
+  );
+
+  color: #ffffff;
+
+  border-radius: 20px;
+
+  padding: 40px;
+
+  margin-bottom: 35px;
+
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+}
+
+.hero-banner-content {
+  flex: 1;
+}
+
+.hero-banner-title {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.hero-banner-subtitle {
+  margin-top: 14px;
+  color: #cbd5e1;
+  line-height: 1.8;
+  max-width: 700px;
+}
+
+.hero-banner-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================
+   Dashboard Layout
+========================================== */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.dashboard-main,
+.dashboard-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ==========================================
+   Lists
+========================================== */
+
+.dashboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-list li {
+  padding: 14px 0;
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.dashboard-list li:last-child {
+  border-bottom: none;
+}
+
+/* ==========================================
+   Business Cards
+========================================== */
+
+.business-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.business-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 22px;
+  transition: all 0.25s ease;
+}
+
+.business-item:hover {
+  transform: translateY(-3px);
+  border-color: #16a34a;
+}
+
+.business-item h3 {
+  margin: 0;
+  color: #0b1f3a;
+  font-size: 1.1rem;
+}
+
+.business-item p {
+  margin: 10px 0 18px;
+  color: #64748b;
+}
+
+/* ==========================================
+   Quick Actions
+========================================== */
+
+.quick-actions {
+  display: grid;
+  gap: 14px;
+}
+
+.quick-actions .btn {
+  width: 100%;
+}
+
+/* ==========================================
+   Responsive
+========================================== */
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 30px;
+  }
+
+  .hero-banner-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-banner-actions {
+    width: 100%;
+  }
+
+  .hero-banner-actions .btn {
+    width: 100%;
+  }
+}

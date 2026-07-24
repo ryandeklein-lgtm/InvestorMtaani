@@ -1,0 +1,37 @@
+.btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px 30px;
+    border:none;
+    border-radius:10px;
+    font-weight:600;
+    transition:.25s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}
+
+.btn-primary{
+    background:#15402B;
+    color:white;
+}
+
+.btn-primary:hover{
+    background:#0F3021;
+}
+
+.btn-accent{
+    background:#E7A93D;
+    color:#14110D;
+}
+
+.btn-accent:hover{
+    background:#C58D2C;
+}
+
+.btn-danger{
+    background:#C33F26;
+    color:white;
+}

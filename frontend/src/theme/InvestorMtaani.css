@@ -1,0 +1,257 @@
+/* ==========================================================
+   INVESTOR MTAANI DESIGN SYSTEM
+========================================================== */
+
+/* Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
+/* ---------- Theme Variables ---------- */
+
+:root{
+  --primary:#15402B;
+  --primary-dark:#0F3021;
+
+  --accent:#E7A93D;
+  --accent-dark:#C58D2C;
+
+  --secondary:#C33F26;
+
+  --cream:#FBF6EA;
+  --background:#F7F3E8;
+
+  --white:#FFFFFF;
+
+  --text:#14110D;
+  --text-light:#6B665C;
+
+  --border:#DDD3BF;
+
+  --shadow-sm:0 5px 15px rgba(0,0,0,.08);
+  --shadow-md:0 10px 30px rgba(0,0,0,.12);
+  --shadow-lg:0 18px 45px rgba(0,0,0,.18);
+
+  --radius:18px;
+}
+
+/* ---------- Reset ---------- */
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background:var(--cream);
+  color:var(--text);
+  font-family:"Sora",sans-serif;
+  line-height:1.6;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+img{
+  max-width:100%;
+  display:block;
+}
+
+button{
+  font-family:"Sora",sans-serif;
+  cursor:pointer;
+}
+
+/* ---------- Typography ---------- */
+
+h1,h2,h3,h4,h5{
+  font-family:"Fraunces",serif;
+}
+
+.eyebrow{
+  color:var(--accent);
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-family:"Space Mono",monospace;
+  font-size:12px;
+}
+
+/* ---------- Layout ---------- */
+
+.page{
+  min-height:100vh;
+  padding:40px 8%;
+}
+
+.container{
+  width:min(1280px,100%);
+  margin:auto;
+}
+
+.section{
+  margin:60px auto;
+}
+
+.grid{
+  display:grid;
+  gap:24px;
+}
+
+.grid-2{
+  grid-template-columns:repeat(auto-fit,minmax(450px,1fr));
+}
+
+.grid-3{
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+}
+
+.grid-4{
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
+
+/* ---------- Dashboard ---------- */
+
+.dashboard-header{
+  background:linear-gradient(135deg,var(--primary),#1F5A3D);
+  color:white;
+  padding:50px;
+  border-radius:24px;
+  margin-bottom:40px;
+}
+
+.dashboard-title{
+  font-size:clamp(34px,5vw,48px);
+  margin:12px 0;
+}
+
+.dashboard-subtitle{
+  color:#D9E6DB;
+}
+
+/* ---------- Cards ---------- */
+
+.card{
+  background:white;
+  border-radius:var(--radius);
+  padding:28px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:var(--shadow-md);
+}
+
+.stat-card{
+  background:white;
+  border-radius:var(--radius);
+  padding:28px;
+  border-top:6px solid var(--accent);
+  box-shadow:var(--shadow-sm);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px 28px;
+  border:none;
+  border-radius:12px;
+  font-weight:600;
+  transition:.25s;
+}
+
+.btn:hover{
+  transform:translateY(-2px);
+}
+
+.btn-primary{
+  background:var(--primary);
+  color:white;
+}
+
+.btn-primary:hover{
+  background:var(--primary-dark);
+}
+
+.btn-accent{
+  background:var(--accent);
+  color:var(--text);
+}
+
+.btn-accent:hover{
+  background:var(--accent-dark);
+}
+
+.btn-danger{
+  background:var(--secondary);
+  color:white;
+}
+
+/* ---------- Forms ---------- */
+
+.input,
+textarea,
+select{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  margin-top:8px;
+  font-size:15px;
+}
+
+.input:focus,
+textarea:focus,
+select:focus{
+  outline:none;
+  border-color:var(--primary);
+}
+
+/* ---------- Tables ---------- */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:var(--primary);
+  color:white;
+  padding:16px;
+}
+
+td{
+  padding:16px;
+  border-bottom:1px solid #ECECEC;
+}
+
+/* ---------- Badges ---------- */
+
+.badge{
+  display:inline-block;
+  padding:8px 14px;
+  border-radius:999px;
+  background:var(--accent);
+  color:var(--text);
+  font-size:13px;
+  font-weight:600;
+}
+
+/* ---------- Empty State ---------- */
+
+.empty-state{
+  background:white;
+  padding:60px;
+  border-radius:24px;
+  text-align:center;
+  box-shadow:var(--shadow-sm);
+}

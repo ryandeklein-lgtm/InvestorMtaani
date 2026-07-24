@@ -1,0 +1,26 @@
+.role-selector {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.role-option {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.role-option:hover {
+  border-color: #888;
+}
+
+.role-option.active {
+  background: #1a1a2e;
+  color: #fff;
+  border-color: #1a1a2e;
+}

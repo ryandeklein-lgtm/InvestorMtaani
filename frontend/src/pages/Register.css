@@ -1,0 +1,402 @@
+/* ===========================
+   Investor Mtaani Register
+   Brand palette (matches Landing page):
+   Deep green:  #15402B
+   Gold/amber:  #E7A93D
+   Rust/red:    #C33F26
+   Cream bg:    #FBF6EA
+   Tan bg:      #EFE2BE
+   Near-black:  #14110D
+   Body text:   #443F32 / #55503F
+=========================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500;1,600&family=Sora:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+.register-page {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Sora", sans-serif;
+  background: #FBF6EA;
+  color: #14110D;
+}
+
+/* ===========================
+   LEFT PANEL
+=========================== */
+
+.register-left {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #15402B;
+  color: #FBF6EA;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.register-left::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(231,169,61,0.10) 0px, rgba(231,169,61,0.10) 2px, transparent 2px, transparent 16px),
+    repeating-linear-gradient(-45deg, rgba(195,63,38,0.08) 0px, rgba(195,63,38,0.08) 2px, transparent 2px, transparent 16px);
+  pointer-events: none;
+}
+
+.register-left > * {
+  position: relative;
+}
+
+.register-left h1 {
+  font-family: "Fraunces", serif;
+  font-weight: 700;
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.register-left h2 {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 30px;
+  margin-bottom: 25px;
+  color: #E7A93D;
+}
+
+.register-left p {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #D9E5DC;
+}
+
+.feature-list {
+  margin-top: 40px;
+}
+
+.feature {
+  margin-bottom: 18px;
+  font-size: 18px;
+}
+
+.quote-box {
+  margin-top: 60px;
+  padding: 20px;
+  border-left: 5px solid #E7A93D;
+  background: rgba(251,246,234,0.08);
+  border-radius: 8px;
+  font-style: italic;
+}
+
+/* ===========================
+   RIGHT PANEL
+=========================== */
+
+.register-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 560px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 40px;
+  border: 1px solid rgba(20,17,13,0.08);
+  box-shadow: 0 10px 35px rgba(20,17,13,.08);
+}
+
+.register-card h2 {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
+  text-align: center;
+  color: #14110D;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #55503F;
+  margin-bottom: 30px;
+}
+
+/* ===========================
+ROLE BUTTONS
+=========================== */
+
+.role-buttons {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.role-buttons button {
+  flex: 1;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid rgba(20,17,13,0.15);
+  background: #FFFFFF;
+  color: #14110D;
+  cursor: pointer;
+  font-family: "Sora", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  transition: .3s;
+}
+
+.role-buttons button:hover {
+  transform: translateY(-2px);
+}
+
+.role-buttons .active-business {
+  border-color: #15402B;
+  background: #EFE2BE;
+  color: #15402B;
+}
+
+.role-buttons .active-investor {
+  border-color: #C33F26;
+  background: #FBE3DB;
+  color: #C33F26;
+}
+
+/* ===========================
+FORM
+=========================== */
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-form input,
+.register-form select {
+  padding: 14px;
+  margin-bottom: 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(20,17,13,0.15);
+  font-family: "Sora", sans-serif;
+  font-size: 15px;
+  transition: .3s;
+}
+
+.register-form input:focus,
+.register-form select:focus {
+  border-color: #E7A93D;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(231,169,61,.20);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  font-size: 14px;
+  color: #443F32;
+}
+
+.checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.register-btn {
+  background: #E7A93D;
+  color: #14110D;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-family: "Sora", sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .3s;
+}
+
+.register-btn:hover {
+  background: #d99a2c;
+}
+
+.success {
+  color: #15402B;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.error {
+  color: #C33F26;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.login-link {
+  margin-top: 25px;
+  text-align: center;
+  color: #55503F;
+}
+
+.login-link a {
+  color: #C33F26;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media (max-width: 900px) {
+
+  .register-page {
+    flex-direction: column;
+  }
+
+  .register-left {
+    padding: 40px;
+    text-align: center;
+  }
+
+  .register-left h1 {
+    font-size: 36px;
+  }
+
+  .register-right {
+    padding: 25px;
+  }
+
+}
+/* ===========================
+   REUSABLE FORM COMPONENTS
+=========================== */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #14110D;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #C33F26;
+  margin-left: 4px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(20,17,13,0.15);
+  border-radius: 10px;
+  font-family: "Sora", sans-serif;
+  font-size: 15px;
+  transition: all 0.25s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #E7A93D;
+  box-shadow: 0 0 0 4px rgba(231, 169, 61, 0.20);
+}
+/* ===========================
+   PASSWORD INPUT
+=========================== */
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-input {
+  padding-right: 60px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.password-toggle:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+/* ===========================
+   REUSABLE SELECT
+=========================== */
+
+.form-select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid rgba(20,17,13,0.15);
+  border-radius: 10px;
+  background: #FFFFFF;
+  font-family: "Sora", sans-serif;
+  font-size: 15px;
+  transition: all 0.25s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #E7A93D;
+  box-shadow: 0 0 0 4px rgba(231,169,61,.20);
+}
+/* ===========================================
+   DYNAMIC FORM GRID
+=========================================== */
+
+.dynamic-form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.grid-col {
+  width: 100%;
+}
+
+.grid-12 {
+  grid-column: span 12;
+}
+
+.grid-6 {
+  grid-column: span 6;
+}
+
+.grid-4 {
+  grid-column: span 4;
+}
+
+.grid-3 {
+  grid-column: span 3;
+}
+
+@media (max-width: 768px) {
+  .dynamic-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-12,
+  .grid-6,
+  .grid-4,
+  .grid-3 {
+    grid-column: span 1;
+  }
+}

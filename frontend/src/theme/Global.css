@@ -1,0 +1,42 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Sora:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    font-family:"Sora",sans-serif;
+    background:#FBF6EA;
+    color:#14110D;
+    line-height:1.6;
+}
+
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+button{
+    font-family:"Sora",sans-serif;
+    cursor:pointer;
+}
+
+img{
+    max-width:100%;
+    display:block;
+}
+
+h1,h2,h3,h4,h5{
+    font-family:"Fraunces",serif;
+    font-weight:600;
+}
+
+code{
+    font-family:"Space Mono",monospace;
+}

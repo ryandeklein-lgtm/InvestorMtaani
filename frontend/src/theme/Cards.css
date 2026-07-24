@@ -1,0 +1,18 @@
+.card{
+    background:white;
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    transition:.25s;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+}
+
+.stat-card{
+    background:white;
+    padding:30px;
+    border-radius:18px;
+    border-top:6px solid #E7A93D;
+}

@@ -1,0 +1,40 @@
+.page{
+    min-height:100vh;
+    padding:40px 8%;
+}
+
+.section{
+    margin:70px auto;
+}
+
+.container{
+    width:min(1280px,100%);
+    margin:auto;
+}
+
+.flex{
+    display:flex;
+}
+
+.flex-between{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.grid{
+    display:grid;
+    gap:24px;
+}
+
+.grid-2{
+    grid-template-columns:repeat(auto-fit,minmax(450px,1fr));
+}
+
+.grid-3{
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+}
+
+.grid-4{
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
