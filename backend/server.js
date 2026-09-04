@@ -8,9 +8,11 @@ const pool = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const startupRoutes = require("./routes/startupRoutes");
 const businessRoutes = require("./routes/businessRoutes");
+const investorRoutes = require("./routes/investorRoutes");
 const matchmakingRoutes = require("./routes/matchmakingRoutes");
 const fundingRoutes = require("./routes/fundingRoutes");
 const newsRoutes = require("./routes/newsRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -43,6 +45,9 @@ app.use("/api/startups", startupRoutes);
 // Business routes
 app.use("/api/businesses", businessRoutes);
 
+// Investor routes
+app.use("/api/investors", investorRoutes);
+
 // Matchmaking routes
 app.use("/api/matchmaking", matchmakingRoutes);
 
@@ -51,6 +56,9 @@ app.use("/api/funding", fundingRoutes);
 
 // News routes
 app.use("/api/news", newsRoutes);
+
+// Admin routes
+app.use("/api/admin", adminRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -3,7 +3,7 @@ import { useAuthContext } from "../contexts/AuthContext";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuthContext();
+  const { isAuthenticated, logout, user } = useAuthContext();
 
   const handleLogout = () => {
     logout();
@@ -87,13 +87,19 @@ export default function Navbar() {
               Browse Businesses
             </NavLink>
 
-            <NavLink to="/business-profile" style={getNavStyle}>
-              My Business
-            </NavLink>
+            {/* Only business-role accounts see/reach their business profile */}
+            {user?.role === "business" && (
+              <NavLink to="/business-profile" style={getNavStyle}>
+                My Business
+              </NavLink>
+            )}
 
-            <NavLink to="/investor-profile" style={getNavStyle}>
-              Investor Dashboard
-            </NavLink>
+            {/* Only investor-role accounts see/reach the investor dashboard */}
+            {user?.role === "investor" && (
+              <NavLink to="/investor-profile" style={getNavStyle}>
+                Investor Dashboard
+              </NavLink>
+            )}
 
             <NavLink to="/matchmaking" style={getNavStyle}>
               Matchmaking

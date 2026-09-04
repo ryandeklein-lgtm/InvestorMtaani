@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Authentication
 import Login from "./pages/Login";
@@ -19,6 +20,7 @@ import BusinessProfile from "./pages/BusinessProfile";
 
 // Investor
 import InvestorProfile from "./pages/InvestorProfile";
+import InvestorForm from "./pages/InvestorForm";
 
 // Investor Pages
 import Watchlist from "./pages/Watchlist";
@@ -29,12 +31,13 @@ import Messages from "./pages/Messages";
 import Funding from "./pages/Funding";
 import Matchmaking from "./pages/Matchmaking";
 import Notifications from "./pages/Notifications";
+
+// 404
 import NotFound from "./pages/NotFound";
 
 function Layout() {
   const location = useLocation();
 
-  // Hide Navbar on Login and Register pages
   const hideNavbar =
     location.pathname === "/login" ||
     location.pathname === "/register";
@@ -58,26 +61,74 @@ function Layout() {
         <Route path="/browse" element={<BrowseBusinesses />} />
 
         {/* Business */}
-        <Route path="/business/:id" element={<BusinessDetails />} />
-        <Route path="/business-profile" element={<BusinessProfile />} />
-        <Route path="/business/create" element={<BusinessForm />} />
-        <Route path="/business-matches" element={<BusinessMatches />} />
+        <Route
+          path="/business/:id"
+          element={<BusinessDetails />}
+        />
+
+        <Route
+          path="/business-profile"
+          element={<BusinessProfile />}
+        />
+
+        <Route
+          path="/business/create"
+          element={<BusinessForm />}
+        />
+
+        <Route
+          path="/business-matches"
+          element={<BusinessMatches />}
+        />
 
         {/* Investor */}
-        <Route path="/investor-profile" element={<InvestorProfile />} />
+        <Route
+          path="/investor-profile"
+          element={<InvestorProfile />}
+        />
+
+        <Route
+          path="/investor/create"
+          element={<InvestorForm />}
+        />
 
         {/* Investor Pages */}
-        <Route path="/watchlist" element={<Watchlist />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/messages" element={<Messages />} />
+        <Route
+          path="/watchlist"
+          element={<Watchlist />}
+        />
+
+        <Route
+          path="/portfolio"
+          element={<Portfolio />}
+        />
+
+        <Route
+          path="/messages"
+          element={<Messages />}
+        />
 
         {/* Platform */}
-        <Route path="/funding" element={<Funding />} />
-        <Route path="/matchmaking" element={<Matchmaking />} />
-        <Route path="/notifications" element={<Notifications />} />
+        <Route
+          path="/funding"
+          element={<Funding />}
+        />
+
+        <Route
+          path="/matchmaking"
+          element={<Matchmaking />}
+        />
+
+        <Route
+          path="/notifications"
+          element={<Notifications />}
+        />
 
         {/* 404 */}
-        <Route path="*" element={<NotFound />} />
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
       </Routes>
     </>
   );

@@ -8,10 +8,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Rehydrate the full user (including role) from localStorage,
+    // not just a bare { token } placeholder.
     const token = authService.getToken();
+    const storedUser = authService.getUser();
 
-    if (token) {
-      setUser({ token });
+    if (token && storedUser) {
+      setUser(storedUser);
     }
 
     setLoading(false);
@@ -19,7 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const data = await authService.login(credentials);
-    setUser(data.user || { token: data.token });
+    setUser(data.user);
     return data;
   };
 
