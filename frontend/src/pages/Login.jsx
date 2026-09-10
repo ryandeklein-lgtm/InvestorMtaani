@@ -55,16 +55,7 @@ function Login() {
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
-      if (response.user.role === "business") {
-        navigate("/business-profile");
-        return;
-      }
-
-      if (response.user.role === "investor") {
-        navigate("/investor-profile");
-        return;
-      }
-
+      // Successful login always goes to Home
       navigate("/home");
     } catch (err) {
       console.error("Login error:", err);
@@ -79,264 +70,335 @@ function Login() {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.brand}>
-          INVESTOR MTAANI
-        </div>
+    <>
+      <GlobalStyles />
 
-        <h1 style={styles.title}>
-          Welcome Back
-        </h1>
+      <div className="im-login-page">
+        <div className="im-grid-bg" />
+        <div className="im-glow" />
 
-        <p style={styles.subtitle}>
-          Choose how you want to sign in
-        </p>
+        <div className="im-login-card">
+          <span className="im-corner im-corner-tl" />
+          <span className="im-corner im-corner-tr" />
+          <span className="im-corner im-corner-bl" />
+          <span className="im-corner im-corner-br" />
 
-        <div style={styles.roleButtons}>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedRole("business");
-              setError("");
-            }}
-            style={{
-              ...styles.roleButton,
-              ...(selectedRole === "business"
-                ? styles.businessActive
-                : {}),
-            }}
-          >
-            <span style={styles.icon}>🏢</span>
-            <span>Business</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedRole("investor");
-              setError("");
-            }}
-            style={{
-              ...styles.roleButton,
-              ...(selectedRole === "investor"
-                ? styles.investorActive
-                : {}),
-            }}
-          >
-            <span style={styles.icon}>💼</span>
-            <span>Investor</span>
-          </button>
-        </div>
-
-        {error && (
-          <div style={styles.error}>
-            {error}
+          <div className="im-login-status">
+            <span className="im-dot" />
+            investor mtaani
           </div>
-        )}
 
-        <form onSubmit={handleSubmit}>
-          <label style={styles.label}>
-            Email Address
-          </label>
+          <h1 className="im-login-title">Welcome back</h1>
+          <p className="im-login-subtitle">Choose how you want to sign in</p>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
+          {/* ROLE SELECTION */}
+          <div className="im-role-buttons">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole("business");
+                setError("");
+              }}
+              className={`im-role-btn ${
+                selectedRole === "business" ? "im-role-btn-business" : ""
+              }`}
+            >
+              Business
+            </button>
 
-          <label style={styles.label}>
-            Password
-          </label>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole("investor");
+                setError("");
+              }}
+              className={`im-role-btn ${
+                selectedRole === "investor" ? "im-role-btn-investor" : ""
+              }`}
+            >
+              Investor
+            </button>
+          </div>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter your password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={styles.input}
-          />
+          {/* ERROR */}
+          {error && <div className="im-error">{error}</div>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              ...styles.submitButton,
-              ...(loading ? styles.submitDisabled : {}),
-            }}
-          >
-            {loading ? "Signing In..." : "Login"}
-          </button>
-        </form>
+          {/* LOGIN FORM */}
+          <form onSubmit={handleSubmit}>
+            <label className="im-label">Email address</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="im-input"
+            />
 
-        <p style={styles.footerText}>
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            style={styles.link}
-          >
-            Register
-          </Link>
-        </p>
+            <label className="im-label">Password</label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="im-input"
+            />
+
+            <button type="submit" disabled={loading} className="im-submit-btn">
+              {loading ? "Signing in…" : "Login"}
+            </button>
+          </form>
+
+          {/* REGISTER LINK */}
+          <p className="im-footer-text">
+            Don't have an account? <Link to="/register">Register</Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#FBF6EA",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "40px 20px",
-    fontFamily: "Arial, sans-serif",
-  },
+function GlobalStyles() {
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-  card: {
-    width: "100%",
-    maxWidth: "460px",
-    background: "#FFFFFF",
-    padding: "40px",
-    borderRadius: "18px",
-    border: "1px solid rgba(20,17,13,0.08)",
-    boxShadow: "0 12px 40px rgba(20,17,13,0.10)",
-    boxSizing: "border-box",
-  },
+      .im-login-page {
+        --void: #060911;
+        --panel: #0e1626;
+        --panel-alt: #0b1220;
+        --panel-border: rgba(61, 214, 245, 0.16);
+        --cyan: #3dd6f5;
+        --violet: #8b7cf6;
+        --text: #e7edf5;
+        --muted: #7c8aa0;
+        --danger: #f2545b;
 
-  brand: {
-    textAlign: "center",
-    color: "#C33F26",
-    fontSize: "12px",
-    fontWeight: "700",
-    letterSpacing: "2px",
-    marginBottom: "15px",
-  },
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        background: var(--void);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+        font-family: 'Space Grotesk', sans-serif;
+      }
 
-  title: {
-    textAlign: "center",
-    color: "#14110D",
-    fontSize: "32px",
-    fontWeight: "700",
-    margin: "0 0 10px",
-  },
+      .im-grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(61, 214, 245, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(61, 214, 245, 0.06) 1px, transparent 1px);
+        background-size: 46px 46px;
+        -webkit-mask-image: radial-gradient(circle at 50% 40%, black, transparent 70%);
+        mask-image: radial-gradient(circle at 50% 40%, black, transparent 70%);
+        pointer-events: none;
+      }
 
-  subtitle: {
-    textAlign: "center",
-    color: "#55503F",
-    fontSize: "15px",
-    margin: "0 0 30px",
-  },
+      .im-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 700px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(61, 214, 245, 0.12), transparent 70%);
+        pointer-events: none;
+      }
 
-  roleButtons: {
-    display: "flex",
-    gap: "10px",
-    marginBottom: "25px",
-  },
+      .im-login-card {
+        position: relative;
+        width: 100%;
+        max-width: 440px;
+        background: var(--panel);
+        padding: 40px;
+        border: 1px solid var(--panel-border);
+        border-radius: 6px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        box-sizing: border-box;
+        color: var(--text);
+      }
 
-  roleButton: {
-    flex: 1,
-    minHeight: "80px",
-    padding: "12px 6px",
-    borderRadius: "10px",
-    border: "1px solid rgba(20,17,13,0.15)",
-    background: "#FFFFFF",
-    color: "#14110D",
-    cursor: "pointer",
-    fontWeight: "700",
-    fontSize: "13px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "7px",
-  },
+      .im-corner {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-color: var(--cyan);
+        opacity: 0.5;
+      }
+      .im-corner-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+      .im-corner-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+      .im-corner-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+      .im-corner-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
 
-  icon: {
-    fontSize: "22px",
-  },
+      .im-login-status {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 18px;
+      }
 
-  businessActive: {
-    border: "2px solid #15402B",
-    background: "#EFE2BE",
-    color: "#15402B",
-  },
+      .im-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--cyan);
+        display: inline-block;
+        margin-right: 8px;
+        animation: im-pulse 2s infinite;
+      }
+      @keyframes im-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(61, 214, 245, 0.55); }
+        50% { box-shadow: 0 0 0 5px rgba(61, 214, 245, 0); }
+      }
 
-  investorActive: {
-    border: "2px solid #C33F26",
-    background: "#FBE3DB",
-    color: "#C33F26",
-  },
+      .im-login-title {
+        text-align: center;
+        font-weight: 700;
+        font-size: 28px;
+        margin: 0 0 8px;
+      }
 
-  error: {
-    background: "#FBE3DB",
-    border: "1px solid #C33F26",
-    color: "#C33F26",
-    padding: "12px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    fontSize: "14px",
-    textAlign: "center",
-  },
+      .im-login-subtitle {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14.5px;
+        margin: 0 0 28px;
+      }
 
-  label: {
-    display: "block",
-    color: "#443F32",
-    fontSize: "13px",
-    fontWeight: "700",
-    marginBottom: "7px",
-  },
+      .im-role-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
 
-  input: {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "14px",
-    marginBottom: "18px",
-    borderRadius: "9px",
-    border: "1px solid rgba(20,17,13,0.18)",
-    fontSize: "15px",
-    outline: "none",
-  },
+      .im-role-btn {
+        flex: 1;
+        min-height: 52px;
+        padding: 12px 6px;
+        border-radius: 3px;
+        border: 1px solid var(--panel-border);
+        background: var(--panel-alt);
+        color: var(--text);
+        cursor: pointer;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 500;
+        font-size: 13.5px;
+        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+      }
 
-  submitButton: {
-    width: "100%",
-    padding: "15px",
-    background: "#E7A93D",
-    color: "#14110D",
-    border: "none",
-    borderRadius: "9px",
-    fontWeight: "700",
-    fontSize: "15px",
-    cursor: "pointer",
-    marginTop: "5px",
-  },
+      .im-role-btn:hover {
+        border-color: rgba(61, 214, 245, 0.4);
+      }
 
-  submitDisabled: {
-    opacity: 0.6,
-    cursor: "not-allowed",
-  },
+      .im-role-btn-business {
+        border-color: var(--cyan);
+        background: rgba(61, 214, 245, 0.12);
+        color: var(--cyan);
+      }
 
-  footerText: {
-    textAlign: "center",
-    marginTop: "25px",
-    marginBottom: "0",
-    color: "#55503F",
-    fontSize: "14px",
-  },
+      .im-role-btn-investor {
+        border-color: var(--violet);
+        background: rgba(139, 124, 246, 0.14);
+        color: var(--violet);
+      }
 
-  link: {
-    color: "#C33F26",
-    fontWeight: "700",
-    textDecoration: "none",
-  },
-};
+      .im-error {
+        background: rgba(242, 84, 91, 0.1);
+        border: 1px solid rgba(242, 84, 91, 0.35);
+        color: var(--danger);
+        padding: 12px 14px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        text-align: center;
+      }
+
+      .im-label {
+        display: block;
+        color: var(--muted);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        font-weight: 500;
+        margin-bottom: 7px;
+      }
+
+      .im-input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 13px 14px;
+        margin-bottom: 18px;
+        border-radius: 3px;
+        border: 1px solid var(--panel-border);
+        background: var(--panel-alt);
+        color: var(--text);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 14.5px;
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .im-input::placeholder {
+        color: var(--muted);
+      }
+
+      .im-input:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 0 3px rgba(61, 214, 245, 0.16);
+      }
+
+      .im-submit-btn {
+        width: 100%;
+        padding: 15px;
+        background: var(--cyan);
+        color: #06111a;
+        border: none;
+        border-radius: 3px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+        font-size: 14.5px;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: opacity 0.2s ease;
+      }
+
+      .im-submit-btn:hover {
+        opacity: 0.88;
+      }
+
+      .im-submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .im-footer-text {
+        text-align: center;
+        margin: 24px 0 0;
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+
+      .im-footer-text a {
+        color: var(--cyan);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .im-footer-text a:hover {
+        text-decoration: underline;
+      }
+    `}</style>
+  );
+}
 
 export default Login;

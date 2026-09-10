@@ -8,167 +8,252 @@ export default function Home() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500;1,600&family=Sora:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-        .im-home { font-family: 'Sora', sans-serif; background: #FBF6EA; min-height: 100vh; }
+        .im-home {
+          --void: #060911;
+          --panel: #0e1626;
+          --panel-border: rgba(61, 214, 245, 0.16);
+          --cyan: #3dd6f5;
+          --violet: #8b7cf6;
+          --text: #e7edf5;
+          --muted: #7c8aa0;
+
+          font-family: 'Space Grotesk', sans-serif;
+          background: var(--void);
+          color: var(--text);
+          min-height: 100vh;
+        }
 
         .im-home-hero {
           position: relative;
           overflow: hidden;
-          background: #15402B;
-          padding: 70px 8% 60px;
+          padding: 64px 8% 56px;
         }
         .im-home-hero::before {
           content: '';
           position: absolute;
           inset: 0;
           background-image:
-            repeating-linear-gradient(45deg, rgba(231,169,61,0.10) 0px, rgba(231,169,61,0.10) 2px, transparent 2px, transparent 16px),
-            repeating-linear-gradient(-45deg, rgba(195,63,38,0.08) 0px, rgba(195,63,38,0.08) 2px, transparent 2px, transparent 16px);
+            linear-gradient(rgba(61, 214, 245, 0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(61, 214, 245, 0.06) 1px, transparent 1px);
+          background-size: 44px 44px;
+          -webkit-mask-image: radial-gradient(circle at 15% 0%, black, transparent 70%);
+          mask-image: radial-gradient(circle at 15% 0%, black, transparent 70%);
           pointer-events: none;
         }
-        .im-home-eyebrow {
-          position: relative;
-          font-family: 'Space Mono', monospace;
-          font-size: 13px;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          color: #E7A93D;
-          display: inline-block;
-          margin-bottom: 16px;
+        .im-home-hero::after {
+          content: '';
+          position: absolute;
+          top: -220px;
+          left: -100px;
+          width: 700px;
+          height: 460px;
+          background: radial-gradient(circle, rgba(61, 214, 245, 0.14), transparent 70%);
+          pointer-events: none;
         }
+
+        .im-home-status {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12.5px;
+          color: var(--muted);
+          margin-bottom: 18px;
+        }
+        .im-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--cyan);
+          display: inline-block;
+          margin-right: 9px;
+          animation: im-pulse 2s infinite;
+        }
+        @keyframes im-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(61, 214, 245, 0.55); }
+          50% { box-shadow: 0 0 0 5px rgba(61, 214, 245, 0); }
+        }
+
+        .im-home-scan-wrap {
+          position: relative;
+          max-width: 640px;
+          overflow: hidden;
+        }
+        .im-scanline {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 1px;
+          background: linear-gradient(90deg, var(--cyan), transparent 80%);
+          animation: im-scan 1.6s ease-out 1 forwards;
+        }
+        @keyframes im-scan {
+          0% { transform: translateY(0); opacity: 0; }
+          12% { opacity: 0.9; }
+          100% { transform: translateY(120px); opacity: 0; }
+        }
+
         .im-home-title {
           position: relative;
-          font-family: 'Fraunces', serif;
           font-weight: 700;
-          font-size: clamp(30px, 4vw, 42px);
-          color: #FBF6EA;
+          font-size: clamp(28px, 4vw, 40px);
+          line-height: 1.15;
           margin: 0 0 12px;
         }
         .im-home-subtitle {
           position: relative;
-          font-size: 17px;
-          color: #D9E5DC;
+          font-size: 16px;
+          color: var(--muted);
           margin: 0;
         }
 
         .im-home-section {
-          padding: 50px 8%;
+          padding: 46px 8%;
           max-width: 1220px;
           margin: 0 auto;
         }
         .im-home-section h2 {
-          font-family: 'Fraunces', serif;
           font-weight: 600;
-          font-size: 26px;
-          color: #14110D;
-          margin: 0 0 22px;
+          font-size: 22px;
+          margin: 0 0 20px;
         }
 
         .im-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 22px;
+          gap: 20px;
         }
 
+        .im-panel {
+          position: relative;
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-radius: 4px;
+        }
+        .im-corner {
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          border-color: var(--cyan);
+          opacity: 0.5;
+        }
+        .im-corner-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+        .im-corner-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+        .im-corner-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+        .im-corner-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+
         .im-stat-card {
-          background: #FFFFFF;
-          border-radius: 12px;
-          padding: 26px 24px;
-          border: 1px solid rgba(20,17,13,0.08);
-          border-top: 4px solid #E7A93D;
+          padding: 24px 22px;
         }
         .im-stat-card h3 {
           margin: 0;
-          font-size: 15px;
-          color: #55503F;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--muted);
         }
         .im-stat-card .im-stat-number {
-          font-family: 'Space Mono', monospace;
-          font-weight: 700;
-          font-size: 32px;
-          color: #C33F26;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 600;
+          font-size: 28px;
+          color: var(--cyan);
           margin: 12px 0 6px;
         }
-        .im-stat-card p {
+        .im-stat-card p:last-child {
           margin: 0;
-          font-size: 13px;
-          color: #64748b;
+          font-size: 12.5px;
+          color: var(--muted);
         }
 
         .im-action-card {
-          background: #FFFFFF;
-          border-radius: 12px;
-          padding: 26px 24px;
-          border: 1px solid rgba(20,17,13,0.08);
+          padding: 24px 22px;
           text-decoration: none;
           color: inherit;
           display: block;
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .im-action-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 14px 30px rgba(20,17,13,0.1);
+          border-color: rgba(61, 214, 245, 0.5);
+          box-shadow: 0 0 0 1px rgba(61, 214, 245, 0.2), 0 0 24px rgba(61, 214, 245, 0.12);
         }
         .im-action-card h3 {
           margin: 0 0 8px;
-          font-size: 17px;
-          color: #14110D;
-          font-family: 'Sora', sans-serif;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text);
         }
         .im-action-card p {
           margin: 0;
-          font-size: 14px;
-          color: #55503F;
+          font-size: 13.5px;
+          color: var(--muted);
           line-height: 1.6;
         }
 
         .im-news-card {
-          background: #FFFFFF;
-          border-radius: 14px;
-          padding: 28px;
-          border: 1px solid rgba(20,17,13,0.08);
+          padding: 26px;
         }
       `}</style>
 
       <div className="im-home">
         {/* Hero */}
         <section className="im-home-hero">
-          <span className="im-home-eyebrow">Investor Mtaani</span>
+          <div className="im-home-status">
+            <span className="im-dot" />
+            system online
+          </div>
 
-          <h1 className="im-home-title">
-            Welcome back{user?.name ? `, ${user.name}` : ""} 👋
-          </h1>
-
-          <p className="im-home-subtitle">
-            Connecting African Innovation with Global Capital.
-          </p>
+          <div className="im-home-scan-wrap">
+            <div className="im-scanline" />
+            <h1 className="im-home-title">
+              Welcome back{user?.name ? `, ${user.name}` : ""}
+            </h1>
+            <p className="im-home-subtitle">
+              Connecting African innovation with global capital.
+            </p>
+          </div>
         </section>
 
         {/* Statistics */}
         <section className="im-home-section">
           <div className="im-grid">
-            <div className="im-stat-card">
-              <h3>🏢 Businesses</h3>
+            <div className="im-panel im-stat-card">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Businesses</h3>
               <p className="im-stat-number">1</p>
               <p>Registered businesses</p>
             </div>
 
-            <div className="im-stat-card">
-              <h3>🤝 Matches</h3>
+            <div className="im-panel im-stat-card">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Matches</h3>
               <p className="im-stat-number">0</p>
               <p>Successful matchmaking</p>
             </div>
 
-            <div className="im-stat-card">
-              <h3>💰 Funding</h3>
+            <div className="im-panel im-stat-card">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Funding</h3>
               <p className="im-stat-number">KES 0</p>
               <p>Total investments</p>
             </div>
 
-            <div className="im-stat-card">
-              <h3>📈 Growth</h3>
+            <div className="im-panel im-stat-card">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Growth</h3>
               <p className="im-stat-number">75%</p>
               <p>Investment readiness</p>
             </div>
@@ -177,26 +262,42 @@ export default function Home() {
 
         {/* Quick Actions */}
         <section className="im-home-section">
-          <h2>Quick Actions</h2>
+          <h2>Quick actions</h2>
 
           <div className="im-grid">
-            <Link className="im-action-card" to="/browse">
-              <h3>🔍 Browse Businesses</h3>
+            <Link className="im-panel im-action-card" to="/browse">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Browse businesses</h3>
               <p>Explore investment opportunities.</p>
             </Link>
 
-            <Link className="im-action-card" to="/matchmaking">
-              <h3>🤝 Matchmake</h3>
+            <Link className="im-panel im-action-card" to="/matchmaking">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Matchmake</h3>
               <p>Connect investors and businesses.</p>
             </Link>
 
-            <Link className="im-action-card" to="/funding">
-              <h3>💰 Funding</h3>
+            <Link className="im-panel im-action-card" to="/funding">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Funding</h3>
               <p>View funding requests.</p>
             </Link>
 
-            <Link className="im-action-card" to="/notifications">
-              <h3>🔔 Notifications</h3>
+            <Link className="im-panel im-action-card" to="/notifications">
+              <span className="im-corner im-corner-tl" />
+              <span className="im-corner im-corner-tr" />
+              <span className="im-corner im-corner-bl" />
+              <span className="im-corner im-corner-br" />
+              <h3>Notifications</h3>
               <p>Stay updated with activity.</p>
             </Link>
           </div>
@@ -204,9 +305,13 @@ export default function Home() {
 
         {/* News */}
         <section className="im-home-section">
-          <h2>Market Pulse</h2>
+          <h2>Market pulse</h2>
 
-          <div className="im-news-card">
+          <div className="im-panel im-news-card">
+            <span className="im-corner im-corner-tl" />
+            <span className="im-corner im-corner-tr" />
+            <span className="im-corner im-corner-bl" />
+            <span className="im-corner im-corner-br" />
             <NewsFeed />
           </div>
         </section>

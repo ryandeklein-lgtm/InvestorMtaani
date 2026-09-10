@@ -1,402 +1,819 @@
-/* ===========================
-   Investor Mtaani Register
-   Brand palette (matches Landing page):
-   Deep green:  #15402B
-   Gold/amber:  #E7A93D
-   Rust/red:    #C33F26
-   Cream bg:    #FBF6EA
-   Tan bg:      #EFE2BE
-   Near-black:  #14110D
-   Body text:   #443F32 / #55503F
-=========================== */
+/* ==========================================================
+   INVESTOR MTAANI
+   REGISTER PAGE
+   Futuristic Theme
+========================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500;1,600&family=Sora:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
-* {
-  box-sizing: border-box;
+:root {
+  --void: #060911;
+  --void-alt: #080d17;
+  --panel: #0e1626;
+  --panel-alt: #0b1220;
+  --panel-border: rgba(61, 214, 245, 0.16);
+  --cyan: #3dd6f5;
+  --violet: #8b7cf6;
+  --text: #e7edf5;
+  --muted: #7c8aa0;
+  --success: #4ade80;
+  --danger: #f2545b;
 }
+
+
+/* ==========================================================
+   PAGE
+========================================================== */
 
 .register-page {
-  display: flex;
   min-height: 100vh;
-  font-family: "Sora", sans-serif;
-  background: #FBF6EA;
-  color: #14110D;
+  width: 100%;
+  display: flex;
+
+  background: var(--void);
+  color: var(--text);
+
+  font-family: "Space Grotesk", sans-serif;
 }
 
-/* ===========================
-   LEFT PANEL
-=========================== */
 
-.register-left {
+/* ==========================================================
+   LEFT BRAND PANEL
+========================================================== */
+
+.register-page .register-left {
   flex: 1;
+  min-height: 100vh;
+
   position: relative;
   overflow: hidden;
-  background: #15402B;
-  color: #FBF6EA;
-  padding: 60px;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  padding: 70px;
+
+  background: var(--void);
+  color: var(--text);
 }
 
-.register-left::before {
+
+/* Grid overlay + glow, replacing the old diagonal stripe pattern */
+
+.register-page .register-left::before {
   content: "";
+
   position: absolute;
   inset: 0;
+
   background-image:
-    repeating-linear-gradient(45deg, rgba(231,169,61,0.10) 0px, rgba(231,169,61,0.10) 2px, transparent 2px, transparent 16px),
-    repeating-linear-gradient(-45deg, rgba(195,63,38,0.08) 0px, rgba(195,63,38,0.08) 2px, transparent 2px, transparent 16px);
+    linear-gradient(rgba(61, 214, 245, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61, 214, 245, 0.07) 1px, transparent 1px);
+  background-size: 46px 46px;
+
+  -webkit-mask-image: radial-gradient(circle at 25% 25%, black, transparent 68%);
+  mask-image: radial-gradient(circle at 25% 25%, black, transparent 68%);
+
   pointer-events: none;
 }
 
-.register-left > * {
+.register-page .register-left::after {
+  content: "";
+
+  position: absolute;
+  top: -240px;
+  left: -120px;
+
+  width: 720px;
+  height: 480px;
+
+  background: radial-gradient(circle, rgba(61, 214, 245, 0.16), transparent 70%);
+
+  pointer-events: none;
+}
+
+
+.register-page .register-left > * {
   position: relative;
+  z-index: 2;
 }
 
-.register-left h1 {
-  font-family: "Fraunces", serif;
+
+/* Brand title */
+
+.register-page .register-left h1 {
+  margin: 0 0 14px;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(38px, 5vw, 58px);
   font-weight: 700;
-  font-size: 48px;
-  margin-bottom: 15px;
+  line-height: 1.1;
+
+  color: var(--text);
 }
 
-.register-left h2 {
-  font-family: "Fraunces", serif;
-  font-style: italic;
+
+.register-page .register-left h2 {
+  margin: 0 0 24px;
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
   font-weight: 500;
-  font-size: 30px;
-  margin-bottom: 25px;
-  color: #E7A93D;
+  font-style: normal;
+
+  color: var(--cyan);
 }
 
-.register-left p {
-  font-size: 18px;
+
+.register-page .register-left p {
+  max-width: 620px;
+
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 16.5px;
   line-height: 1.8;
-  color: #D9E5DC;
 }
 
-.feature-list {
-  margin-top: 40px;
+
+/* ==========================================================
+   FEATURES
+========================================================== */
+
+.register-page .feature-list {
+  margin-top: 38px;
 }
 
-.feature {
-  margin-bottom: 18px;
-  font-size: 18px;
-}
 
-.quote-box {
-  margin-top: 60px;
-  padding: 20px;
-  border-left: 5px solid #E7A93D;
-  background: rgba(251,246,234,0.08);
-  border-radius: 8px;
-  font-style: italic;
-}
-
-/* ===========================
-   RIGHT PANEL
-=========================== */
-
-.register-right {
-  flex: 1;
+.register-page .feature {
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 50px;
+
+  margin-bottom: 18px;
+
+  color: var(--text);
+
+  font-size: 15.5px;
+  font-weight: 500;
 }
 
-.register-card {
+
+.register-page .feature::before {
+  content: "✓";
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+
+  margin-right: 12px;
+
+  border-radius: 3px;
+  border: 1px solid rgba(61, 214, 245, 0.4);
+
+  background: rgba(61, 214, 245, 0.1);
+  color: var(--cyan);
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* ==========================================================
+   QUOTE
+========================================================== */
+
+.register-page .quote-box {
+  max-width: 560px;
+
+  margin-top: 55px;
+  padding: 20px 22px;
+
+  border-left: 2px solid var(--violet);
+  border-radius: 0 4px 4px 0;
+
+  background: rgba(139, 124, 246, 0.07);
+
+  color: var(--muted);
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  line-height: 1.7;
+}
+
+
+/* ==========================================================
+   RIGHT PANEL
+========================================================== */
+
+.register-page .register-right {
+  flex: 1;
+
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 50px;
+
+  background: var(--void-alt);
+}
+
+
+/* ==========================================================
+   REGISTER CARD
+========================================================== */
+
+.register-page .register-card {
   width: 100%;
   max-width: 560px;
-  background: #FFFFFF;
-  border-radius: 16px;
-  padding: 40px;
-  border: 1px solid rgba(20,17,13,0.08);
-  box-shadow: 0 10px 35px rgba(20,17,13,.08);
+
+  padding: 42px;
+
+  background: var(--panel);
+
+  border: 1px solid var(--panel-border);
+  border-top: 2px solid var(--cyan);
+  border-radius: 6px;
+
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42);
+
+  color: var(--text);
 }
 
-.register-card h2 {
-  font-family: "Fraunces", serif;
-  font-weight: 600;
+
+.register-page .register-card h2 {
+  margin: 0 0 10px;
+
   text-align: center;
-  color: #14110D;
-  margin-bottom: 10px;
-}
 
-.subtitle {
-  text-align: center;
-  color: #55503F;
-  margin-bottom: 30px;
-}
-
-/* ===========================
-ROLE BUTTONS
-=========================== */
-
-.role-buttons {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.role-buttons button {
-  flex: 1;
-  padding: 15px;
-  border-radius: 10px;
-  border: 2px solid rgba(20,17,13,0.15);
-  background: #FFFFFF;
-  color: #14110D;
-  cursor: pointer;
-  font-family: "Sora", sans-serif;
-  font-size: 16px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 28px;
   font-weight: 700;
-  transition: .3s;
+
+  color: var(--text);
 }
 
-.role-buttons button:hover {
-  transform: translateY(-2px);
+
+.register-page .subtitle {
+  margin: 0 0 30px;
+
+  text-align: center;
+
+  color: var(--muted);
+
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
-.role-buttons .active-business {
-  border-color: #15402B;
-  background: #EFE2BE;
-  color: #15402B;
+
+/* ==========================================================
+   ROLE SELECTION
+========================================================== */
+
+.register-page .role-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 14px;
+
+  margin-bottom: 30px;
 }
 
-.role-buttons .active-investor {
-  border-color: #C33F26;
-  background: #FBE3DB;
-  color: #C33F26;
+
+.register-page .role-buttons button {
+  min-height: 56px;
+
+  padding: 14px 18px;
+
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+
+  background: var(--panel-alt);
+  color: var(--text);
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13.5px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-/* ===========================
-FORM
-=========================== */
 
-.register-form {
+.register-page .role-buttons button:hover {
+  border-color: rgba(61, 214, 245, 0.45);
+  background: rgba(61, 214, 245, 0.06);
+}
+
+
+/* Business — cyan */
+
+.register-page .role-buttons .active-business {
+  border-color: var(--cyan);
+
+  background: rgba(61, 214, 245, 0.12);
+
+  color: var(--cyan);
+
+  box-shadow: 0 0 0 1px rgba(61, 214, 245, 0.2);
+}
+
+
+/* Investor — violet */
+
+.register-page .role-buttons .active-investor {
+  border-color: var(--violet);
+
+  background: rgba(139, 124, 246, 0.14);
+
+  color: var(--violet);
+
+  box-shadow: 0 0 0 1px rgba(139, 124, 246, 0.2);
+}
+
+
+/* ==========================================================
+   FORM
+========================================================== */
+
+.register-page .register-form {
+  width: 100%;
+
   display: flex;
   flex-direction: column;
 }
 
-.register-form input,
-.register-form select {
-  padding: 14px;
+
+/* Form group */
+
+.register-page .form-group {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
   margin-bottom: 18px;
-  border-radius: 10px;
-  border: 1px solid rgba(20,17,13,0.15);
-  font-family: "Sora", sans-serif;
-  font-size: 15px;
-  transition: .3s;
 }
 
-.register-form input:focus,
-.register-form select:focus {
-  border-color: #E7A93D;
+
+/* Labels */
+
+.register-page .form-label {
+  margin-bottom: 8px;
+
+  color: var(--muted);
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+
+.register-page .required {
+  margin-left: 4px;
+
+  color: var(--cyan);
+}
+
+
+/* ==========================================================
+   INPUTS
+========================================================== */
+
+.register-page .form-input,
+.register-page .register-form input,
+.register-page .form-select,
+.register-page .register-form select {
+  width: 100%;
+
+  min-height: 48px;
+
+  padding: 13px 15px;
+
+  border: 1px solid var(--panel-border);
+  border-radius: 3px;
+
+  background: var(--panel-alt);
+  color: var(--text);
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 14px;
+
   outline: none;
-  box-shadow: 0 0 0 4px rgba(231,169,61,.20);
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.checkbox {
+
+/* Placeholder */
+
+.register-page .form-input::placeholder,
+.register-page .register-form input::placeholder {
+  color: var(--muted);
+}
+
+
+/* Focus */
+
+.register-page .form-input:focus,
+.register-page .register-form input:focus,
+.register-page .form-select:focus,
+.register-page .register-form select:focus {
+  border-color: var(--cyan);
+
+  background: var(--panel);
+
+  box-shadow: 0 0 0 3px rgba(61, 214, 245, 0.16);
+}
+
+
+/* Select */
+
+.register-page .form-select,
+.register-page .register-form select {
+  cursor: pointer;
+}
+
+
+.register-page .form-select option,
+.register-page .register-form select option {
+  background: var(--panel);
+  color: var(--text);
+}
+
+
+/* ==========================================================
+   PASSWORD
+========================================================== */
+
+.register-page .password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+
+.register-page .password-input {
+  padding-right: 58px !important;
+}
+
+
+.register-page .password-toggle {
+  position: absolute;
+
+  top: 50%;
+  right: 12px;
+
+  transform: translateY(-50%);
+
+  width: 36px;
+  height: 36px;
+
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 25px;
-  font-size: 14px;
-  color: #443F32;
-}
+  justify-content: center;
 
-.checkbox input {
-  width: auto;
-  margin: 0;
-}
+  padding: 0;
 
-.register-btn {
-  background: #E7A93D;
-  color: #14110D;
   border: none;
-  padding: 15px;
-  border-radius: 10px;
-  font-family: "Sora", sans-serif;
+  border-radius: 3px;
+
+  background: transparent;
+  color: var(--cyan);
+
   font-size: 16px;
-  font-weight: bold;
+
   cursor: pointer;
-  transition: .3s;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
-.register-btn:hover {
-  background: #d99a2c;
+
+.register-page .password-toggle:hover {
+  background: rgba(61, 214, 245, 0.1);
+
+  transform: translateY(-50%) scale(1.05);
 }
 
-.success {
-  color: #15402B;
+
+/* ==========================================================
+   CHECKBOX
+========================================================== */
+
+.register-page .checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  margin: 4px 0 25px;
+
+  color: var(--muted);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+.register-page .checkbox input {
+  width: 17px !important;
+  height: 17px;
+
+  min-height: 17px !important;
+
+  margin: 2px 0 0 !important;
+
+  padding: 0 !important;
+
+  accent-color: var(--cyan);
+
+  cursor: pointer;
+}
+
+
+/* ==========================================================
+   REGISTER BUTTON
+========================================================== */
+
+.register-page .register-btn {
+  width: 100%;
+
+  min-height: 52px;
+
+  padding: 15px 20px;
+
+  border: none;
+  border-radius: 3px;
+
+  background: var(--cyan);
+  color: #06111a;
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+
+.register-page .register-btn:hover {
+  opacity: 0.88;
+
+  box-shadow: 0 10px 24px rgba(61, 214, 245, 0.2);
+}
+
+
+.register-page .register-btn:active {
+  opacity: 1;
+}
+
+
+.register-page .register-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* ==========================================================
+   SUCCESS / ERROR
+========================================================== */
+
+.register-page .success {
+  margin-bottom: 16px;
+
+  padding: 12px 14px;
+
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  border-radius: 4px;
+
+  background: rgba(74, 222, 128, 0.1);
+
+  color: var(--success);
+
   text-align: center;
-  margin-bottom: 15px;
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
 }
 
-.error {
-  color: #C33F26;
+
+.register-page .error {
+  margin-bottom: 16px;
+
+  padding: 12px 14px;
+
+  border: 1px solid rgba(242, 84, 91, 0.35);
+  border-radius: 4px;
+
+  background: rgba(242, 84, 91, 0.1);
+
+  color: var(--danger);
+
   text-align: center;
-  margin-bottom: 15px;
+
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
 }
 
-.login-link {
-  margin-top: 25px;
+
+/* ==========================================================
+   LOGIN LINK
+========================================================== */
+
+.register-page .login-link {
+  margin-top: 24px;
+
   text-align: center;
-  color: #55503F;
+
+  color: var(--muted);
+
+  font-size: 14px;
 }
 
-.login-link a {
-  color: #C33F26;
+
+.register-page .login-link a {
+  color: var(--cyan);
+
+  font-weight: 600;
+
   text-decoration: none;
-  font-weight: bold;
+
+  transition: color 0.2s ease;
 }
 
-/* ===========================
-RESPONSIVE
-=========================== */
 
-@media (max-width: 900px) {
+.register-page .login-link a:hover {
+  color: var(--text);
+
+  text-decoration: underline;
+}
+
+
+/* ==========================================================
+   DYNAMIC FORM GRID
+========================================================== */
+
+.register-page .dynamic-form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(12, 1fr);
+
+  gap: 20px;
+}
+
+
+.register-page .grid-col {
+  width: 100%;
+}
+
+
+.register-page .grid-12 {
+  grid-column: span 12;
+}
+
+
+.register-page .grid-6 {
+  grid-column: span 6;
+}
+
+
+.register-page .grid-4 {
+  grid-column: span 4;
+}
+
+
+.register-page .grid-3 {
+  grid-column: span 3;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 1000px) {
 
   .register-page {
     flex-direction: column;
   }
 
-  .register-left {
-    padding: 40px;
+  .register-page .register-left {
+    min-height: auto;
+
+    padding: 55px 40px;
+  }
+
+  .register-page .register-right {
+    min-height: auto;
+
+    padding: 40px 25px;
+  }
+
+}
+
+
+@media (max-width: 768px) {
+
+  .register-page .register-left {
+    padding: 45px 25px;
+
     text-align: center;
   }
 
-  .register-left h1 {
-    font-size: 36px;
+  .register-page .register-left h1 {
+    font-size: 38px;
   }
 
-  .register-right {
-    padding: 25px;
+  .register-page .register-left h2 {
+    font-size: 17px;
   }
 
-}
-/* ===========================
-   REUSABLE FORM COMPONENTS
-=========================== */
+  .register-page .register-left p {
+    font-size: 15px;
+  }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 18px;
-}
+  .register-page .feature {
+    justify-content: center;
+  }
 
-.form-label {
-  font-weight: 600;
-  color: #14110D;
-  margin-bottom: 8px;
-}
+  .register-page .quote-box {
+    margin-top: 35px;
 
-.required {
-  color: #C33F26;
-  margin-left: 4px;
-}
+    text-align: left;
+  }
 
-.form-input {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid rgba(20,17,13,0.15);
-  border-radius: 10px;
-  font-family: "Sora", sans-serif;
-  font-size: 15px;
-  transition: all 0.25s ease;
-}
+  .register-page .register-right {
+    padding: 25px 16px;
+  }
 
-.form-input:focus {
-  outline: none;
-  border-color: #E7A93D;
-  box-shadow: 0 0 0 4px rgba(231, 169, 61, 0.20);
-}
-/* ===========================
-   PASSWORD INPUT
-=========================== */
+  .register-page .register-card {
+    padding: 28px 22px;
 
-.password-wrapper {
-  position: relative;
-}
+    border-radius: 4px;
+  }
 
-.password-input {
-  padding-right: 60px;
-}
-
-.password-toggle {
-  position: absolute;
-  top: 50%;
-  right: 14px;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.password-toggle:hover {
-  transform: translateY(-50%) scale(1.1);
-}
-/* ===========================
-   REUSABLE SELECT
-=========================== */
-
-.form-select {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid rgba(20,17,13,0.15);
-  border-radius: 10px;
-  background: #FFFFFF;
-  font-family: "Sora", sans-serif;
-  font-size: 15px;
-  transition: all 0.25s ease;
-}
-
-.form-select:focus {
-  outline: none;
-  border-color: #E7A93D;
-  box-shadow: 0 0 0 4px rgba(231,169,61,.20);
-}
-/* ===========================================
-   DYNAMIC FORM GRID
-=========================================== */
-
-.dynamic-form-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
-}
-
-.grid-col {
-  width: 100%;
-}
-
-.grid-12 {
-  grid-column: span 12;
-}
-
-.grid-6 {
-  grid-column: span 6;
-}
-
-.grid-4 {
-  grid-column: span 4;
-}
-
-.grid-3 {
-  grid-column: span 3;
-}
-
-@media (max-width: 768px) {
-  .dynamic-form-grid {
+  .register-page .role-buttons {
     grid-template-columns: 1fr;
   }
 
-  .grid-12,
-  .grid-6,
-  .grid-4,
-  .grid-3 {
+  .register-page .dynamic-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .register-page .grid-12,
+  .register-page .grid-6,
+  .register-page .grid-4,
+  .register-page .grid-3 {
     grid-column: span 1;
   }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .register-page .register-left {
+    padding: 35px 20px;
+  }
+
+  .register-page .register-left h1 {
+    font-size: 32px;
+  }
+
+  .register-page .register-left h2 {
+    font-size: 16px;
+  }
+
+  .register-page .register-right {
+    padding: 18px 12px;
+  }
+
+  .register-page .register-card {
+    padding: 24px 18px;
+  }
+
+  .register-page .register-card h2 {
+    font-size: 24px;
+  }
+
 }

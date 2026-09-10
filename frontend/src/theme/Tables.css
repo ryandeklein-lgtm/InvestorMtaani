@@ -1,15 +1,277 @@
-table{
-    width:100%;
-    border-collapse:collapse;
+/* ==========================================================
+   INVESTOR MTAANI
+   FUTURISTIC NAVY DESIGN SYSTEM
+   TABLES
+========================================================== */
+
+
+/* ==========================================================
+   TABLE WRAPPER
+========================================================== */
+
+.table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  background: var(--panel);
+
+  border: 1px solid var(--border-soft);
+
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow-sm);
 }
 
-th{
-    background:#15402B;
-    color:white;
-    padding:16px;
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  background: var(--panel);
+
+  color: var(--text);
+
+  font-size: 14px;
 }
 
-td{
-    padding:16px;
-    border-bottom:1px solid #EEE;
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+thead {
+  background: #101D31;
+}
+
+
+th {
+  padding: 15px;
+
+  background: #101D31;
+
+  color: var(--cyan);
+
+  text-align: left;
+
+  font-family: "JetBrains Mono", monospace;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+
+  white-space: nowrap;
+
+  border-bottom: 1px solid var(--border);
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+tbody {
+  background: var(--panel);
+}
+
+
+td {
+  padding: 15px;
+
+  color: var(--text-light);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  vertical-align: middle;
+}
+
+
+/* ==========================================================
+   TABLE ROWS
+========================================================== */
+
+tbody tr {
+  background: var(--panel);
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+
+tbody tr:hover {
+  background: var(--panel-hover);
+}
+
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* ==========================================================
+   TABLE LINKS
+========================================================== */
+
+table a {
+  color: var(--cyan);
+
+  font-weight: 600;
+
+  transition: color 0.2s ease;
+}
+
+
+table a:hover {
+  color: var(--cyan-bright);
+}
+
+
+/* ==========================================================
+   TABLE STATUS
+========================================================== */
+
+.table-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-family: "JetBrains Mono", monospace;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+
+.table-status::before {
+  content: "";
+
+  width: 7px;
+
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: var(--cyan);
+
+  box-shadow: 0 0 8px rgba(61, 214, 245, 0.7);
+}
+
+
+.table-status.success {
+  color: var(--green);
+}
+
+
+.table-status.success::before {
+  background: var(--green);
+
+  box-shadow: 0 0 8px rgba(53, 208, 127, 0.7);
+}
+
+
+.table-status.warning {
+  color: var(--gold);
+}
+
+
+.table-status.warning::before {
+  background: var(--gold);
+
+  box-shadow: 0 0 8px rgba(241, 199, 91, 0.7);
+}
+
+
+.table-status.danger {
+  color: var(--red);
+}
+
+
+.table-status.danger::before {
+  background: var(--red);
+
+  box-shadow: 0 0 8px rgba(255, 100, 124, 0.7);
+}
+
+
+/* ==========================================================
+   TABLE BADGE
+========================================================== */
+
+table .badge {
+  white-space: nowrap;
+}
+
+
+/* ==========================================================
+   TABLE ACTIONS
+========================================================== */
+
+.table-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+
+.table-actions .btn {
+  white-space: nowrap;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 768px) {
+
+  .table-wrapper {
+    border-radius: 10px;
+  }
+
+  table {
+    min-width: 650px;
+  }
+
+  th,
+  td {
+    padding: 12px;
+  }
+
+  th {
+    font-size: 11px;
+  }
+
+  td {
+    font-size: 13px;
+  }
+}
+
+
+@media (max-width: 480px) {
+
+  .table-wrapper {
+    border-radius: 8px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+  }
 }

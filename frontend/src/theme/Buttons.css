@@ -1,37 +1,312 @@
-.btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    padding:14px 30px;
-    border:none;
-    border-radius:10px;
-    font-weight:600;
-    transition:.25s;
+/* ==========================================================
+   INVESTOR MTAANI
+   FUTURISTIC NAVY DESIGN SYSTEM
+   BUTTONS
+========================================================== */
+
+
+/* ==========================================================
+   BASE BUTTON
+========================================================== */
+
+.btn {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  min-height: 44px;
+
+  padding: 12px 22px;
+
+  border: 1px solid transparent;
+
+  border-radius: 9px;
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  line-height: 1;
+
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.btn:hover{
-    transform:translateY(-2px);
+
+/* ==========================================================
+   HOVER
+========================================================== */
+
+.btn:hover {
+  transform: translateY(-2px);
 }
 
-.btn-primary{
-    background:#15402B;
-    color:white;
+
+/* ==========================================================
+   ACTIVE
+========================================================== */
+
+.btn:active {
+  transform: translateY(0);
 }
 
-.btn-primary:hover{
-    background:#0F3021;
+
+/* ==========================================================
+   PRIMARY
+========================================================== */
+
+.btn-primary {
+  background: var(--cyan);
+
+  color: #061018;
+
+  border-color: var(--cyan);
+
+  box-shadow:
+    0 0 18px rgba(61, 214, 245, 0.12);
 }
 
-.btn-accent{
-    background:#E7A93D;
-    color:#14110D;
+.btn-primary:hover {
+  background: var(--cyan-bright);
+
+  color: #061018;
+
+  border-color: var(--cyan-bright);
+
+  box-shadow:
+    0 0 28px rgba(61, 214, 245, 0.25);
 }
 
-.btn-accent:hover{
-    background:#C58D2C;
+
+/* ==========================================================
+   ACCENT
+========================================================== */
+
+.btn-accent {
+  background: var(--violet);
+
+  color: #ffffff;
+
+  border-color: var(--violet);
+
+  box-shadow:
+    0 0 18px rgba(139, 124, 246, 0.10);
 }
 
-.btn-danger{
-    background:#C33F26;
-    color:white;
+.btn-accent:hover {
+  background: var(--violet-bright);
+
+  color: #ffffff;
+
+  border-color: var(--violet-bright);
+
+  box-shadow:
+    0 0 26px rgba(139, 124, 246, 0.25);
+}
+
+
+/* ==========================================================
+   GOLD
+========================================================== */
+
+.btn-gold {
+  background: var(--gold);
+
+  color: #11100A;
+
+  border-color: var(--gold);
+
+  box-shadow:
+    0 0 18px rgba(241, 199, 91, 0.10);
+}
+
+.btn-gold:hover {
+  background: #F8D878;
+
+  color: #11100A;
+
+  border-color: #F8D878;
+
+  box-shadow:
+    0 0 26px rgba(241, 199, 91, 0.22);
+}
+
+
+/* ==========================================================
+   DANGER
+========================================================== */
+
+.btn-danger {
+  background: var(--red);
+
+  color: #ffffff;
+
+  border-color: var(--red);
+}
+
+.btn-danger:hover {
+  background: var(--red-dark);
+
+  color: #ffffff;
+
+  border-color: var(--red-dark);
+
+  box-shadow:
+    0 0 22px rgba(255, 100, 124, 0.20);
+}
+
+
+/* ==========================================================
+   OUTLINE
+========================================================== */
+
+.btn-outline {
+  background: transparent;
+
+  color: var(--cyan);
+
+  border-color: var(--border-strong);
+}
+
+.btn-outline:hover {
+  background: rgba(61, 214, 245, 0.08);
+
+  color: var(--cyan-bright);
+
+  border-color: var(--cyan);
+
+  box-shadow:
+    0 0 24px rgba(61, 214, 245, 0.15);
+}
+
+
+/* ==========================================================
+   SECONDARY
+========================================================== */
+
+.btn-secondary {
+  background: rgba(139, 124, 246, 0.08);
+
+  color: var(--violet-bright);
+
+  border-color: rgba(139, 124, 246, 0.30);
+}
+
+.btn-secondary:hover {
+  background: rgba(139, 124, 246, 0.15);
+
+  color: var(--violet-bright);
+
+  border-color: var(--violet);
+
+  box-shadow:
+    0 0 22px rgba(139, 124, 246, 0.15);
+}
+
+
+/* ==========================================================
+   DISABLED
+========================================================== */
+
+.btn:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.45;
+
+  transform: none;
+
+  box-shadow: none;
+}
+
+.btn:disabled:hover {
+  transform: none;
+}
+
+
+/* ==========================================================
+   FULL WIDTH
+========================================================== */
+
+.btn-full {
+  width: 100%;
+}
+
+
+/* ==========================================================
+   SMALL BUTTON
+========================================================== */
+
+.btn-sm {
+  min-height: 36px;
+
+  padding: 9px 16px;
+
+  font-size: 12px;
+}
+
+
+/* ==========================================================
+   LARGE BUTTON
+========================================================== */
+
+.btn-lg {
+  min-height: 50px;
+
+  padding: 14px 28px;
+
+  font-size: 14px;
+}
+
+
+/* ==========================================================
+   BUTTON GROUP
+========================================================== */
+
+.btn-group {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 480px) {
+
+  .btn {
+    width: 100%;
+  }
+
+  .btn-group {
+    width: 100%;
+
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .btn-group .btn {
+    width: 100%;
+  }
 }

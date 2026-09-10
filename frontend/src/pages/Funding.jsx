@@ -92,38 +92,53 @@ function Funding() {
     }
   };
 
+  const Corners = () => (
+    <>
+      <span className="im-corner im-corner-tl" />
+      <span className="im-corner im-corner-tr" />
+      <span className="im-corner im-corner-bl" />
+      <span className="im-corner im-corner-br" />
+    </>
+  );
+
   // BUSINESS VIEW
   if (role === "business") {
     return (
       <>
-        <FontImport />
+        <GlobalStyles />
 
-        <div style={styles.page}>
-          <div style={styles.container}>
-            <div style={styles.header}>
-              <span style={styles.eyebrow}>BUSINESS FUNDING</span>
+        <div className="im-fund-page">
+          <div className="im-grid-bg" />
+          <div className="im-glow" />
 
-              <h1 style={styles.title}>Request funding</h1>
+          <div className="im-fund-inner">
+            <div className="im-fund-header">
+              <div className="im-status">
+                <span className="im-dot" />
+                business funding
+              </div>
 
-              <p style={styles.subtitle}>
-                Tell investors how much capital your business needs,
-                why you need it, and what the investment will help
-                you achieve.
-              </p>
+              <div className="im-scan-wrap">
+                <div className="im-scanline" />
+                <h1 className="im-fund-title">Request funding</h1>
+                <p className="im-fund-subtitle">
+                  Tell investors how much capital your business needs,
+                  why you need it, and what the investment will help
+                  you achieve.
+                </p>
+              </div>
             </div>
 
-            <div style={styles.layout}>
-              <form onSubmit={handleSubmit} style={styles.formCard}>
-                <h2 style={styles.cardTitle}>
-                  Create Funding Request
-                </h2>
+            <div className="im-fund-layout">
+              <form onSubmit={handleSubmit} className="im-panel im-form-card">
+                <Corners />
 
-                <label style={styles.label}>
-                  Amount Requested
+                <h2 className="im-card-title">Create funding request</h2>
 
-                  <div style={styles.moneyInput}>
-                    <span style={styles.currency}>KES</span>
-
+                <label className="im-label">
+                  Amount requested
+                  <div className="im-money-input">
+                    <span className="im-currency">KES</span>
                     <input
                       name="amount_requested"
                       type="number"
@@ -131,156 +146,110 @@ function Funding() {
                       placeholder="2500000"
                       value={form.amount_requested}
                       onChange={handleChange}
-                      style={styles.moneyField}
+                      className="im-money-field"
                       required
                     />
                   </div>
                 </label>
 
-                <label style={styles.label}>
-                  Funding Type
-
+                <label className="im-label">
+                  Funding type
                   <select
                     name="funding_type"
                     value={form.funding_type}
                     onChange={handleChange}
-                    style={styles.input}
+                    className="im-select"
                     required
                   >
-                    <option value="">
-                      Select funding type
-                    </option>
-
-                    <option value="Equity Investment">
-                      Equity Investment
-                    </option>
-
-                    <option value="Debt / Loan">
-                      Debt / Loan
-                    </option>
-
-                    <option value="Revenue Share">
-                      Revenue Share
-                    </option>
-
+                    <option value="">Select funding type</option>
+                    <option value="Equity Investment">Equity Investment</option>
+                    <option value="Debt / Loan">Debt / Loan</option>
+                    <option value="Revenue Share">Revenue Share</option>
                     <option value="Strategic Partnership">
                       Strategic Partnership
                     </option>
                   </select>
                 </label>
 
-                <label style={styles.label}>
+                <label className="im-label">
                   What will the funding be used for?
-
                   <textarea
                     name="funding_reason"
                     placeholder="Explain exactly how the capital will be used..."
                     value={form.funding_reason}
                     onChange={handleChange}
-                    style={styles.textarea}
+                    className="im-textarea"
                     required
                   />
                 </label>
 
-                <label style={styles.label}>
-                  Expected Impact
-
+                <label className="im-label">
+                  Expected impact
                   <textarea
                     name="expected_impact"
                     placeholder="Example: Increase production, hire employees and expand into new markets."
                     value={form.expected_impact}
                     onChange={handleChange}
-                    style={styles.textarea}
+                    className="im-textarea"
                   />
                 </label>
 
-                <label style={styles.label}>
-                  Funding Timeline
-
+                <label className="im-label">
+                  Funding timeline
                   <select
                     name="funding_timeline"
                     value={form.funding_timeline}
                     onChange={handleChange}
-                    style={styles.input}
+                    className="im-select"
                   >
-                    <option value="">
-                      Select timeline
-                    </option>
-
-                    <option value="Immediately">
-                      Immediately
-                    </option>
-
-                    <option value="Within 1 month">
-                      Within 1 month
-                    </option>
-
-                    <option value="Within 3 months">
-                      Within 3 months
-                    </option>
-
-                    <option value="Within 6 months">
-                      Within 6 months
-                    </option>
+                    <option value="">Select timeline</option>
+                    <option value="Immediately">Immediately</option>
+                    <option value="Within 1 month">Within 1 month</option>
+                    <option value="Within 3 months">Within 3 months</option>
+                    <option value="Within 6 months">Within 6 months</option>
                   </select>
                 </label>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  style={styles.submitButton}
+                  className="im-submit-btn"
                 >
-                  {submitting
-                    ? "Submitting Request..."
-                    : "Submit Funding Request"}
+                  {submitting ? "Submitting request…" : "Submit funding request"}
                 </button>
               </form>
 
-              <aside style={styles.sidebar}>
-                <div style={styles.infoCard}>
-                  <span style={styles.infoEyebrow}>
-                    YOUR FUNDING STORY
-                  </span>
-
-                  <h2 style={styles.infoTitle}>
-                    Make the ask clear.
-                  </h2>
-
-                  <p style={styles.infoText}>
+              <aside className="im-sidebar">
+                <div className="im-info-card">
+                  <span className="im-info-tag">funding story</span>
+                  <h2 className="im-info-title">Make the ask clear.</h2>
+                  <p className="im-info-text">
                     Investors should quickly understand how much
                     you need, where the money will go, and what
                     growth the investment could unlock.
                   </p>
                 </div>
 
-                <div style={styles.requestsCard}>
-                  <h3 style={styles.requestsTitle}>
-                    Your Funding Requests
-                  </h3>
+                <div className="im-panel im-requests-card">
+                  <Corners />
+                  <h3 className="im-requests-title">Your funding requests</h3>
 
                   {loading ? (
-                    <p style={styles.muted}>Loading...</p>
+                    <p className="im-muted">Loading…</p>
                   ) : requests.length === 0 ? (
-                    <p style={styles.muted}>
+                    <p className="im-muted">
                       You have not created a funding request yet.
                     </p>
                   ) : (
                     requests.map((request) => (
-                      <div
-                        key={request.id}
-                        style={styles.requestItem}
-                      >
-                        <strong style={styles.requestAmount}>
-                          {formatMoney(
-                            request.amount_requested
-                          )}
+                      <div key={request.id} className="im-request-item">
+                        <strong className="im-request-amount">
+                          {formatMoney(request.amount_requested)}
                         </strong>
-
-                        <span style={styles.requestType}>
+                        <span className="im-request-type">
                           {request.funding_type}
                         </span>
-
-                        <span style={styles.status}>
+                        <span className="im-request-status">
                           {request.status}
                         </span>
                       </div>
@@ -298,134 +267,106 @@ function Funding() {
   // INVESTOR / PUBLIC VIEW
   return (
     <>
-      <FontImport />
+      <GlobalStyles />
 
-      <div style={styles.page}>
-        <div style={styles.container}>
-          <div style={styles.header}>
-            <span style={styles.eyebrow}>
-              INVESTMENT OPPORTUNITIES
-            </span>
+      <div className="im-fund-page">
+        <div className="im-grid-bg" />
+        <div className="im-glow" />
 
-            <h1 style={styles.title}>
-              Businesses seeking funding
-            </h1>
+        <div className="im-fund-inner">
+          <div className="im-fund-header">
+            <div className="im-status">
+              <span className="im-dot" />
+              investment opportunities
+            </div>
 
-            <p style={styles.subtitle}>
-              Discover businesses looking for capital,
-              strategic partners and investors.
-            </p>
+            <div className="im-scan-wrap">
+              <div className="im-scanline" />
+              <h1 className="im-fund-title">Businesses seeking funding</h1>
+              <p className="im-fund-subtitle">
+                Discover businesses looking for capital,
+                strategic partners and investors.
+              </p>
+            </div>
           </div>
 
           {loading ? (
-            <div style={styles.messageCard}>
-              Loading funding opportunities...
+            <div className="im-panel im-message-card">
+              <Corners />
+              <span className="im-dot" />
+              Loading opportunities<span className="im-cursor">_</span>
             </div>
           ) : requests.length === 0 ? (
-            <div style={styles.messageCard}>
-              <h2 style={styles.messageTitle}>
-                No open funding opportunities yet
-              </h2>
-
-              <p style={styles.muted}>
+            <div className="im-panel im-message-card">
+              <Corners />
+              <h2 className="im-message-title">No open funding opportunities yet</h2>
+              <p className="im-muted">
                 New business funding requests will appear here.
               </p>
             </div>
           ) : (
-            <div style={styles.opportunitiesGrid}>
+            <div className="im-opportunities-grid">
               {requests.map((request) => (
-                <div
-                  key={request.id}
-                  style={styles.opportunityCard}
-                >
-                  <div style={styles.opportunityTop}>
-                    <span style={styles.industryBadge}>
+                <div key={request.id} className="im-panel im-opportunity-card">
+                  <Corners />
+
+                  <div className="im-opportunity-top">
+                    <span className="im-chip im-chip-violet">
                       {request.industry || "Business"}
                     </span>
-
-                    <span style={styles.openBadge}>
+                    <span className="im-chip im-chip-cyan">
                       {request.status || "open"}
                     </span>
                   </div>
 
-                  <h2 style={styles.businessName}>
-                    {request.business_name}
-                  </h2>
-
-                  <p style={styles.location}>
-                    📍 {request.location || "Location not set"}
+                  <h2 className="im-business-name">{request.business_name}</h2>
+                  <p className="im-location">
+                    {request.location || "Location not set"}
                   </p>
 
-                  <div style={styles.amountBox}>
-                    <span style={styles.amountLabel}>
-                      FUNDING REQUEST
-                    </span>
-
-                    <strong style={styles.bigAmount}>
-                      {formatMoney(
-                        request.amount_requested
-                      )}
+                  <div className="im-amount-box">
+                    <span className="im-amount-label">funding request</span>
+                    <strong className="im-big-amount">
+                      {formatMoney(request.amount_requested)}
                     </strong>
                   </div>
 
-                  <div style={styles.opportunityDetails}>
-                    <div>
-                      <span style={styles.detailLabel}>
-                        Funding Type
-                      </span>
-
-                      <strong style={styles.detailValue}>
-                        {request.funding_type}
-                      </strong>
+                  <div className="im-opportunity-details">
+                    <div className="im-stat">
+                      <span className="im-stat-value">{request.funding_type}</span>
+                      <span className="im-stat-label">funding type</span>
                     </div>
-
-                    <div>
-                      <span style={styles.detailLabel}>
-                        Timeline
+                    <div className="im-stat">
+                      <span className="im-stat-value">
+                        {request.funding_timeline || "Not specified"}
                       </span>
-
-                      <strong style={styles.detailValue}>
-                        {request.funding_timeline ||
-                          "Not specified"}
-                      </strong>
+                      <span className="im-stat-label">timeline</span>
                     </div>
                   </div>
 
-                  <h3 style={styles.reasonTitle}>
-                    Use of Funds
-                  </h3>
-
-                  <p style={styles.reason}>
-                    {request.funding_reason}
-                  </p>
+                  <h3 className="im-reason-title">Use of funds</h3>
+                  <p className="im-reason">{request.funding_reason}</p>
 
                   {request.expected_impact && (
                     <>
-                      <h3 style={styles.reasonTitle}>
-                        Expected Impact
-                      </h3>
-
-                      <p style={styles.reason}>
-                        {request.expected_impact}
-                      </p>
+                      <h3 className="im-reason-title">Expected impact</h3>
+                      <p className="im-reason">{request.expected_impact}</p>
                     </>
                   )}
 
                   {role === "investor" ? (
                     <button
-                      style={styles.matchButton}
-                      onClick={() =>
-                        navigate(`/business/${request.business_id}`)
-                      }
+                      className="im-btn im-btn-block"
+                      onClick={() => navigate(`/business/${request.business_id}`)}
                     >
-                      View Business
+                      View business
                     </button>
                   ) : (
                     <button
-                      style={styles.matchButton}
+                      className="im-btn im-btn-block"
                       onClick={() => navigate("/login")}
                     >
-                      Login to Explore
+                      Login to explore
                     </button>
                   )}
                 </div>
@@ -438,16 +379,493 @@ function Funding() {
   );
 }
 
-function FontImport() {
+function GlobalStyles() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500;1,600&family=Sora:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-      .im-funding-input:focus,
-      .im-funding-textarea:focus {
+      .im-fund-page {
+        --void: #060911;
+        --panel: #0e1626;
+        --panel-alt: #0b1220;
+        --panel-border: rgba(61, 214, 245, 0.16);
+        --cyan: #3dd6f5;
+        --violet: #8b7cf6;
+        --text: #e7edf5;
+        --muted: #7c8aa0;
+
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        background: var(--void);
+        color: var(--text);
+        font-family: 'Space Grotesk', sans-serif;
+        padding: 56px 24px 100px;
+      }
+
+      .im-grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(61, 214, 245, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(61, 214, 245, 0.06) 1px, transparent 1px);
+        background-size: 46px 46px;
+        -webkit-mask-image: radial-gradient(circle at 50% 0%, black, transparent 72%);
+        mask-image: radial-gradient(circle at 50% 0%, black, transparent 72%);
+        pointer-events: none;
+      }
+
+      .im-glow {
+        position: absolute;
+        top: -220px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 900px;
+        height: 480px;
+        background: radial-gradient(circle, rgba(61, 214, 245, 0.14), transparent 70%);
+        pointer-events: none;
+      }
+
+      .im-fund-inner {
+        position: relative;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .im-fund-header {
+        max-width: 700px;
+        margin-bottom: 40px;
+      }
+
+      .im-status {
+        display: inline-flex;
+        align-items: center;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+
+      .im-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--cyan);
+        display: inline-block;
+        margin-right: 9px;
+        animation: im-pulse 2s infinite;
+      }
+      @keyframes im-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(61, 214, 245, 0.55); }
+        50% { box-shadow: 0 0 0 5px rgba(61, 214, 245, 0); }
+      }
+
+      .im-scan-wrap {
+        position: relative;
+        overflow: hidden;
+      }
+      .im-scanline {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 1px;
+        background: linear-gradient(90deg, var(--cyan), transparent 80%);
+        animation: im-scan 1.6s ease-out 1 forwards;
+      }
+      @keyframes im-scan {
+        0% { transform: translateY(0); opacity: 0; }
+        12% { opacity: 0.9; }
+        100% { transform: translateY(130px); opacity: 0; }
+      }
+
+      .im-fund-title {
+        font-weight: 700;
+        font-size: clamp(28px, 4vw, 38px);
+        line-height: 1.15;
+        margin: 0 0 12px;
+      }
+
+      .im-fund-subtitle {
+        color: var(--muted);
+        font-size: 15.5px;
+        line-height: 1.7;
+        margin: 0;
+      }
+
+      .im-fund-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        gap: 26px;
+        align-items: start;
+      }
+
+      .im-panel {
+        position: relative;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 4px;
+      }
+      .im-corner {
+        position: absolute;
+        width: 13px;
+        height: 13px;
+        border-color: var(--cyan);
+        opacity: 0.5;
+      }
+      .im-corner-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+      .im-corner-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+      .im-corner-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+      .im-corner-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+
+      .im-form-card {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .im-card-title {
+        margin: 0 0 4px;
+        font-weight: 600;
+        font-size: 19px;
+      }
+
+      .im-label {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        color: var(--muted);
+        text-align: left;
+      }
+
+      .im-input,
+      .im-select,
+      .im-textarea {
+        padding: 13px 14px;
+        border: 1px solid var(--panel-border);
+        border-radius: 3px;
+        background: var(--panel-alt);
+        color: var(--text);
+        font-size: 14.5px;
+        font-family: 'Space Grotesk', sans-serif;
+      }
+
+      .im-select {
+        padding: 13px 14px;
+      }
+
+      .im-textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+
+      .im-select:focus,
+      .im-textarea:focus {
         outline: none;
-        border-color: #E7A93D !important;
-        box-shadow: 0 0 0 4px rgba(231,169,61,.20);
+        border-color: var(--cyan);
+        box-shadow: 0 0 0 3px rgba(61, 214, 245, 0.18);
+      }
+
+      .im-money-input {
+        display: flex;
+        border: 1px solid var(--panel-border);
+        border-radius: 3px;
+        overflow: hidden;
+        background: var(--panel-alt);
+      }
+
+      .im-currency {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        background: rgba(61, 214, 245, 0.1);
+        color: var(--cyan);
+        font-weight: 600;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+      }
+
+      .im-money-field {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--text);
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .im-money-field:focus {
+        box-shadow: none;
+      }
+
+      .im-money-input:has(.im-money-field:focus) {
+        border-color: var(--cyan);
+        box-shadow: 0 0 0 3px rgba(61, 214, 245, 0.18);
+      }
+
+      .im-submit-btn {
+        background: var(--cyan);
+        color: #06111a;
+        border: none;
+        border-radius: 3px;
+        padding: 15px;
+        font-size: 14.5px;
+        font-weight: 600;
+        font-family: 'JetBrains Mono', monospace;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+      }
+
+      .im-submit-btn:hover {
+        opacity: 0.88;
+      }
+
+      .im-submit-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .im-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .im-info-card {
+        background: rgba(139, 124, 246, 0.08);
+        border: 1px solid rgba(139, 124, 246, 0.3);
+        border-radius: 4px;
+        padding: 26px;
+      }
+
+      .im-info-tag {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--violet);
+      }
+
+      .im-info-title {
+        margin: 14px 0;
+        font-weight: 600;
+        font-size: 18px;
+      }
+
+      .im-info-text {
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      .im-requests-card {
+        padding: 24px;
+      }
+
+      .im-requests-title {
+        margin: 0 0 6px;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      .im-request-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--panel-border);
+      }
+      .im-request-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .im-request-amount {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 16px;
+        color: var(--cyan);
+        font-weight: 600;
+      }
+
+      .im-request-type {
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+
+      .im-request-status {
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--text);
+        font-size: 11.5px;
+      }
+
+      .im-muted {
+        color: var(--muted);
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      .im-opportunities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 22px;
+      }
+
+      .im-opportunity-card {
+        padding: 28px;
+      }
+
+      .im-opportunity-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .im-chip {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11.5px;
+        padding: 6px 12px;
+        border-radius: 3px;
+      }
+      .im-chip-violet {
+        color: var(--violet);
+        background: rgba(139, 124, 246, 0.12);
+        border: 1px solid rgba(139, 124, 246, 0.35);
+      }
+      .im-chip-cyan {
+        color: var(--cyan);
+        background: rgba(61, 214, 245, 0.1);
+        border: 1px solid rgba(61, 214, 245, 0.3);
+      }
+
+      .im-business-name {
+        margin: 20px 0 6px;
+        font-weight: 600;
+        font-size: 19px;
+      }
+
+      .im-location {
+        color: var(--muted);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12.5px;
+        margin: 0;
+      }
+
+      .im-amount-box {
+        background: var(--panel-alt);
+        border: 1px solid var(--panel-border);
+        border-radius: 4px;
+        padding: 18px;
+        margin: 22px 0;
+      }
+
+      .im-amount-label {
+        display: block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+
+      .im-big-amount {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 23px;
+        color: var(--cyan);
+      }
+
+      .im-opportunity-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        border-top: 1px solid var(--panel-border);
+        border-bottom: 1px solid var(--panel-border);
+        padding: 16px 0;
+        margin-bottom: 22px;
+      }
+
+      .im-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .im-stat-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
+      .im-stat-label {
+        font-size: 11.5px;
+        color: var(--muted);
+      }
+
+      .im-reason-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 20px 0 8px;
+      }
+
+      .im-reason {
+        color: var(--muted);
+        line-height: 1.7;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      .im-btn {
+        display: inline-block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+        color: var(--cyan);
+        background: transparent;
+        border: 1px solid rgba(61, 214, 245, 0.4);
+        padding: 13px 18px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+      .im-btn:hover {
+        background: var(--cyan);
+        color: #06111a;
+      }
+      .im-btn-block {
+        width: 100%;
+        margin-top: 22px;
+      }
+
+      .im-message-card {
+        padding: 50px;
+        text-align: center;
+        color: var(--muted);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+      }
+
+      .im-message-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        margin: 0 0 10px;
+        color: var(--text);
+      }
+
+      .im-cursor {
+        color: var(--cyan);
+        margin-left: 2px;
+        animation: im-blink 1s step-end infinite;
+      }
+      @keyframes im-blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+
+      @media (max-width: 860px) {
+        .im-fund-layout {
+          grid-template-columns: 1fr;
+        }
       }
     `}</style>
   );
@@ -456,365 +874,5 @@ function FontImport() {
 function formatMoney(amount) {
   return `KES ${Number(amount || 0).toLocaleString()}`;
 }
-
-// Brand palette (matches Landing page)
-// Deep green:  #15402B
-// Gold/amber:  #E7A93D
-// Rust/red:    #C33F26
-// Cream bg:    #FBF6EA
-// Tan bg:      #EFE2BE
-// Near-black:  #14110D
-// Body text:   #443F32 / #55503F
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#FBF6EA",
-    padding: "60px 20px 100px",
-    fontFamily: "'Sora', sans-serif",
-    color: "#14110D",
-  },
-
-  container: {
-    maxWidth: "1100px",
-    margin: "0 auto",
-  },
-
-  header: {
-    maxWidth: "720px",
-    marginBottom: "40px",
-  },
-
-  eyebrow: {
-    color: "#C33F26",
-    fontSize: "12px",
-    fontWeight: "800",
-    letterSpacing: "1.5px",
-    fontFamily: "'Space Mono', monospace",
-    textTransform: "uppercase",
-  },
-
-  title: {
-    color: "#14110D",
-    fontSize: "42px",
-    margin: "14px 0",
-    fontFamily: "'Fraunces', serif",
-    fontWeight: "700",
-  },
-
-  subtitle: {
-    color: "#55503F",
-    lineHeight: "1.7",
-    fontSize: "16px",
-  },
-
-  layout: {
-    display: "grid",
-    gridTemplateColumns:
-      "minmax(0, 2fr) minmax(280px, 1fr)",
-    gap: "28px",
-    alignItems: "start",
-  },
-
-  formCard: {
-    background: "#FFFFFF",
-    border: "1px solid rgba(20,17,13,0.08)",
-    borderRadius: "18px",
-    padding: "32px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "22px",
-  },
-
-  cardTitle: {
-    color: "#14110D",
-    margin: "0 0 5px",
-    fontFamily: "'Fraunces', serif",
-    fontWeight: "600",
-  },
-
-  label: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    color: "#443F32",
-    fontSize: "14px",
-    fontWeight: "700",
-    textAlign: "left",
-  },
-
-  input: {
-    padding: "14px",
-    border: "1px solid rgba(20,17,13,0.15)",
-    borderRadius: "10px",
-    background: "#FFFFFF",
-    color: "#14110D",
-    fontSize: "15px",
-    fontFamily: "'Sora', sans-serif",
-  },
-
-  textarea: {
-    minHeight: "120px",
-    padding: "14px",
-    border: "1px solid rgba(20,17,13,0.15)",
-    borderRadius: "10px",
-    fontFamily: "'Sora', sans-serif",
-    fontSize: "15px",
-    resize: "vertical",
-  },
-
-  moneyInput: {
-    display: "flex",
-    border: "1px solid rgba(21,64,43,0.35)",
-    borderRadius: "10px",
-    overflow: "hidden",
-  },
-
-  currency: {
-    display: "flex",
-    alignItems: "center",
-    padding: "0 16px",
-    background: "#EFE2BE",
-    color: "#15402B",
-    fontWeight: "800",
-    fontFamily: "'Space Mono', monospace",
-  },
-
-  moneyField: {
-    flex: 1,
-    padding: "16px",
-    border: "none",
-    outline: "none",
-    fontSize: "18px",
-    fontWeight: "700",
-    fontFamily: "'Sora', sans-serif",
-  },
-
-  submitButton: {
-    background: "#E7A93D",
-    color: "#14110D",
-    border: "none",
-    borderRadius: "10px",
-    padding: "16px",
-    fontSize: "15px",
-    fontWeight: "800",
-    fontFamily: "'Sora', sans-serif",
-    cursor: "pointer",
-  },
-
-  sidebar: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-
-  infoCard: {
-    background: "#15402B",
-    color: "#FBF6EA",
-    borderRadius: "18px",
-    padding: "28px",
-    border: "1px solid rgba(231,169,61,0.25)",
-  },
-
-  infoEyebrow: {
-    color: "#E7A93D",
-    fontSize: "11px",
-    fontWeight: "800",
-    letterSpacing: "1px",
-    fontFamily: "'Space Mono', monospace",
-  },
-
-  infoTitle: {
-    color: "#FBF6EA",
-    margin: "14px 0",
-    fontFamily: "'Fraunces', serif",
-    fontWeight: "600",
-  },
-
-  infoText: {
-    color: "#D9E5DC",
-    lineHeight: "1.7",
-  },
-
-  requestsCard: {
-    background: "#FFFFFF",
-    border: "1px solid rgba(20,17,13,0.08)",
-    borderRadius: "18px",
-    padding: "24px",
-  },
-
-  requestsTitle: {
-    color: "#14110D",
-    marginTop: 0,
-    fontFamily: "'Fraunces', serif",
-    fontWeight: "600",
-  },
-
-  requestItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-    padding: "16px 0",
-    borderBottom: "1px solid rgba(20,17,13,0.08)",
-  },
-
-  requestAmount: {
-    color: "#14110D",
-    fontSize: "18px",
-    fontFamily: "'Space Mono', monospace",
-  },
-
-  requestType: {
-    color: "#55503F",
-    fontSize: "14px",
-  },
-
-  status: {
-    color: "#15402B",
-    fontSize: "12px",
-    fontWeight: "800",
-    textTransform: "uppercase",
-  },
-
-  muted: {
-    color: "#55503F",
-    lineHeight: "1.6",
-  },
-
-  opportunitiesGrid: {
-    display: "grid",
-    gridTemplateColumns:
-      "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: "24px",
-  },
-
-  opportunityCard: {
-    background: "#FFFFFF",
-    border: "1px solid rgba(20,17,13,0.08)",
-    borderRadius: "18px",
-    padding: "28px",
-    textAlign: "left",
-  },
-
-  opportunityTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "12px",
-  },
-
-  industryBadge: {
-    background: "rgba(231,169,61,0.18)",
-    color: "#B9832A",
-    padding: "7px 11px",
-    borderRadius: "999px",
-    fontSize: "11px",
-    fontWeight: "800",
-    fontFamily: "'Space Mono', monospace",
-  },
-
-  openBadge: {
-    background: "#EFE2BE",
-    color: "#15402B",
-    padding: "7px 11px",
-    borderRadius: "999px",
-    fontSize: "11px",
-    fontWeight: "800",
-    textTransform: "uppercase",
-    fontFamily: "'Space Mono', monospace",
-  },
-
-  businessName: {
-    color: "#14110D",
-    margin: "22px 0 8px",
-    fontFamily: "'Fraunces', serif",
-    fontWeight: "600",
-  },
-
-  location: {
-    color: "#55503F",
-  },
-
-  amountBox: {
-    background: "#EFE2BE",
-    border: "1px solid rgba(21,64,43,0.18)",
-    borderRadius: "14px",
-    padding: "20px",
-    margin: "24px 0",
-  },
-
-  amountLabel: {
-    display: "block",
-    color: "#15402B",
-    fontSize: "11px",
-    fontWeight: "800",
-    marginBottom: "7px",
-    fontFamily: "'Space Mono', monospace",
-  },
-
-  bigAmount: {
-    color: "#14110D",
-    fontSize: "25px",
-    fontFamily: "'Fraunces', serif",
-  },
-
-  opportunityDetails: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "20px",
-    marginBottom: "24px",
-  },
-
-  detailLabel: {
-    display: "block",
-    color: "#55503F",
-    fontSize: "12px",
-    marginBottom: "6px",
-  },
-
-  detailValue: {
-    color: "#14110D",
-  },
-
-  reasonTitle: {
-    color: "#14110D",
-    fontSize: "15px",
-    marginTop: "22px",
-    fontFamily: "'Sora', sans-serif",
-    fontWeight: "700",
-  },
-
-  reason: {
-    color: "#55503F",
-    lineHeight: "1.7",
-  },
-
-  matchButton: {
-    width: "100%",
-    marginTop: "24px",
-    background: "#15402B",
-    color: "#FBF6EA",
-    border: "none",
-    borderRadius: "10px",
-    padding: "14px",
-    fontWeight: "800",
-    fontFamily: "'Sora', sans-serif",
-    cursor: "pointer",
-  },
-
-  messageCard: {
-    background: "#FFFFFF",
-    border: "1px solid rgba(20,17,13,0.08)",
-    borderRadius: "18px",
-    padding: "50px",
-    textAlign: "center",
-    color: "#14110D",
-  },
-
-  messageTitle: {
-    fontFamily: "'Fraunces', serif",
-    fontWeight: "600",
-    margin: "0 0 10px",
-  },
-};
 
 export default Funding;

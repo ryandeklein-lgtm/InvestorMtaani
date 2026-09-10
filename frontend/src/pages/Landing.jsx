@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 
 export default function Landing() {
   const sectors = [
-    { name: "FinTech", icon: "💳", accent: "#E7A93D" },
-    { name: "AgriTech", icon: "🌱", accent: "#15402B" },
-    { name: "HealthTech", icon: "❤️", accent: "#C33F26" },
-    { name: "EdTech", icon: "🎓", accent: "#E7A93D" },
-    { name: "Clean Energy", icon: "⚡", accent: "#15402B" },
-    { name: "Artificial Intelligence", icon: "🤖", accent: "#C33F26" },
+    { name: "FinTech" },
+    { name: "AgriTech" },
+    { name: "HealthTech" },
+    { name: "EdTech" },
+    { name: "Clean Energy" },
+    { name: "Artificial Intelligence" },
   ];
 
   const tickerItems = [
@@ -22,11 +22,11 @@ export default function Landing() {
   ];
 
   const badges = [
-    { icon: "✅", label: "Verified Profiles" },
-    { icon: "🤝", label: "Investor Matchmaking" },
-    { icon: "📊", label: "Financial Transparency" },
-    { icon: "🌍", label: "Pan-African Reach" },
-    { icon: "🔒", label: "Secure Platform" },
+    "Verified profiles",
+    "Investor matchmaking",
+    "Financial transparency",
+    "Pan-African reach",
+    "Secure platform",
   ];
 
   const businessSteps = [
@@ -59,26 +59,87 @@ export default function Landing() {
     },
   ];
 
+  const Corners = () => (
+    <>
+      <span className="im-corner im-corner-tl" />
+      <span className="im-corner im-corner-tr" />
+      <span className="im-corner im-corner-bl" />
+      <span className="im-corner im-corner-br" />
+    </>
+  );
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,700;1,500;1,600&family=Sora:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
         .im-root * { box-sizing: border-box; }
-        .im-root { font-family: 'Sora', sans-serif; color: #14110D; }
+        .im-root {
+          --void: #060911;
+          --void-alt: #080d17;
+          --panel: #0e1626;
+          --panel-alt: #0b1220;
+          --panel-border: rgba(61, 214, 245, 0.16);
+          --cyan: #3dd6f5;
+          --violet: #8b7cf6;
+          --text: #e7edf5;
+          --muted: #7c8aa0;
 
+          font-family: 'Space Grotesk', sans-serif;
+          color: var(--text);
+          background: var(--void);
+        }
+
+        .im-corner {
+          position: absolute;
+          width: 13px;
+          height: 13px;
+          border-color: var(--cyan);
+          opacity: 0.5;
+        }
+        .im-corner-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+        .im-corner-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+        .im-corner-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+        .im-corner-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+
+        .im-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--cyan);
+          display: inline-block;
+          margin-right: 9px;
+          animation: im-pulse 2s infinite;
+        }
+        @keyframes im-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(61, 214, 245, 0.55); }
+          50% { box-shadow: 0 0 0 5px rgba(61, 214, 245, 0); }
+        }
+
+        /* Hero */
         .im-hero {
           position: relative;
           overflow: hidden;
-          background: #15402B;
-          padding: 100px 8% 70px;
+          padding: 90px 8% 70px;
         }
-        .im-hero-pattern {
+        .im-hero-grid {
           position: absolute;
           inset: 0;
           background-image:
-            repeating-linear-gradient(45deg, rgba(231,169,61,0.10) 0px, rgba(231,169,61,0.10) 2px, transparent 2px, transparent 16px),
-            repeating-linear-gradient(-45deg, rgba(195,63,38,0.08) 0px, rgba(195,63,38,0.08) 2px, transparent 2px, transparent 16px);
+            linear-gradient(rgba(61, 214, 245, 0.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(61, 214, 245, 0.07) 1px, transparent 1px);
+          background-size: 46px 46px;
+          -webkit-mask-image: radial-gradient(circle at 20% 20%, black, transparent 68%);
+          mask-image: radial-gradient(circle at 20% 20%, black, transparent 68%);
+          pointer-events: none;
+        }
+        .im-hero-glow {
+          position: absolute;
+          top: -240px;
+          left: -120px;
+          width: 800px;
+          height: 520px;
+          background: radial-gradient(circle, rgba(61, 214, 245, 0.16), transparent 70%);
           pointer-events: none;
         }
         .im-hero-container {
@@ -91,88 +152,117 @@ export default function Landing() {
           flex-wrap: wrap;
           gap: 48px;
         }
-        .im-hero-text { flex: 1 1 420px; min-width: 320px; color: #FBF6EA; }
-        .im-eyebrow {
-          font-family: 'Space Mono', monospace;
-          font-size: 13px;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          color: #E7A93D;
-          display: inline-block;
-          margin-bottom: 22px;
+        .im-hero-text { flex: 1 1 420px; min-width: 320px; }
+
+        .im-status {
+          display: inline-flex;
+          align-items: center;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12.5px;
+          color: var(--muted);
+          margin-bottom: 24px;
         }
+
+        .im-hero-scan {
+          position: relative;
+          overflow: hidden;
+        }
+        .im-scanline {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 1px;
+          background: linear-gradient(90deg, var(--cyan), transparent 80%);
+          animation: im-scan 1.8s ease-out 1 forwards;
+        }
+        @keyframes im-scan {
+          0% { transform: translateY(0); opacity: 0; }
+          12% { opacity: 0.9; }
+          100% { transform: translateY(170px); opacity: 0; }
+        }
+
         .im-hero-title {
-          font-family: 'Fraunces', serif;
           font-weight: 700;
-          font-size: clamp(38px, 5.2vw, 64px);
-          line-height: 1.08;
+          font-size: clamp(34px, 5vw, 58px);
+          line-height: 1.12;
           margin: 0 0 22px;
         }
-        .im-hero-title em {
-          font-style: italic;
-          font-weight: 500;
-          color: #E7A93D;
-        }
         .im-hero-para {
-          font-size: 19px;
+          font-size: 17.5px;
           line-height: 1.75;
-          color: #D9E5DC;
+          color: var(--muted);
           max-width: 540px;
           margin: 0 0 36px;
         }
         .im-hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 40px; }
+
         .im-btn {
-          font-family: 'Sora', sans-serif;
-          font-weight: 600;
-          font-size: 15px;
-          padding: 15px 30px;
-          border-radius: 8px;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 500;
+          font-size: 14px;
+          padding: 15px 28px;
+          border-radius: 3px;
           text-decoration: none;
           display: inline-block;
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          cursor: pointer;
+          border: 1px solid rgba(61, 214, 245, 0.4);
+          background: transparent;
+          color: var(--cyan);
+          transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
         }
-        .im-btn:hover { transform: translateY(-2px); }
-        .im-btn:focus-visible { outline: 3px solid #E7A93D; outline-offset: 3px; }
-        .im-btn-primary { background: #E7A93D; color: #14110D; }
-        .im-btn-primary:hover { box-shadow: 0 8px 20px rgba(231,169,61,0.35); }
-        .im-btn-secondary { border: 2px solid #FBF6EA; color: #FBF6EA; }
-        .im-btn-secondary:hover { background: rgba(251,246,234,0.1); }
+        .im-btn:hover { background: var(--cyan); color: #06111a; }
+        .im-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+        .im-btn-solid { background: var(--cyan); color: #06111a; border-color: var(--cyan); }
+        .im-btn-solid:hover { opacity: 0.88; background: var(--cyan); color: #06111a; }
 
-        .im-badge-row { display: flex; flex-wrap: wrap; gap: 10px 22px; }
+        .im-badge-row { display: flex; flex-wrap: wrap; gap: 12px 26px; }
         .im-badge {
-          font-size: 14px;
-          color: #D9E5DC;
+          font-size: 13.5px;
+          color: var(--muted);
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 9px;
+        }
+        .im-badge::before {
+          content: '';
+          width: 6px;
+          height: 6px;
+          background: var(--violet);
+          flex-shrink: 0;
         }
 
+        /* Ticker */
         .im-ticker-board {
           flex: 1 1 340px;
           min-width: 300px;
           max-width: 420px;
-          background: #14110D;
-          border: 3px solid #E7A93D;
-          border-radius: 14px;
+          position: relative;
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-radius: 4px;
           overflow: hidden;
           align-self: center;
-          box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
         }
         .im-ticker-head {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 14px 18px;
-          background: #C33F26;
-          font-family: 'Space Mono', monospace;
+          border-bottom: 1px solid var(--panel-border);
+          font-family: 'JetBrains Mono', monospace;
           font-size: 12px;
-          letter-spacing: 1.5px;
-          color: #FBF6EA;
+          color: var(--muted);
         }
         .im-ticker-dot {
-          width: 9px; height: 9px; border-radius: 50%;
-          background: #E7A93D;
-          animation: im-pulse 1.4s ease-in-out infinite;
+          width: 8px; height: 8px; border-radius: 50%;
+          background: var(--cyan);
+          animation: im-ticker-pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes im-ticker-pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
         }
         .im-ticker-track { height: 280px; overflow: hidden; position: relative; }
         .im-ticker-list {
@@ -185,191 +275,188 @@ export default function Landing() {
           justify-content: space-between;
           gap: 12px;
           padding: 14px 18px;
-          border-bottom: 1px solid rgba(251,246,234,0.08);
-          font-family: 'Space Mono', monospace;
-          font-size: 13px;
-          color: #FBF6EA;
+          border-bottom: 1px solid var(--panel-border);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12.5px;
         }
-        .im-ticker-name { flex: 1; }
-        .im-ticker-sector { color: #E7A93D; }
-        .im-ticker-amount { color: #7FBF9E; }
+        .im-ticker-name { flex: 1; color: var(--text); }
+        .im-ticker-sector { color: var(--violet); }
+        .im-ticker-amount { color: var(--cyan); }
 
         @keyframes im-scroll {
           0% { transform: translateY(0); }
           100% { transform: translateY(-50%); }
         }
-        @keyframes im-pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
 
-        .im-about { padding: 84px 8% 40px; background: #FBF6EA; }
-        .im-about-inner { max-width: 780px; margin: 0 auto; text-align: center; }
-        .im-about-eyebrow {
-          font-family: 'Space Mono', monospace;
-          font-size: 12px;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          color: #C33F26;
-          display: block;
-          margin-bottom: 16px;
-        }
+        /* About */
+        .im-about { padding: 80px 8%; border-top: 1px solid var(--panel-border); }
+        .im-about-inner { max-width: 720px; margin: 0 auto; text-align: center; }
         .im-about-title {
-          font-family: 'Fraunces', serif;
           font-weight: 600;
-          font-size: clamp(28px, 3.8vw, 42px);
+          font-size: clamp(26px, 3.6vw, 38px);
           margin: 0 0 20px;
-          color: #14110D;
         }
         .im-about-text {
-          font-size: 18px;
-          line-height: 1.8;
-          color: #443F32;
+          font-size: 16.5px;
+          line-height: 1.85;
+          color: var(--muted);
         }
 
-        .im-how { padding: 60px 8% 84px; background: #FBF6EA; }
+        /* How it works */
+        .im-how { padding: 20px 8% 84px; }
         .im-how-tracks {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-          gap: 40px;
+          gap: 24px;
           max-width: 1100px;
           margin: 0 auto;
         }
-        .im-track { background: #FFFFFF; border-radius: 14px; padding: 36px 30px; border: 1px solid rgba(20,17,13,0.08); }
-        .im-track-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-        .im-track-icon {
-          width: 42px; height: 42px; border-radius: 10px;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 20px;
-          background: #15402B; color: #FBF6EA;
+        .im-track {
+          position: relative;
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-radius: 4px;
+          padding: 32px 28px;
         }
-        .im-track.im-track-investor .im-track-icon { background: #C33F26; }
-        .im-track-header h3 { font-family: 'Sora', sans-serif; font-size: 19px; margin: 0; color: #14110D; }
-        .im-step { display: flex; gap: 16px; margin-bottom: 24px; }
+        .im-track-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 26px;
+          padding-bottom: 18px;
+          border-bottom: 1px solid var(--panel-border);
+        }
+        .im-track-header h3 { font-size: 17px; margin: 0; }
+        .im-track-tag {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: var(--cyan);
+        }
+        .im-track-investor .im-track-tag { color: var(--violet); }
+
+        .im-step { display: flex; gap: 16px; margin-bottom: 22px; }
         .im-step:last-child { margin-bottom: 0; }
         .im-step-num {
-          font-family: 'Space Mono', monospace;
-          font-weight: 700;
-          font-size: 14px;
-          color: #E7A93D;
-          background: #14110D;
-          width: 30px; height: 30px;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 600;
+          font-size: 12.5px;
+          color: var(--cyan);
+          border: 1px solid var(--panel-border);
+          width: 26px; height: 26px;
           border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
-        .im-step-title { font-weight: 600; font-size: 15px; margin: 0 0 4px; color: #14110D; }
-        .im-step-text { font-size: 14px; line-height: 1.65; color: #55503F; margin: 0; }
+        .im-step-title { font-weight: 600; font-size: 14.5px; margin: 0 0 4px; }
+        .im-step-text { font-size: 13.5px; line-height: 1.65; color: var(--muted); margin: 0; }
 
-        .im-stats { padding: 76px 8%; background: #EFE2BE; }
+        /* Stats */
+        .im-stats { padding: 72px 8%; background: var(--void-alt); border-top: 1px solid var(--panel-border); border-bottom: 1px solid var(--panel-border); }
         .im-section-title {
-          font-family: 'Fraunces', serif;
           font-weight: 600;
           text-align: center;
-          font-size: clamp(28px, 3.6vw, 40px);
-          margin: 0 0 14px;
-          color: #14110D;
+          font-size: clamp(26px, 3.4vw, 36px);
+          margin: 0 0 12px;
         }
         .im-section-subtitle {
           text-align: center;
-          color: #55503F;
-          margin: 0 0 50px;
-          font-size: 17px;
+          color: var(--muted);
+          margin: 0 0 46px;
+          font-size: 15.5px;
         }
         .im-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 22px;
+          gap: 20px;
         }
         .im-stat-card {
-          background: #FBF6EA;
-          padding: 34px 24px;
-          border-radius: 12px;
-          text-align: center;
-          border: 1px solid rgba(20,17,13,0.08);
-        }
-        .im-stat-number {
-          font-family: 'Space Mono', monospace;
-          font-weight: 700;
-          font-size: 34px;
-          color: #C33F26;
-          margin: 0 0 8px;
-        }
-        .im-stat-label { color: #55503F; font-size: 14px; }
-
-        .im-industries { padding: 84px 8%; background: #FBF6EA; }
-        .im-sector-link { text-decoration: none; color: inherit; }
-        .im-sector-card {
-          background: #FFFFFF;
-          border-radius: 12px;
+          position: relative;
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-radius: 4px;
           padding: 30px 22px;
           text-align: center;
-          border: 1px solid rgba(20,17,13,0.08);
-          border-top: 5px solid var(--accent, #E7A93D);
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
-        .im-sector-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(20,17,13,0.1); }
-        .im-sector-icon { font-size: 38px; margin-bottom: 14px; }
-        .im-sector-card h3 { font-family: 'Sora', sans-serif; margin: 0 0 8px; font-size: 17px; }
-        .im-explore-text { color: #C33F26; font-weight: 600; font-size: 13px; margin: 0; }
-
-        .im-view-all-wrap { text-align: center; margin-top: 46px; }
-        .im-view-all-btn {
-          display: inline-block;
-          background: #15402B;
-          color: #FBF6EA;
-          padding: 15px 32px;
-          border-radius: 8px;
-          text-decoration: none;
+        .im-stat-number {
+          font-family: 'JetBrains Mono', monospace;
           font-weight: 600;
+          font-size: 30px;
+          color: var(--cyan);
+          margin: 0 0 8px;
         }
-        .im-view-all-btn:hover { background: #0F3021; }
-        .im-view-all-btn:focus-visible { outline: 3px solid #E7A93D; outline-offset: 3px; }
+        .im-stat-label { color: var(--muted); font-size: 13.5px; }
 
+        /* Industries */
+        .im-industries { padding: 80px 8%; }
+        .im-sector-link { text-decoration: none; color: inherit; }
+        .im-sector-card {
+          position: relative;
+          background: var(--panel);
+          border: 1px solid var(--panel-border);
+          border-top: 2px solid var(--violet);
+          border-radius: 4px;
+          padding: 30px 22px;
+          text-align: center;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .im-sector-card:hover {
+          border-color: rgba(61, 214, 245, 0.5);
+          box-shadow: 0 0 0 1px rgba(61, 214, 245, 0.2), 0 0 24px rgba(61, 214, 245, 0.12);
+        }
+        .im-sector-card h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+        .im-explore-text {
+          color: var(--muted);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          margin: 0;
+        }
+
+        .im-view-all-wrap { text-align: center; margin-top: 44px; }
+
+        /* CTA */
         .im-cta {
-          background: #C33F26;
-          color: #FBF6EA;
+          position: relative;
           padding: 90px 8%;
           text-align: center;
-          border-top: 6px solid #E7A93D;
+          border-top: 1px solid var(--panel-border);
+          overflow: hidden;
+        }
+        .im-cta-glow {
+          position: absolute;
+          bottom: -220px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 800px;
+          height: 460px;
+          background: radial-gradient(circle, rgba(139, 124, 246, 0.14), transparent 70%);
+          pointer-events: none;
         }
         .im-cta-title {
-          font-family: 'Fraunces', serif;
-          font-style: italic;
+          position: relative;
           font-weight: 600;
-          font-size: clamp(30px, 4vw, 44px);
-          margin: 0 0 20px;
+          font-size: clamp(28px, 3.8vw, 40px);
+          margin: 0 0 18px;
         }
         .im-cta-text {
-          max-width: 640px;
-          margin: 0 auto 34px;
-          font-size: 18px;
+          position: relative;
+          max-width: 620px;
+          margin: 0 auto 32px;
+          font-size: 16.5px;
           line-height: 1.75;
-          color: #FBE3DB;
+          color: var(--muted);
         }
-        .im-cta-btn {
-          background: #FBF6EA;
-          color: #C33F26;
-          padding: 16px 34px;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 700;
-          display: inline-block;
-        }
-        .im-cta-btn:hover { background: #E7A93D; color: #14110D; }
-        .im-cta-btn:focus-visible { outline: 3px solid #14110D; outline-offset: 3px; }
 
         .im-footer {
-          background: #14110D;
-          color: #B9B2A0;
+          border-top: 1px solid var(--panel-border);
+          color: var(--muted);
           text-align: center;
-          padding: 30px;
-          font-size: 14px;
-          font-family: 'Space Mono', monospace;
+          padding: 28px;
+          font-size: 13px;
+          font-family: 'JetBrains Mono', monospace;
         }
 
         @media (max-width: 860px) {
-          .im-hero { padding: 70px 6% 50px; }
+          .im-hero { padding: 64px 6% 50px; }
           .im-hero-container { flex-direction: column; }
           .im-ticker-board { max-width: 100%; }
         }
@@ -377,45 +464,52 @@ export default function Landing() {
         @media (prefers-reduced-motion: reduce) {
           .im-ticker-list { animation: none; }
           .im-ticker-dot { animation: none; }
+          .im-scanline { animation: none; opacity: 0; }
         }
       `}</style>
 
       <div className="im-root">
-        {/* Hero Section */}
+        {/* Hero */}
         <section className="im-hero">
-          <div className="im-hero-pattern" />
+          <div className="im-hero-grid" />
+          <div className="im-hero-glow" />
 
           <div className="im-hero-container">
             <div className="im-hero-text">
-              <span className="im-eyebrow">Mtaani Exchange · Est. 2026</span>
+              <div className="im-status">
+                <span className="im-dot" />
+                mtaani exchange
+              </div>
 
-              <h1 className="im-hero-title">
-                Invest in Africa's
-                <br />
-                <em>Next Unicorn</em>
-              </h1>
+              <div className="im-hero-scan">
+                <div className="im-scanline" />
+                <h1 className="im-hero-title">
+                  Invest in Africa's
+                  <br />
+                  next unicorn
+                </h1>
 
-              <p className="im-hero-para">
-                Investor Mtaani connects visionary African businesses with
-                investors looking for high-growth opportunities across
-                FinTech, HealthTech, AgriTech, AI, Clean Energy and more.
-              </p>
+                <p className="im-hero-para">
+                  Investor Mtaani connects visionary African businesses with
+                  investors looking for high-growth opportunities across
+                  FinTech, HealthTech, AgriTech, AI, Clean Energy and more.
+                </p>
+              </div>
 
               <div className="im-hero-buttons">
-                <Link to="/browse" className="im-btn im-btn-primary">
-                  Browse Businesses
+                <Link to="/browse" className="im-btn im-btn-solid">
+                  Browse businesses
                 </Link>
 
-                <Link to="/register" className="im-btn im-btn-secondary">
-                  Register Business
+                <Link to="/register" className="im-btn">
+                  Register a business
                 </Link>
               </div>
 
               <div className="im-badge-row">
-                {badges.map((badge) => (
-                  <span className="im-badge" key={badge.label}>
-                    <span>{badge.icon}</span>
-                    {badge.label}
+                {badges.map((label) => (
+                  <span className="im-badge" key={label}>
+                    {label}
                   </span>
                 ))}
               </div>
@@ -423,7 +517,7 @@ export default function Landing() {
 
             <div className="im-ticker-board" aria-label="Live funding requests">
               <div className="im-ticker-head">
-                <span>LIVE ON THE STREET</span>
+                <span>live on the street</span>
                 <span className="im-ticker-dot" />
               </div>
 
@@ -445,8 +539,6 @@ export default function Landing() {
         {/* About */}
         <section className="im-about">
           <div className="im-about-inner">
-            <span className="im-about-eyebrow">What is Investor Mtaani</span>
-
             <h2 className="im-about-title">
               A marketplace built for African deal-making
             </h2>
@@ -464,7 +556,7 @@ export default function Landing() {
 
         {/* How It Works */}
         <section className="im-how">
-          <h2 className="im-section-title">How It Works</h2>
+          <h2 className="im-section-title">How it works</h2>
 
           <p className="im-section-subtitle">
             Two sides, one platform. Here's what each path looks like.
@@ -473,8 +565,10 @@ export default function Landing() {
           <div className="im-how-tracks">
             <div className="im-track">
               <div className="im-track-header">
-                <span className="im-track-icon">🏢</span>
-                <h3>For Businesses</h3>
+                <div>
+                  <span className="im-track-tag">path 01</span>
+                  <h3>For businesses</h3>
+                </div>
               </div>
 
               {businessSteps.map((step, i) => (
@@ -490,8 +584,10 @@ export default function Landing() {
 
             <div className="im-track im-track-investor">
               <div className="im-track-header">
-                <span className="im-track-icon">💼</span>
-                <h3>For Investors</h3>
+                <div>
+                  <span className="im-track-tag">path 02</span>
+                  <h3>For investors</h3>
+                </div>
               </div>
 
               {investorSteps.map((step, i) => (
@@ -509,16 +605,17 @@ export default function Landing() {
 
         {/* Statistics */}
         <section className="im-stats">
-          <h2 className="im-section-title">Investor Mtaani by the Numbers</h2>
+          <h2 className="im-section-title">Investor Mtaani by the numbers</h2>
 
           <div className="im-grid">
             {[
-              ["500+", "Verified Businesses"],
-              ["120+", "Active Investors"],
-              ["KES 4.5B", "Capital Raised"],
-              ["15", "African Countries"],
+              ["500+", "Verified businesses"],
+              ["120+", "Active investors"],
+              ["KES 4.5B", "Capital raised"],
+              ["15", "African countries"],
             ].map(([value, label]) => (
               <div key={label} className="im-stat-card">
+                <Corners />
                 <p className="im-stat-number">{value}</p>
                 <p className="im-stat-label">{label}</p>
               </div>
@@ -528,7 +625,7 @@ export default function Landing() {
 
         {/* Industries */}
         <section className="im-industries">
-          <h2 className="im-section-title">Explore Investment Sectors</h2>
+          <h2 className="im-section-title">Explore investment sectors</h2>
 
           <p className="im-section-subtitle">
             Choose a sector to discover businesses seeking investors.
@@ -541,27 +638,25 @@ export default function Landing() {
                 to={`/browse?industry=${encodeURIComponent(sector.name)}`}
                 className="im-sector-link"
               >
-                <div
-                  className="im-sector-card"
-                  style={{ "--accent": sector.accent }}
-                >
-                  <div className="im-sector-icon">{sector.icon}</div>
+                <div className="im-sector-card">
+                  <Corners />
                   <h3>{sector.name}</h3>
-                  <p className="im-explore-text">Explore businesses →</p>
+                  <p className="im-explore-text">Explore businesses</p>
                 </div>
               </Link>
             ))}
           </div>
 
           <div className="im-view-all-wrap">
-            <Link to="/browse" className="im-view-all-btn">
-              View All Businesses
+            <Link to="/browse" className="im-btn im-btn-solid">
+              View all businesses
             </Link>
           </div>
         </section>
 
         {/* CTA */}
         <section className="im-cta">
+          <div className="im-cta-glow" />
           <h2 className="im-cta-title">Ready to build Africa's future?</h2>
 
           <p className="im-cta-text">
@@ -570,8 +665,8 @@ export default function Landing() {
             investors matchmake.
           </p>
 
-          <Link to="/register" className="im-cta-btn">
-            Get Started Today
+          <Link to="/register" className="im-btn im-btn-solid">
+            Get started
           </Link>
         </section>
 
