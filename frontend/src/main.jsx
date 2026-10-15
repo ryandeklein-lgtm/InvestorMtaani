@@ -12,6 +12,7 @@ import "./theme/Forms.css";
 import "./theme/Tables.css";
 import "./theme/Dashboard.css";
 import "./theme/Polish.css";
+import "./theme/Responsive.css";
 
 import App from "./App";
 import { AuthProvider } from "./contexts/AuthContext";

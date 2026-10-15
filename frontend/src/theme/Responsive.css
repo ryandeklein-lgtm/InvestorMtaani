@@ -1,0 +1,79 @@
+/* Shared narrow-screen layout rules for pages with both CSS and inline styles. */
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  #root main,
+  #root main > *,
+  #root main section,
+  #root main article,
+  #root main form,
+  #root main [class*="container"],
+  #root main [class*="inner"],
+  #root main [class*="card"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  #root main [style*="grid-template-columns"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root main [style*="width: 420px"],
+  #root main [style*="width: 500px"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #root main input,
+  #root main select,
+  #root main textarea {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  #root main table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root main p,
+  #root main h1,
+  #root main h2,
+  #root main h3,
+  #root main h4,
+  #root main label,
+  #root main a,
+  #root main button {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 480px) {
+  #root main .page {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  #root main .card,
+  #root main .tech-panel,
+  #root main .empty-state,
+  #root main .dashboard-header {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}

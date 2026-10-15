@@ -2,7 +2,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./Register.css";
 
-import AuthLayout from "../components/auth/AuthLayout";
 import DynamicForm from "../components/auth/DynamicForm";
 import TermsCheckbox from "../components/auth/TermsCheckbox";
 
@@ -33,7 +32,6 @@ function Register() {
       : investorFields;
 
   return (
-    <AuthLayout>
       <div className="register-page">
 
         {/* =====================================================
@@ -534,7 +532,6 @@ function Register() {
         </section>
 
       </div>
-    </AuthLayout>
   );
 }
 
