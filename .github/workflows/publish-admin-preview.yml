@@ -1,0 +1,57 @@
+name: Publish read-only admin preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/admin-preview.html"
+      - "frontend/src/adminPreview.jsx"
+      - "frontend/src/pages/AdminPage.jsx"
+      - "frontend/vite.admin-preview.config.js"
+      - ".github/workflows/publish-admin-preview.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: admin-preview-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out preview source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Build the standalone preview
+        run: npx vite build --config vite.admin-preview.config.js
+        working-directory: frontend
+      - name: Upload preview site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: frontend/admin-preview-dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish read-only preview
+        id: deployment
+        uses: actions/deploy-pages@v4

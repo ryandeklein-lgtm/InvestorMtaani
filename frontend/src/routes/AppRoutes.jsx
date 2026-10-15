@@ -17,6 +17,7 @@ import BusinessDetails from "./pages/BusinessDetails";
 import BusinessForm from "./pages/BusinessForm";
 import BusinessMatches from "./pages/BusinessMatches";
 import BusinessProfile from "./pages/BusinessProfile";
+import KYC from "./pages/KYCFlow";
 
 // Investor
 import InvestorProfile from "./pages/InvestorProfile";
@@ -36,6 +37,11 @@ import NotFound from "./pages/NotFound";
 // Admin
 import AdminPage from "./pages/AdminPage";
 
+// Shortcuts so the route list below stays readable
+const BUSINESS_ONLY = ["business"];
+const INVESTOR_ONLY = ["investor"];
+const BUSINESS_OR_INVESTOR = ["business", "investor"];
+
 function Layout() {
   const location = useLocation();
 
@@ -52,7 +58,7 @@ function Layout() {
         {/* Landing */}
         <Route path="/" element={<Landing />} />
 
-        {/* Home */}
+        {/* Home (any logged-in user) */}
         <Route
           path="/home"
           element={
@@ -66,16 +72,17 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Browse Businesses */}
+        {/* Browse Businesses (public: backend only returns approved ones) */}
         <Route path="/browse" element={<BrowseBusinesses />} />
 
-        {/* Business */}
+        {/* Business details (public: approved businesses only) */}
         <Route path="/business/:id" element={<BusinessDetails />} />
 
+        {/* Business-only pages */}
         <Route
           path="/business-profile"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={BUSINESS_ONLY}>
               <BusinessProfile />
             </ProtectedRoute>
           }
@@ -84,7 +91,7 @@ function Layout() {
         <Route
           path="/business/create"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={BUSINESS_ONLY}>
               <BusinessForm />
             </ProtectedRoute>
           }
@@ -93,17 +100,27 @@ function Layout() {
         <Route
           path="/business-matches"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={BUSINESS_ONLY}>
               <BusinessMatches />
             </ProtectedRoute>
           }
         />
 
-        {/* Investor */}
+        {/* KYC: the brief requires it for both businesses and investors */}
+        <Route
+          path="/kyc"
+          element={
+            <ProtectedRoute roles={BUSINESS_OR_INVESTOR}>
+              <KYC />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Investor-only pages */}
         <Route
           path="/investor-profile"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={INVESTOR_ONLY}>
               <InvestorProfile />
             </ProtectedRoute>
           }
@@ -112,17 +129,16 @@ function Layout() {
         <Route
           path="/investor/create"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={INVESTOR_ONLY}>
               <InvestorForm />
             </ProtectedRoute>
           }
         />
 
-        {/* Investor Pages */}
         <Route
           path="/watchlist"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={INVESTOR_ONLY}>
               <Watchlist />
             </ProtectedRoute>
           }
@@ -131,26 +147,26 @@ function Layout() {
         <Route
           path="/portfolio"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={INVESTOR_ONLY}>
               <Portfolio />
             </ProtectedRoute>
           }
         />
 
+        {/* Shared pages */}
         <Route
           path="/messages"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={BUSINESS_OR_INVESTOR}>
               <Messages />
             </ProtectedRoute>
           }
         />
 
-        {/* Platform */}
         <Route
           path="/funding"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={BUSINESS_OR_INVESTOR}>
               <Funding />
             </ProtectedRoute>
           }
@@ -159,7 +175,7 @@ function Layout() {
         <Route
           path="/matchmaking"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={BUSINESS_OR_INVESTOR}>
               <Matchmaking />
             </ProtectedRoute>
           }

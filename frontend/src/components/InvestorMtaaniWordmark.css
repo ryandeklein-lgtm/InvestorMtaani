@@ -1,0 +1,26 @@
+.im-wordmark {
+  display: inline-grid;
+  justify-items: start;
+  gap: 2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.im-wordmark-kicker {
+  color: #91a5b8;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+
+.im-wordmark-name {
+  background: linear-gradient(100deg, #f1f7fa 8%, #bceee7 72%, #a8c9ff 100%);
+  background-clip: text;
+  color: transparent;
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: .065em;
+}
+
+.im-wordmark--footer .im-wordmark-kicker { font-size: 9px; }
+.im-wordmark--footer .im-wordmark-name { font-size: 19px; }

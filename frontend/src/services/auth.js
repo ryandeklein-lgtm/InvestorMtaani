@@ -3,39 +3,25 @@ import api from "./api";
 const authService = {
   // Register new user
   register: async (userData) => {
-    const response = await api.post(
-      "/auth/register",
-      userData
-    );
+    const response = await api.post("/auth/register", userData);
 
     return response.data;
   },
 
-
   // Login user
   login: async (credentials) => {
-    const response = await api.post(
-      "/auth/login",
-      credentials
-    );
+    const response = await api.post("/auth/login", credentials);
 
     if (response.data.token) {
       // Save JWT token
-      localStorage.setItem(
-        "token",
-        response.data.token
-      );
+      localStorage.setItem("token", response.data.token);
 
       // Save logged-in user details
-      localStorage.setItem(
-        "user",
-        JSON.stringify(response.data.user)
-      );
+      localStorage.setItem("user", JSON.stringify(response.data.user));
     }
 
     return response.data;
   },
-
 
   // Logout user
   logout: () => {
@@ -43,20 +29,22 @@ const authService = {
     localStorage.removeItem("user");
   },
 
-
   // Get token
   getToken: () => {
     return localStorage.getItem("token");
   },
 
-
-  // Get current user
+  // Get current user (returns null if missing or corrupted)
   getUser: () => {
-    const user = localStorage.getItem("user");
+    try {
+      const user = localStorage.getItem("user");
 
-    return user ? JSON.parse(user) : null;
+      return user ? JSON.parse(user) : null;
+    } catch {
+      localStorage.removeItem("user");
+      return null;
+    }
   },
-
 
   // Check if user is logged in
   isAuthenticated: () => {

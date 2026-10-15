@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const pool = require("./config/db");
@@ -13,52 +15,97 @@ const matchmakingRoutes = require("./routes/matchmakingRoutes");
 const fundingRoutes = require("./routes/fundingRoutes");
 const newsRoutes = require("./routes/newsRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const kycRoutes = require("./routes/kycRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+
+// Fail early if required settings are missing
+const REQUIRED_ENV = [
+  "JWT_SECRET",
+];
+
+const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]);
+const hasDatabaseUrl = Boolean(process.env.DATABASE_URL);
+const databaseFields = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"];
+if (!hasDatabaseUrl) {
+  missingEnv.push(...databaseFields.filter((key) => !process.env[key]));
+}
+if (process.env.NODE_ENV === "production" && !process.env.FRONTEND_URL) {
+  missingEnv.push("FRONTEND_URL");
+}
+if (missingEnv.length > 0) {
+  console.error(
+    "🔴 Missing required environment variables:",
+    missingEnv.join(", ")
+  );
+  process.exit(1);
+}
+if (
+  process.env.JWT_SECRET.length < 32 ||
+  process.env.JWT_SECRET.toLowerCase().includes("replace-this")
+) {
+  console.error("🔴 Set JWT_SECRET to a unique random value of at least 32 characters.");
+  process.exit(1);
+}
 
 const app = express();
+if (process.env.TRUST_PROXY === "true") app.set("trust proxy", 1);
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Security headers
+app.use(helmet());
 
-// Test route
+// CORS: only allow your frontend(s). Separate several URLs with commas.
+const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+  .split(",")
+  .map((url) => url.trim());
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
+app.use(express.json({ limit: "1mb" }));
+
+// Slow down brute-force attempts on login/register
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many attempts. Please try again in a few minutes.",
+  },
+});
+
+// Health check
 app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "Investor Mtaani API is running 🚀",
   });
 });
-
-// Current backend test
-app.get("/ryan-test", (req, res) => {
-  res.json({
-    success: true,
-    message: "This is the CURRENT backend.",
-  });
+app.get("/healthz", (req, res) => {
+  pool.query("SELECT 1")
+    .then(() => res.status(200).json({ success: true, status: "healthy" }))
+    .catch(() => res.status(503).json({ success: false, status: "unavailable" }));
 });
 
 // API Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 
 // Old startup route - keep for now
 app.use("/api/startups", startupRoutes);
 
-// Business routes
 app.use("/api/businesses", businessRoutes);
-
-// Investor routes
 app.use("/api/investors", investorRoutes);
-
-// Matchmaking routes
 app.use("/api/matchmaking", matchmakingRoutes);
-
-// Funding routes
+app.use("/api/kyc", kycRoutes);
 app.use("/api/funding", fundingRoutes);
-
-// News routes
 app.use("/api/news", newsRoutes);
-
-// Admin routes
 app.use("/api/admin", adminRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -70,29 +117,55 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error("Server Error:", err);
+  const status = err.status || 500;
 
-  res.status(500).json({
+  if (status === 500) {
+    console.error("Server Error:", err);
+  }
+
+  res.status(status).json({
     success: false,
-    message: "Internal server error",
+    message: status === 500 ? "Internal server error" : err.message,
   });
 });
 
-// Database test + server start
+// Check the database, then start the server
 const PORT = process.env.PORT || 5000;
+let httpServer;
 
-app.listen(PORT, async () => {
+const start = async () => {
   try {
     await pool.query("SELECT NOW()");
-
     console.log("🟢 PostgreSQL connected successfully");
-    console.log(
-      `🚀 Investor Mtaani Backend running on http://localhost:${PORT}`
-    );
+
+    httpServer = app.listen(PORT, "0.0.0.0", () => {
+      console.log(
+        `🚀 Investor Mtaani Backend running on http://localhost:${PORT}`
+      );
+    });
   } catch (error) {
-    console.error(
-      "🔴 Database connection failed:",
-      error.message
-    );
+    console.error("🔴 Database connection failed:", error.message);
+    process.exit(1);
   }
-});
+};
+
+const shutdown = async (signal) => {
+  console.log(`${signal} received; closing HTTP server and database pool.`);
+  try {
+    if (httpServer) {
+      await new Promise((resolve, reject) => {
+        httpServer.close((error) => error ? reject(error) : resolve());
+      });
+    }
+    await pool.end();
+    process.exit(0);
+  } catch (error) {
+    console.error("Error while closing database pool:", error.message);
+    process.exit(1);
+  }
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+start();

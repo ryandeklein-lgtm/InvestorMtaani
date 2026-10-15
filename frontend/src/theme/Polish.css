@@ -1,0 +1,115 @@
+/* Shared finish applied across public, account, business and admin screens. */
+:root {
+  color-scheme: dark;
+  --cyan: #49ddca;
+  --cyan-bright: #8af1e1;
+  --cyan-dark: #1da995;
+  --cyan-glow: rgba(73, 221, 202, .18);
+  --border: rgba(73, 221, 202, .17);
+  --border-strong: rgba(73, 221, 202, .4);
+  --radius: 14px;
+  --radius-lg: 20px;
+}
+
+html { background: #070b13; }
+body {
+  background:
+    radial-gradient(ellipse at 8% -8%, rgba(73, 221, 202, .075), transparent 34rem),
+    radial-gradient(ellipse at 94% 20%, rgba(139, 124, 246, .055), transparent 30rem),
+    #070b13;
+  color: #e7edf5;
+}
+
+::selection { background: rgba(73, 221, 202, .28); color: #f7fffe; }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #74ead9;
+  outline-offset: 3px;
+}
+
+button:not(:disabled) { min-height: 40px; }
+button:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+  transform: none;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  min-height: 44px;
+  border-color: rgba(148, 163, 184, .2);
+  border-radius: 10px;
+  background-color: #0b1422;
+  color: #edf4fa;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(73, 221, 202, .72);
+  background-color: #0d1928;
+  box-shadow: 0 0 0 3px rgba(73, 221, 202, .12), 0 8px 24px rgba(0, 0, 0, .12);
+}
+input::placeholder, textarea::placeholder { color: #8292a7; opacity: 1; }
+input[type="checkbox"], input[type="radio"] { accent-color: #49ddca; }
+
+table { border-collapse: separate; border-spacing: 0; }
+th { color: #a9bacb; font-weight: 650; }
+td, th { border-color: rgba(148, 163, 184, .14); }
+
+.card, .tech-panel, .action-card, .notification-card, .empty-state {
+  border-radius: 16px;
+}
+.card, .tech-panel, .action-card {
+  background-image: linear-gradient(145deg, rgba(18, 31, 49, .96), rgba(10, 18, 31, .97));
+  box-shadow: 0 14px 38px rgba(0, 0, 0, .2);
+}
+.action-card { min-height: 150px; }
+.action-card:focus-visible { border-color: rgba(73, 221, 202, .7); }
+.badge, .eyebrow { letter-spacing: .08em; }
+
+.im-route-loader {
+  display: flex;
+  min-height: 45vh;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #b6c5d5;
+  font-size: 14px;
+}
+.im-loader-orbit {
+  width: 19px;
+  height: 19px;
+  border: 2px solid rgba(73, 221, 202, .2);
+  border-top-color: #49ddca;
+  border-radius: 50%;
+  animation: im-loader-spin .8s linear infinite;
+}
+@keyframes im-loader-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .page { padding: 24px 18px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .section { margin: 34px auto; }
+  .card, .tech-panel { padding: 20px; }
+  table { min-width: 640px; }
+}
+@media (max-width: 480px) {
+  .page { padding: 18px 14px; }
+  .card, .tech-panel { padding: 16px; }
+  .dashboard-header { padding: 24px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

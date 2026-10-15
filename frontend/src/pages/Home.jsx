@@ -4,6 +4,24 @@ import NewsFeed from "../components/NewsFeed";
 
 export default function Home() {
   const { user } = useAuthContext();
+  const isBusiness = user?.role === "business";
+  const isInvestor = user?.role === "investor";
+  const nextSteps = isBusiness
+    ? [
+        { number: "01", title: "Verify your account", text: "Complete identity checks so your application can be reviewed.", to: "/kyc", action: "Continue verification" },
+        { number: "02", title: "Build your business profile", text: "Share your business details, funding need and use of funds.", to: "/business-profile", action: "Open business profile" },
+        { number: "03", title: "Explore funding options", text: "See the funding information and options available on the platform.", to: "/funding", action: "View funding" },
+      ]
+    : isInvestor
+      ? [
+          { number: "01", title: "Verify your account", text: "Complete identity checks before requesting introductions.", to: "/kyc", action: "Continue verification" },
+          { number: "02", title: "Set your investor preferences", text: "Tell us which sectors, locations and structures interest you.", to: "/investor/create", action: "Set preferences" },
+          { number: "03", title: "Discover businesses", text: "Explore opportunities and request an introduction when ready.", to: "/browse", action: "Browse businesses" },
+        ]
+      : [
+          { number: "01", title: "Explore businesses", text: "Browse the opportunities currently available on the platform.", to: "/browse", action: "Browse businesses" },
+          { number: "02", title: "See how matching works", text: "Learn how businesses and investors connect through the platform.", to: "/matchmaking", action: "Explore matchmaking" },
+        ];
 
   return (
     <>
@@ -191,6 +209,41 @@ export default function Home() {
           line-height: 1.6;
         }
 
+        .im-next-step {
+          min-height: 194px;
+          padding: 22px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          border-radius: 12px;
+        }
+        .im-step-number {
+          margin-bottom: 20px;
+          color: var(--cyan);
+          font: 600 11px 'JetBrains Mono', monospace;
+          letter-spacing: .12em;
+        }
+        .im-step-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: auto;
+          padding-top: 18px;
+          color: var(--cyan);
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .im-home-section-title {
+          margin: 0 0 7px;
+          color: var(--text);
+          font-size: 22px;
+        }
+        .im-home-section-description {
+          margin: 0 0 20px;
+          color: var(--muted);
+          font-size: 13px;
+        }
+
         .im-news-card {
           padding: 26px;
         }
@@ -210,96 +263,32 @@ export default function Home() {
               Welcome back{user?.name ? `, ${user.name}` : ""}
             </h1>
             <p className="im-home-subtitle">
-              Connecting African innovation with global capital.
+              {isBusiness
+                ? "Your workspace for verification, your business profile and funding applications."
+                : isInvestor
+                  ? "Your workspace for discovering businesses and managing introductions."
+                  : "Your workspace for exploring the Investor Mtaani marketplace."}
             </p>
           </div>
         </section>
 
-        {/* Statistics */}
+        {/* Role-based next steps */}
         <section className="im-home-section">
+          <h2 className="im-home-section-title">Your next steps</h2>
+          <p className="im-home-section-description">A simple path to get started. Choose a step to continue when you’re ready.</p>
           <div className="im-grid">
-            <div className="im-panel im-stat-card">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Businesses</h3>
-              <p className="im-stat-number">1</p>
-              <p>Registered businesses</p>
-            </div>
-
-            <div className="im-panel im-stat-card">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Matches</h3>
-              <p className="im-stat-number">0</p>
-              <p>Successful matchmaking</p>
-            </div>
-
-            <div className="im-panel im-stat-card">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Funding</h3>
-              <p className="im-stat-number">KES 0</p>
-              <p>Total investments</p>
-            </div>
-
-            <div className="im-panel im-stat-card">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Growth</h3>
-              <p className="im-stat-number">75%</p>
-              <p>Investment readiness</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section className="im-home-section">
-          <h2>Quick actions</h2>
-
-          <div className="im-grid">
-            <Link className="im-panel im-action-card" to="/browse">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Browse businesses</h3>
-              <p>Explore investment opportunities.</p>
-            </Link>
-
-            <Link className="im-panel im-action-card" to="/matchmaking">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Matchmake</h3>
-              <p>Connect investors and businesses.</p>
-            </Link>
-
-            <Link className="im-panel im-action-card" to="/funding">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Funding</h3>
-              <p>View funding requests.</p>
-            </Link>
-
-            <Link className="im-panel im-action-card" to="/notifications">
-              <span className="im-corner im-corner-tl" />
-              <span className="im-corner im-corner-tr" />
-              <span className="im-corner im-corner-bl" />
-              <span className="im-corner im-corner-br" />
-              <h3>Notifications</h3>
-              <p>Stay updated with activity.</p>
-            </Link>
+            {nextSteps.map((step) => (
+              <Link key={step.number} className="im-panel im-action-card im-next-step" to={step.to}>
+                <span className="im-corner im-corner-tl" />
+                <span className="im-corner im-corner-tr" />
+                <span className="im-corner im-corner-bl" />
+                <span className="im-corner im-corner-br" />
+                <span className="im-step-number">STEP {step.number}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+                <span className="im-step-link">{step.action}<span aria-hidden="true">→</span></span>
+              </Link>
+            ))}
           </div>
         </section>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 import BackButton from "../components/BackButton";
 
@@ -6,14 +6,11 @@ function BusinessMatches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [updatingId, setUpdatingId] = useState(null);
 
-  useEffect(() => {
-    fetchMatches();
-  }, []);
-
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     try {
-      setLoading(true);
       const response = await api.get("/matchmaking/business");
       setMatches(response.data.data || []);
     } catch (error) {
@@ -24,9 +21,16 @@ function BusinessMatches() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchMatches, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchMatches]);
 
   const handleStatus = async (matchId, status) => {
+    setActionError("");
+    setUpdatingId(matchId);
     try {
       await api.patch(`/matchmaking/${matchId}/status`, { status });
       setMatches((currentMatches) =>
@@ -36,9 +40,11 @@ function BusinessMatches() {
       );
     } catch (error) {
       console.error("Error updating matchmaking request:", error);
-      alert(
+      setActionError(
         error.response?.data?.message || "Unable to update matchmaking request."
       );
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -165,7 +171,6 @@ function BusinessMatches() {
           margin: 0 0 6px;
           color: #14110D;
         }
-        .bm-email { color: #8A8371; margin: 0; font-size: 14px; }
 
         .bm-status {
           display: inline-flex;
@@ -239,6 +244,38 @@ function BusinessMatches() {
           font-size: 20px;
         }
 
+        .bm-root { min-height: 100vh; background: #070b13; color: #e7edf5; font-family: 'Space Grotesk', sans-serif; }
+        .bm-hero { background: radial-gradient(ellipse at 80% 10%, rgba(73,221,202,.12), transparent 34%), linear-gradient(135deg,#0c1724,#09111d 68%,#101a2a); }
+        .bm-hero-inner { color: #eef5fb; }
+        .bm-eyebrow { color: #75e7d6; }
+        .bm-subtitle, .bm-badge { color: #aebccd; }
+        .bm-badge strong { color: #75e7d6; }
+        .bm-body { background: radial-gradient(ellipse at 12% 0%,rgba(73,221,202,.04),transparent 32rem),#070b13; }
+        .bm-card, .bm-empty { background: linear-gradient(145deg,rgba(17,29,46,.97),rgba(9,15,26,.98)); border: 1px solid rgba(148,163,184,.17); border-radius: 16px; box-shadow: 0 16px 44px rgba(0,0,0,.2); }
+        .bm-card { border-top: 2px solid var(--accent,#49ddca); }
+        .bm-card:hover { box-shadow: 0 20px 52px rgba(0,0,0,.3); }
+        .bm-investor-name, .bm-empty-title, .bm-detail-row strong { color: #edf4fa; }
+        .bm-detail-row { color: #b0bdcc; }
+        .bm-amount { color: #7ce9d8; }
+        .bm-status { background: color-mix(in srgb,var(--accent,#49ddca) 15%,#0b1422); color: var(--accent,#49ddca); border: 1px solid color-mix(in srgb,var(--accent,#49ddca) 28%,transparent); }
+        .bm-divider { border-top-color: rgba(148,163,184,.14); }
+        .bm-message { background: rgba(7,13,23,.72); border: 1px solid rgba(148,163,184,.14); }
+        .bm-message-label { color: #79e8d8; }
+        .bm-message p { color: #c5d1dd; }
+        .bm-date { color: #8292a7; }
+        .bm-actions { border-top-color: rgba(148,163,184,.14); }
+        .bm-btn-accept { background: linear-gradient(110deg,#45e4d1,#63d7fb); color: #06131a; }
+        .bm-btn-accept:hover { background: #8af1e1; }
+        .bm-btn-decline { background: rgba(248,113,133,.08); border-color: rgba(248,113,133,.4); color: #fda4af; }
+        .bm-btn-decline:hover { background: rgba(248,113,133,.15); }
+        .bm-error { background: rgba(248,113,133,.09); border: 1px solid rgba(248,113,133,.25); color: #fecdd3; }
+        .bm-error-dot { background: #fb7185; }
+        .bm-empty-icon { background: rgba(73,221,202,.1); color: #8af1e1; }
+        .bm-empty-title { font-family: 'Space Grotesk',sans-serif; }
+        .bm-empty-text { color: #a9b8c9; }
+        .bm-loading { color: #b3c2d2; font-family: 'Space Grotesk',sans-serif; }
+        .bm-btn:disabled { opacity: .65; cursor: wait; }
+
         @media (max-width: 700px) {
           .bm-hero { padding: 44px 6% 40px; }
           .bm-card-header { flex-direction: column; }
@@ -301,6 +338,8 @@ function BusinessMatches() {
                 </div>
               ) : null}
 
+              {actionError && <div className="bm-error" role="alert"><span className="bm-error-dot" />{actionError}</div>}
+
               {!error && matches.length === 0 ? (
                 <div className="bm-empty">
                   <div className="bm-empty-icon">🤝</div>
@@ -314,10 +353,10 @@ function BusinessMatches() {
                   {matches.map((match) => {
                     const accent =
                       match.status === "accepted"
-                        ? "#15402B"
+                        ? "#45d9a2"
                         : match.status === "declined"
-                        ? "#C33F26"
-                        : "#E7A93D";
+                        ? "#fb7185"
+                        : "#f4c978";
                     const label = match.status
                       ? match.status.charAt(0).toUpperCase() + match.status.slice(1)
                       : "Pending";
@@ -329,7 +368,9 @@ function BusinessMatches() {
                             <h2 className="bm-investor-name">
                               {match.investor_name || "Investor"}
                             </h2>
-                            <p className="bm-email">{match.investor_email}</p>
+                            <p className="bm-detail-row">
+                              Contact details stay private while an introduction is being reviewed.
+                            </p>
                           </div>
                           <span className="bm-status">
                             <span className="bm-status-dot" />
@@ -369,16 +410,25 @@ function BusinessMatches() {
                           Requested: {new Date(match.created_at).toLocaleDateString()}
                         </p>
 
+                        {match.status === "accepted" && (
+                          <p className="bm-detail-row">
+                            Introduction accepted. This records interest only; it does not
+                            complete a transaction or provide direct contact details.
+                          </p>
+                        )}
+
                         {match.status === "pending" && (
                           <div className="bm-actions">
                             <button
                               className="bm-btn bm-btn-accept"
+                              disabled={updatingId === match.id}
                               onClick={() => handleStatus(match.id, "accepted")}
                             >
-                              ✓ Accept Match
+                              {updatingId === match.id ? "Updating…" : "✓ Accept Introduction"}
                             </button>
                             <button
                               className="bm-btn bm-btn-decline"
+                              disabled={updatingId === match.id}
                               onClick={() => handleStatus(match.id, "declined")}
                             >
                               ✕ Decline

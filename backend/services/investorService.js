@@ -12,6 +12,7 @@ const createInvestor = async (investor, userId) => {
     preferred_stage,
     sectors_of_interest,
     geographic_focus,
+    preferred_structure,
     investing_status,
     portfolio_highlights,
   } = investor;
@@ -30,11 +31,12 @@ const createInvestor = async (investor, userId) => {
       preferred_stage,
       sectors_of_interest,
       geographic_focus,
+      preferred_structure,
       investing_status,
       portfolio_highlights
     )
     VALUES
-    ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
     RETURNING *
     `,
     [
@@ -48,6 +50,7 @@ const createInvestor = async (investor, userId) => {
       preferred_stage,
       sectors_of_interest,
       geographic_focus,
+      preferred_structure,
       investing_status,
       portfolio_highlights,
     ]
@@ -114,6 +117,7 @@ const updateInvestor = async (id, investor) => {
     preferred_stage,
     sectors_of_interest,
     geographic_focus,
+    preferred_structure,
     investing_status,
     portfolio_highlights,
   } = investor;
@@ -131,10 +135,11 @@ const updateInvestor = async (id, investor) => {
       preferred_stage = COALESCE($7, preferred_stage),
       sectors_of_interest = COALESCE($8, sectors_of_interest),
       geographic_focus = COALESCE($9, geographic_focus),
-      investing_status = COALESCE($10, investing_status),
-      portfolio_highlights = COALESCE($11, portfolio_highlights),
+      preferred_structure = COALESCE($10, preferred_structure),
+      investing_status = COALESCE($11, investing_status),
+      portfolio_highlights = COALESCE($12, portfolio_highlights),
       updated_at = NOW()
-    WHERE id = $12
+    WHERE id = $13
     RETURNING *
     `,
     [
@@ -147,6 +152,7 @@ const updateInvestor = async (id, investor) => {
       preferred_stage,
       sectors_of_interest,
       geographic_focus,
+      preferred_structure,
       investing_status,
       portfolio_highlights,
       id,

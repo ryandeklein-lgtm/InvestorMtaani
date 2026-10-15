@@ -1,23 +1,32 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import authService from "../services/auth";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const token = authService.getToken();
+      const storedUser = authService.getUser();
 
-  useEffect(() => {
-    // Rehydrate the full user (including role) from localStorage,
-    // not just a bare { token } placeholder.
-    const token = authService.getToken();
-    const storedUser = authService.getUser();
-
-    if (token && storedUser) {
-      setUser(storedUser);
+      return token && storedUser ? storedUser : null;
+    } catch {
+      authService.logout();
+      return null;
     }
+  });
+  const loading = false;
 
-    setLoading(false);
+  // If the token is removed in another tab (logout or expiry), log out here too
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key === "token" && !event.newValue) {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const login = async (credentials) => {
@@ -44,6 +53,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         isAuthenticated: !!user,
+        isAdmin: user?.role === "admin",
       }}
     >
       {children}
@@ -53,4 +63,13 @@ export const AuthProvider = ({ children }) => {
 
 export default AuthContext;
 
-export const useAuthContext = () => useContext(AuthContext);
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuthContext must be used inside <AuthProvider>.");
+  }
+
+  return context;
+};

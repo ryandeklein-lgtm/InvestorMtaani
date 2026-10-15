@@ -1,6 +1,17 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+
+function Corners() {
+  return (
+    <>
+      <span className="im-corner im-corner-tl" />
+      <span className="im-corner im-corner-tr" />
+      <span className="im-corner im-corner-bl" />
+      <span className="im-corner im-corner-br" />
+    </>
+  );
+}
 
 function Funding() {
   const navigate = useNavigate();
@@ -20,14 +31,8 @@ function Funding() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchFundingRequests();
-  }, [role]);
-
-  const fetchFundingRequests = async () => {
+  const fetchFundingRequests = useCallback(async () => {
     try {
-      setLoading(true);
-
       // Businesses see their own requests
       if (role === "business") {
         const response = await api.get("/funding/me");
@@ -44,7 +49,12 @@ function Funding() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [role]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchFundingRequests, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchFundingRequests]);
 
   const handleChange = (e) => {
     setForm({
@@ -91,15 +101,6 @@ function Funding() {
       setSubmitting(false);
     }
   };
-
-  const Corners = () => (
-    <>
-      <span className="im-corner im-corner-tl" />
-      <span className="im-corner im-corner-tr" />
-      <span className="im-corner im-corner-bl" />
-      <span className="im-corner im-corner-br" />
-    </>
-  );
 
   // BUSINESS VIEW
   if (role === "business") {

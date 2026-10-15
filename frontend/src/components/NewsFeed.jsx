@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getBusinessNews } from "../services/newsService";
 import NewsCard from "./NewsCard";
 
@@ -15,25 +15,33 @@ const categories = [
 export default function NewsFeed() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSource, setSelectedSource] = useState("");
 
-  useEffect(() => {
-    loadNews(selectedCategory);
-  }, [selectedCategory]);
-
-  async function loadNews(category) {
-    setLoading(true);
-
+  const loadNews = useCallback(async (category) => {
     try {
       const news = await getBusinessNews(category);
       setArticles(news);
+      setError("");
     } catch (error) {
       console.error(error);
       setArticles([]);
+      setError("We couldn’t load the news right now. Please try again.");
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    setLoading(false);
-  }
+  const sources = [...new Set(articles.map((article) => article.source?.name).filter(Boolean))].sort();
+  const visibleArticles = selectedSource
+    ? articles.filter((article) => article.source?.name === selectedSource)
+    : articles;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => loadNews(selectedCategory), 0);
+    return () => window.clearTimeout(timer);
+  }, [loadNews, selectedCategory]);
 
   return (
     <section style={styles.section}>
@@ -49,7 +57,11 @@ export default function NewsFeed() {
           {categories.map((category) => (
             <button
               key={category.label}
-              onClick={() => setSelectedCategory(category.value)}
+              onClick={() => {
+                if (selectedCategory !== category.value) setLoading(true);
+                setSelectedSource("");
+                setSelectedCategory(category.value);
+              }}
               style={{
                 ...styles.categoryButton,
                 background:
@@ -67,18 +79,36 @@ export default function NewsFeed() {
           ))}
         </div>
 
+        {!loading && sources.length > 1 && (
+          <div role="group" style={styles.sourceFilters} aria-label="Filter news by publisher">
+            <span style={styles.sourceLabel}>PUBLISHER</span>
+            <button type="button" onClick={() => setSelectedSource("")} aria-pressed={!selectedSource} style={{ ...styles.sourceButton, ...(selectedSource ? {} : styles.sourceButtonActive) }}>
+              All sources
+            </button>
+            {sources.map((source) => (
+              <button key={source} type="button" onClick={() => setSelectedSource(source)} aria-pressed={selectedSource === source} style={{ ...styles.sourceButton, ...(selectedSource === source ? styles.sourceButtonActive : {}) }}>
+                {source}
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
-          <h3 style={{ textAlign: "center", marginTop: 40 }}>
+          <h3 role="status" style={{ textAlign: "center", marginTop: 40 }}>
             Loading news...
           </h3>
         ) : (
           <div style={styles.grid}>
-            {articles.length > 0 ? (
-              articles.map((article, index) => (
-                <NewsCard key={index} article={article} />
+            {visibleArticles.length > 0 ? (
+              visibleArticles.map((article) => (
+                <NewsCard key={article.url} article={article} />
               ))
             ) : (
-              <h3>No news available.</h3>
+              <div role={error ? "alert" : "status"} style={styles.emptyState}>
+                <h3>{error ? "News is temporarily unavailable" : selectedSource ? `No ${selectedSource} articles in this category` : "No news available"}</h3>
+                <p>{error || "Try another category or check back soon for more updates."}</p>
+                {error && <button type="button" onClick={() => { setLoading(true); loadNews(selectedCategory); }} style={styles.retryButton}>Try again</button>}
+              </div>
             )}
           </div>
         )}
@@ -120,6 +150,20 @@ const styles = {
     marginBottom: "40px",
   },
 
+  sourceFilters: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    margin: "-18px 0 34px",
+  },
+  sourceLabel: { color: "#64748b", fontSize: 11, fontWeight: 800, letterSpacing: ".12em", marginRight: 4 },
+  sourceButton: { border: "1px solid #cbd5e1", borderRadius: 999, padding: "7px 12px", background: "#fff", color: "#334155", cursor: "pointer", fontSize: 12, fontWeight: 650 },
+  sourceButtonActive: { borderColor: "#0f766e", background: "#0f766e", color: "#fff" },
+  emptyState: { gridColumn: "1 / -1", textAlign: "center", padding: "26px 16px", color: "#334155" },
+  retryButton: { border: 0, borderRadius: 8, padding: "10px 16px", background: "#0f766e", color: "#fff", cursor: "pointer", fontWeight: 700 },
+
   categoryButton: {
     border: "1px solid #16a34a",
     padding: "10px 18px",
@@ -131,7 +175,7 @@ const styles = {
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))",
     gap: "25px",
   },
 };

@@ -1,6 +1,8 @@
-import React from "react";
 
 export default function NewsCard({ article }) {
+  const publishedDate = article.publishedAt ? new Date(article.publishedAt) : null;
+  const hasPublishedDate = publishedDate && !Number.isNaN(publishedDate.getTime());
+
   return (
     <div style={styles.card}>
       <img
@@ -27,7 +29,7 @@ export default function NewsCard({ article }) {
 
         <div style={styles.footer}>
           <small style={styles.date}>
-            {new Date(article.publishedAt).toLocaleDateString()}
+            {hasPublishedDate ? <time dateTime={publishedDate.toISOString()}>{publishedDate.toLocaleDateString()}</time> : "Date unavailable"}
           </small>
 
           <a

@@ -1,9 +1,11 @@
 # Node modules
 node_modules/
+.npm-cache/
 
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Logs
 logs/

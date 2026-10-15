@@ -83,8 +83,7 @@ const getBusinessMatches = async (userId) => {
     `
     SELECT
       mr.*,
-      u.name AS investor_name,
-      u.email AS investor_email,
+      'Investor' AS investor_name,
       b.business_name
     FROM matchmaking_requests mr
     JOIN businesses b
@@ -100,7 +99,21 @@ const getBusinessMatches = async (userId) => {
   return result.rows;
 };
 
-// Update matchmaking request status
+// Load a request with its business owner for authorization checks.
+const getMatchById = async (matchId) => {
+  const result = await pool.query(
+    `
+    SELECT mr.id, mr.status, b.user_id AS "businessOwnerId"
+    FROM matchmaking_requests mr
+    JOIN businesses b ON b.id = mr.business_id
+    WHERE mr.id = $1
+    `,
+    [matchId]
+  );
+  return result.rows[0];
+};
+
+// Update only a pending request belonging to the caller's business.
 const updateMatchStatus = async (matchId, status, userId) => {
   const result = await pool.query(
     `
@@ -110,6 +123,7 @@ const updateMatchStatus = async (matchId, status, userId) => {
     WHERE mr.id = $2
       AND mr.business_id = b.id
       AND b.user_id = $3
+      AND mr.status = 'pending'
     RETURNING mr.*
     `,
     [status, matchId, userId]
@@ -123,5 +137,6 @@ module.exports = {
   getExistingMatch,
   getInvestorMatches,
   getBusinessMatches,
+  getMatchById,
   updateMatchStatus,
 };

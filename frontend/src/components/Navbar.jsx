@@ -1,135 +1,66 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../contexts/AuthContext";
+import InvestorMtaaniLogo from "./InvestorMtaaniLogo";
+import InvestorMtaaniWordmark from "./InvestorMtaaniWordmark";
+import "./Navbar.css";
 
 export default function Navbar() {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuthContext();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
+  const linkClass = ({ isActive }) => `im-nav-link${isActive ? " is-active" : ""}`;
 
   const handleLogout = () => {
+    closeMenu();
     logout();
     navigate("/", { replace: true });
   };
 
-  const linkStyle = {
-    textDecoration: "none",
-    fontWeight: "600",
-    fontSize: "15px",
-    padding: "8px 12px",
-    borderRadius: "8px",
-    transition: "0.3s",
-  };
-
-  const getNavStyle = ({ isActive }) => ({
-    ...linkStyle,
-    color: isActive ? "#16a34a" : "#475569",
-    backgroundColor: isActive ? "#dcfce7" : "transparent",
-  });
-
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "16px 40px",
-        backgroundColor: "#ffffff",
-        borderBottom: "1px solid #e2e8f0",
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-      }}
-    >
-      {/* Logo */}
-      <h2
-        style={{
-          margin: 0,
-          cursor: "pointer",
-          color: "#16a34a",
-          fontWeight: "700",
-        }}
-        onClick={() => navigate(isAuthenticated ? "/home" : "/")}
-      >
-        Investor Mtaani
-      </h2>
+    <header className="im-navbar">
+      <Link className="im-brand" to={isAuthenticated ? "/home" : "/"} onClick={closeMenu} aria-label="Investor Mtaani home">
+        <InvestorMtaaniLogo className="im-brand-mark" size={40} />
+        <InvestorMtaaniWordmark />
+      </Link>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "20px",
-        }}
+      <button
+        className="im-menu-toggle"
+        type="button"
+        aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-expanded={menuOpen}
+        aria-controls="im-primary-navigation"
+        onClick={() => setMenuOpen((open) => !open)}
       >
-        {/* Public */}
-        {!isAuthenticated && (
+        <span /><span /><span />
+      </button>
+
+      <nav id="im-primary-navigation" className={`im-nav-links${menuOpen ? " is-open" : ""}`} aria-label="Primary navigation">
+        {isAuthenticated ? (
           <>
-            <NavLink to="/browse" style={getNavStyle}>
-              Browse Businesses
-            </NavLink>
-
-            <NavLink to="/login" style={getNavStyle}>
-              Login
-            </NavLink>
-
-            <NavLink to="/register" style={getNavStyle}>
-              Register
-            </NavLink>
+            <NavLink to="/home" className={linkClass} onClick={closeMenu}>Home</NavLink>
+            <NavLink to="/browse" className={linkClass} onClick={closeMenu}>Browse businesses</NavLink>
+            {user?.role === "business" && <NavLink to="/business-profile" className={linkClass} onClick={closeMenu}>Business profile</NavLink>}
+            {user?.role === "investor" && <NavLink to="/investor-profile" className={linkClass} onClick={closeMenu}>Investor profile</NavLink>}
+            {(user?.role === "business" || user?.role === "investor") && <NavLink to="/kyc" className={linkClass} onClick={closeMenu}>Verification</NavLink>}
+            {user?.role === "admin" ? (
+              <NavLink to="/admin" className={linkClass} onClick={closeMenu}>Admin</NavLink>
+            ) : (
+              <NavLink to="/matchmaking" className={linkClass} onClick={closeMenu}>Introductions</NavLink>
+            )}
+            <NavLink to="/notifications" className={linkClass} onClick={closeMenu}>Notifications</NavLink>
+            <button className="im-nav-logout" type="button" onClick={handleLogout}>Log out</button>
+          </>
+        ) : (
+          <>
+            <NavLink to="/browse" className={linkClass} onClick={closeMenu}>Browse businesses</NavLink>
+            <NavLink to="/login" className={linkClass} onClick={closeMenu}>Log in</NavLink>
+            <NavLink to="/register" className="im-nav-register" onClick={closeMenu}>Create an account <span aria-hidden="true">→</span></NavLink>
           </>
         )}
-
-        {/* Logged In */}
-        {isAuthenticated && (
-          <>
-            <NavLink to="/home" style={getNavStyle}>
-              Home
-            </NavLink>
-
-            <NavLink to="/browse" style={getNavStyle}>
-              Browse Businesses
-            </NavLink>
-
-            {/* Only business-role accounts see/reach their business profile */}
-            {user?.role === "business" && (
-              <NavLink to="/business-profile" style={getNavStyle}>
-                My Business
-              </NavLink>
-            )}
-
-            {/* Only investor-role accounts see/reach the investor dashboard */}
-            {user?.role === "investor" && (
-              <NavLink to="/investor-profile" style={getNavStyle}>
-                Investor Dashboard
-              </NavLink>
-            )}
-
-            <NavLink to="/matchmaking" style={getNavStyle}>
-              Matchmaking
-            </NavLink>
-
-            <NavLink to="/funding" style={getNavStyle}>
-              Funding
-            </NavLink>
-
-            <NavLink to="/notifications" style={getNavStyle}>
-              Notifications
-            </NavLink>
-
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: "#dc2626",
-                color: "#fff",
-                border: "none",
-                padding: "10px 18px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
-            >
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

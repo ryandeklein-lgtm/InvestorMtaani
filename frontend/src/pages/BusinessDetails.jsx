@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import api from "../services/api";
 import BackButton from "../components/BackButton";
+import { useAuthContext } from "../contexts/AuthContext";
 
 function BusinessDetails() {
   const { id } = useParams();
+  const { user } = useAuthContext();
 
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [matchLoading, setMatchLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -32,40 +35,224 @@ function BusinessDetails() {
     fetchBusiness();
   }, [id]);
 
-  async function handleMatchmake() {
+  async function handleRequestIntroduction() {
     try {
       setMatchLoading(true);
       setMessage("");
+      setMessageType("success");
 
       const response = await api.post(
         "/matchmaking/business/" + id,
         {
-          investment_amount: 0,
-          investment_type: "Matchmaking",
           message:
-            "I am interested in exploring a business partnership.",
-          special_request: false,
+            "I would like to request an introduction and explore a potential investment opportunity with this business.",
         }
       );
 
       setMessage(
-        response.data.message ||
-          "Matchmaking request sent successfully."
+        response.data?.message ||
+          "Introduction request sent successfully."
       );
+      setMessageType("success");
     } catch (error) {
-      console.error("Matchmaking error:", error);
+      console.error("Introduction request error:", error);
 
       setMessage(
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-          ? error.response.data.message
-          : "Unable to send matchmaking request."
+        error.response?.data?.message ||
+          "Unable to send the introduction request. Please try again."
       );
+      setMessageType("error");
     } finally {
       setMatchLoading(false);
     }
   }
+
+  const formatCurrency = (value) => {
+    const number = Number(value || 0);
+
+    return number.toLocaleString("en-KE", {
+      maximumFractionDigits: 0,
+    });
+  };
+
+  const getValue = (...values) => {
+    for (const value of values) {
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== ""
+      ) {
+        return value;
+      }
+    }
+
+    return null;
+  };
+
+  const getStructure = () => {
+    const structure = getValue(
+      business?.funding_structure,
+      business?.investment_type,
+      business?.funding_type,
+      business?.structure
+    );
+
+    if (!structure) {
+      return "Not specified";
+    }
+
+    const value = String(structure).toLowerCase();
+
+    if (value.includes("equity")) {
+      return "Equity";
+    }
+
+    if (
+      value.includes("debt") ||
+      value.includes("loan") ||
+      value.includes("credit")
+    ) {
+      return "Debt / Credit";
+    }
+
+    return structure;
+  };
+
+  const getOperatingHistory = () => {
+    const year = Number(
+      getValue(
+        business?.year_established,
+        business?.founded,
+        business?.established
+      )
+    );
+
+    if (!year || year > new Date().getFullYear()) {
+      return "Not specified";
+    }
+
+    const years = new Date().getFullYear() - year;
+
+    if (years <= 0) {
+      return "Less than 1 year";
+    }
+
+    return `${years} year${years === 1 ? "" : "s"}`;
+  };
+
+  const businessName =
+    business?.business_name ||
+    business?.name ||
+    "Unnamed Business";
+
+  const firstLetter =
+    businessName.charAt(0).toUpperCase();
+
+  const industry =
+    getValue(
+      business?.industry,
+      business?.sector
+    ) || "Industry not specified";
+
+  const location =
+    business?.location || "Location not specified";
+
+  const description =
+    business?.description ||
+    business?.about ||
+    "No business description has been provided.";
+
+  const employees =
+    getValue(
+      business?.employees,
+      business?.employee_count
+    ) || 0;
+
+  const founded =
+    getValue(
+      business?.year_established,
+      business?.founded,
+      business?.established
+    ) || "N/A";
+
+  const views =
+    getValue(business?.views, business?.profile_views) || 0;
+
+  const annualRevenue = Number(
+    getValue(
+      business?.annual_revenue,
+      business?.yearly_revenue,
+      business?.turnover
+    ) || 0
+  );
+
+  const monthlyGross = Number(
+    business?.monthly_gross || 0
+  );
+
+  const monthlyNet = Number(
+    business?.monthly_net || 0
+  );
+
+  const amountSeeking = Number(
+    getValue(
+      business?.amount_seeking,
+      business?.amount_requested,
+      business?.funding_amount,
+      business?.capital_required
+    ) || 0
+  );
+
+  const fundingReason =
+    getValue(
+      business?.funding_reason,
+      business?.use_of_funds,
+      business?.funding_purpose
+    ) || "Use of funds has not been specified.";
+
+  const growthPlan =
+    getValue(
+      business?.growth_plan,
+      business?.growth_plans,
+      business?.growth_strategy,
+      business?.expected_impact
+    ) ||
+    "Growth plans will be discussed during the due diligence and introduction process.";
+
+  const structure = getStructure();
+  const operatingHistory = getOperatingHistory();
+
+  const isVerified =
+    business?.verified === true ||
+    business?.is_verified === true ||
+    business?.verification_status === "verified" ||
+    business?.status === "verified" ||
+    business?.status === "approved" ||
+    Boolean(business?.last_verified_at || business?.verification_date || business?.verified_at);
+
+  const verificationDate = getValue(
+    business?.last_verified_at,
+    business?.verification_date,
+    business?.verified_at
+  );
+
+  const verificationLabel = useMemo(() => {
+    if (!verificationDate) {
+      return "Verification status available";
+    }
+
+    const date = new Date(verificationDate);
+
+    if (Number.isNaN(date.getTime())) {
+      return "Verification status available";
+    }
+
+    return `Verified ${date.toLocaleDateString("en-KE", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })}`;
+  }, [verificationDate]);
 
   if (loading) {
     return (
@@ -74,7 +261,7 @@ function BusinessDetails() {
 
         <div className="business-details-loading">
           <div className="loading-spinner"></div>
-          <p>Loading business...</p>
+          <p>LOADING OPPORTUNITY...</p>
         </div>
       </div>
     );
@@ -86,63 +273,24 @@ function BusinessDetails() {
         <style>{businessDetailsStyles}</style>
 
         <div className="business-details-container">
-          <BackButton />
+          <div className="business-details-back">
+            <BackButton />
+          </div>
 
           <div className="business-details-empty">
             <div className="empty-icon">!</div>
 
-            <h1>Business Not Found</h1>
+            <h1>Opportunity Not Found</h1>
 
             <p>
-              We couldn't find the business you're looking for.
+              We couldn't find the business opportunity
+              you're looking for.
             </p>
           </div>
         </div>
       </div>
     );
   }
-
-  const businessName =
-    business.business_name || "Unnamed Business";
-
-  const firstLetter =
-    businessName.charAt(0).toUpperCase();
-
-  const industry =
-    business.industry || "Industry not specified";
-
-  const location =
-    business.location || "Location not specified";
-
-  const description =
-    business.description ||
-    "No description available.";
-
-  const views = business.views || 0;
-
-  const employees = business.employees || 0;
-
-  const founded =
-    business.year_established || "N/A";
-
-  const annualRevenue = Number(
-    business.annual_revenue || 0
-  ).toLocaleString();
-
-  const monthlyGross = Number(
-    business.monthly_gross || 0
-  ).toLocaleString();
-
-  const monthlyNet = Number(
-    business.monthly_net || 0
-  ).toLocaleString();
-
-  const amountSeeking = Number(
-    business.amount_seeking || 0
-  ).toLocaleString();
-
-  const fundingReason =
-    business.funding_reason || "Not specified";
 
   return (
     <div className="business-details-page">
@@ -158,29 +306,41 @@ function BusinessDetails() {
 
           <div className="business-details-top-line"></div>
 
-          <section className="business-details-header">
+          {/* HEADER */}
 
-            <div className="business-details-logo">
+          <section className="opportunity-header">
+
+            <div className="opportunity-logo">
               {firstLetter}
             </div>
 
-            <div className="business-details-heading">
+            <div className="opportunity-heading">
 
-              <div className="business-details-eyebrow">
-                BUSINESS PROFILE
+              <div className="opportunity-eyebrow">
+                INVESTMENT OPPORTUNITY
               </div>
 
               <h1>{businessName}</h1>
 
-              <div className="business-details-verified">
-                <span>✓</span>
-                Verified Business
+              <div className="opportunity-badges">
+
+                {isVerified && (
+                  <span className="verified-badge">
+                    <span>✓</span>
+                    Verified within review scope
+                  </span>
+                )}
+
+                <span className="opportunity-id">
+                  ID: IM-{id}
+                </span>
+
               </div>
 
-              <div className="business-details-meta">
+              <div className="opportunity-meta">
 
                 <span>
-                  <strong>INDUSTRY</strong>
+                  <strong>SECTOR</strong>
                   {industry}
                 </span>
 
@@ -190,47 +350,64 @@ function BusinessDetails() {
                 </span>
 
               </div>
+
             </div>
           </section>
 
-          <section className="business-details-stats">
+          {/* TRUST STRIP */}
 
-            <div className="business-stat cyan">
-              <span className="business-stat-icon">
-                ◉
-              </span>
+          <section className="trust-strip">
+
+            <div className="trust-item">
+              <span className="trust-icon">✓</span>
 
               <div>
-                <p>PROFILE VIEWS</p>
-                <h3>{views}</h3>
+                <strong>VERIFIED WITHIN REVIEW SCOPE</strong>
+                <small>{verificationLabel}</small>
+                <small>Based on information submitted by the business; not an audit or investment recommendation.</small>
               </div>
             </div>
 
-            <div className="business-stat violet">
-              <span className="business-stat-icon">
+            <div className="trust-item">
+              <span className="trust-icon violet-icon">
                 ◇
               </span>
 
               <div>
-                <p>EMPLOYEES</p>
-                <h3>{employees}</h3>
+                <strong>OPERATING HISTORY</strong>
+                <small>{operatingHistory}</small>
               </div>
             </div>
 
-            <div className="business-stat green">
-              <span className="business-stat-icon">
+            <div className="trust-item">
+              <span className="trust-icon green-icon">
+                ◎
+              </span>
+
+              <div>
+                <strong>TURNOVER</strong>
+                <small>
+                  KES {formatCurrency(annualRevenue)}
+                </small>
+              </div>
+            </div>
+
+            <div className="trust-item">
+              <span className="trust-icon gold-icon">
                 ◷
               </span>
 
               <div>
-                <p>FOUNDED</p>
-                <h3>{founded}</h3>
+                <strong>PROFILE VIEWS</strong>
+                <small>{views}</small>
               </div>
             </div>
 
           </section>
 
           <div className="business-details-divider"></div>
+
+          {/* OVERVIEW */}
 
           <section className="business-details-section">
 
@@ -241,7 +418,7 @@ function BusinessDetails() {
 
               <div>
                 <p>BUSINESS OVERVIEW</p>
-                <h2>About Business</h2>
+                <h2>About the Business</h2>
               </div>
             </div>
 
@@ -249,7 +426,33 @@ function BusinessDetails() {
               <p>{description}</p>
             </div>
 
+            <div className="overview-grid">
+
+              <div className="overview-item">
+                <span>INDUSTRY</span>
+                <strong>{industry}</strong>
+              </div>
+
+              <div className="overview-item">
+                <span>LOCATION</span>
+                <strong>{location}</strong>
+              </div>
+
+              <div className="overview-item">
+                <span>ESTABLISHED</span>
+                <strong>{founded}</strong>
+              </div>
+
+              <div className="overview-item">
+                <span>EMPLOYEES</span>
+                <strong>{employees}</strong>
+              </div>
+
+            </div>
+
           </section>
+
+          {/* FINANCIALS */}
 
           <section className="business-details-section">
 
@@ -259,40 +462,65 @@ function BusinessDetails() {
               </span>
 
               <div>
-                <p>FINANCIAL DATA</p>
+                <p>FINANCIAL PERFORMANCE</p>
                 <h2>Business Financials</h2>
               </div>
             </div>
 
             <div className="financial-grid">
 
-              <div className="financial-card">
-                <span>ANNUAL REVENUE</span>
+              <div className="financial-card violet-financial">
+                <span>ANNUAL TURNOVER</span>
 
                 <strong>
-                  KES {annualRevenue}
+                  KES {formatCurrency(annualRevenue)}
                 </strong>
+
+                <small>
+                  Reported business revenue
+                </small>
               </div>
 
-              <div className="financial-card">
+              <div className="financial-card cyan-financial">
                 <span>MONTHLY GROSS</span>
 
                 <strong>
-                  KES {monthlyGross}
+                  KES {formatCurrency(monthlyGross)}
                 </strong>
+
+                <small>
+                  Monthly gross income
+                </small>
               </div>
 
-              <div className="financial-card">
+              <div className="financial-card green-financial">
                 <span>MONTHLY NET</span>
 
                 <strong>
-                  KES {monthlyNet}
+                  KES {formatCurrency(monthlyNet)}
                 </strong>
+
+                <small>
+                  Monthly net income
+                </small>
               </div>
 
             </div>
 
+            <div className="financial-note">
+              <span>i</span>
+
+              <p>
+                Financial information is subject to
+                verification and due diligence. Investors
+                should independently assess the information
+                before making any investment decision.
+              </p>
+            </div>
+
           </section>
+
+          {/* CAPITAL */}
 
           <section className="business-details-section">
 
@@ -303,7 +531,7 @@ function BusinessDetails() {
 
               <div>
                 <p>CAPITAL REQUIREMENT</p>
-                <h2>Funding Request</h2>
+                <h2>Funding Opportunity</h2>
               </div>
             </div>
 
@@ -313,23 +541,35 @@ function BusinessDetails() {
 
               <div className="funding-content">
 
-                <span className="funding-label">
-                  AMOUNT SEEKING
-                </span>
+                <div className="funding-main">
 
-                <h2>
-                  KES {amountSeeking}
-                </h2>
+                  <span className="funding-label">
+                    CAPITAL SEEKING
+                  </span>
 
-                <div className="funding-purpose">
-
-                  <span>PURPOSE</span>
-
-                  <p>
-                    {fundingReason}
-                  </p>
+                  <h2>
+                    KES {formatCurrency(amountSeeking)}
+                  </h2>
 
                 </div>
+
+                <div className="funding-structure">
+
+                  <span>STRUCTURE</span>
+
+                  <strong>
+                    {structure}
+                  </strong>
+
+                </div>
+
+              </div>
+
+              <div className="funding-purpose">
+
+                <span>USE OF FUNDS</span>
+
+                <p>{fundingReason}</p>
 
               </div>
 
@@ -337,45 +577,244 @@ function BusinessDetails() {
 
           </section>
 
-          <section className="matchmaking-section">
+          {/* GROWTH */}
 
-            <div className="matchmaking-copy">
+          <section className="business-details-section">
 
-              <span>
-                INVESTOR MATCHMAKING
+            <div className="section-heading">
+              <span className="section-number">
+                04
               </span>
 
-              <h2>
-                Interested in this business?
-              </h2>
+              <div>
+                <p>GROWTH PLAN</p>
+                <h2>What the Capital Supports</h2>
+              </div>
+            </div>
 
-              <p>
-                Send a matchmaking request and
-                start exploring a potential
-                investment relationship.
-              </p>
+            <div className="growth-box">
+
+              <div className="growth-icon">
+                ↗
+              </div>
+
+              <div>
+                <h3>Growth & Expansion</h3>
+
+                <p>
+                  {growthPlan}
+                </p>
+              </div>
 
             </div>
 
-            <button
-              type="button"
-              className="matchmaking-button"
-              onClick={handleMatchmake}
-              disabled={matchLoading}
-            >
-              {matchLoading
-                ? "SENDING REQUEST..."
-                : "MATCHMAKE WITH BUSINESS →"}
-            </button>
+          </section>
+
+          {/* STRUCTURE EXPLANATION */}
+
+          <section className="business-details-section">
+
+            <div className="section-heading">
+              <span className="section-number">
+                05
+              </span>
+
+              <div>
+                <p>INVESTMENT STRUCTURE</p>
+                <h2>How the Opportunity Works</h2>
+              </div>
+            </div>
+
+            <div className="structure-grid">
+
+              <div
+                className={
+                  structure.toLowerCase().includes("equity")
+                    ? "structure-card active-structure"
+                    : "structure-card"
+                }
+              >
+
+                <div className="structure-icon">
+                  ◇
+                </div>
+
+                <div>
+                  <h3>Equity Investment</h3>
+
+                  <p>
+                    Capital may be provided in exchange
+                    for an ownership interest, subject to
+                    applicable legal and regulatory
+                    requirements.
+                  </p>
+                </div>
+
+              </div>
+
+              <div
+                className={
+                  structure.toLowerCase().includes("debt")
+                    ? "structure-card active-structure"
+                    : "structure-card"
+                }
+              >
+
+                <div className="structure-icon debt-icon">
+                  ↗
+                </div>
+
+                <div>
+                  <h3>Debt / Credit Financing</h3>
+
+                  <p>
+                    Capital may be structured as a loan
+                    or other permitted debt instrument,
+                    with terms agreed independently by
+                    the parties.
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="structure-note">
+              <span>STRUCTURE SHOWN FOR INFORMATION</span>
+              <p>
+                The final investment or financing terms,
+                including valuation, repayment, security,
+                ownership, rights and other conditions,
+                are negotiated independently by the
+                relevant parties.
+              </p>
+            </div>
+
+          </section>
+
+          {/* REQUEST INTRODUCTION */}
+
+          <section className="introduction-section">
+
+            <div className="introduction-glow"></div>
+
+            <div className="introduction-copy">
+
+              <span className="introduction-label">
+                CONTROLLED INTRODUCTION
+              </span>
+
+              <h2>
+                Interested in exploring this opportunity?
+              </h2>
+
+              <p>
+                Send an introduction request for the
+                business to review. Direct contact details
+                and sensitive documents are not shared here;
+                secure messaging and document access are not
+                available in this prototype yet.
+              </p>
+
+              <div className="introduction-points">
+
+                <span>
+                  <b>✓</b>
+                  Platform-recorded introduction
+                </span>
+
+                <span>
+                  <b>✓</b>
+                  Controlled communication
+                </span>
+
+                <span>
+                  <b>✓</b>
+                  Due diligence before any transaction
+                </span>
+
+              </div>
+
+            </div>
+
+            {!user ? (
+              <Link to="/login" className="introduction-button">
+                SIGN IN TO REQUEST AN INTRODUCTION →
+              </Link>
+            ) : user.role !== "investor" ? (
+              <p className="introduction-status">
+                Introduction requests are available to investor accounts.
+              </p>
+            ) : (
+              <button
+                type="button"
+                className="introduction-button"
+                onClick={handleRequestIntroduction}
+                disabled={matchLoading}
+              >
+                {matchLoading
+                  ? "REQUESTING..."
+                  : "REQUEST INTRODUCTION →"}
+              </button>
+            )}
 
           </section>
 
           {message && (
-            <div className="business-details-message">
-              <span>✓</span>
+            <div
+              className={
+                messageType === "error"
+                  ? "business-details-message error-message"
+                  : "business-details-message"
+              }
+            >
+              <span>
+                {messageType === "error" ? "!" : "✓"}
+              </span>
+
               {message}
             </div>
           )}
+
+          {/* RISK DISCLOSURE */}
+
+          <section className="risk-disclosure">
+
+            <div className="risk-icon">
+              !
+            </div>
+
+            <div>
+
+              <span className="risk-label">
+                IMPORTANT RISK DISCLOSURE
+              </span>
+
+              <p>
+                Investor Mtaani facilitates discovery,
+                verification and introductions between
+                businesses and potential investors. The
+                platform does not guarantee investment
+                performance, repayment, profitability or
+                future business success.
+              </p>
+
+              <p>
+                Investment and financing opportunities
+                carry risk, including possible loss of
+                capital. Investors should conduct their
+                own due diligence and seek independent
+                professional advice where appropriate.
+              </p>
+
+              <small>
+                Verification does not constitute an
+                investment recommendation.
+              </small>
+
+            </div>
+
+          </section>
 
         </main>
       </div>
@@ -386,7 +825,7 @@ function BusinessDetails() {
 const businessDetailsStyles = `
   .business-details-page {
     min-height: 100vh;
-    padding: 32px 24px 80px;
+    padding: 32px 24px 90px;
     background:
       linear-gradient(
         rgba(61, 214, 245, 0.025) 1px,
@@ -405,7 +844,7 @@ const businessDetailsStyles = `
 
   .business-details-container {
     width: 100%;
-    max-width: 1120px;
+    max-width: 1160px;
     margin: 0 auto;
   }
 
@@ -419,7 +858,7 @@ const businessDetailsStyles = `
     background:
       radial-gradient(
         circle at 100% 0%,
-        rgba(139, 124, 246, 0.08),
+        rgba(139, 124, 246, 0.09),
         transparent 28%
       ),
       radial-gradient(
@@ -430,7 +869,7 @@ const businessDetailsStyles = `
       #0E1626;
     border: 1px solid rgba(61, 214, 245, 0.15);
     border-radius: 24px;
-    padding: 44px;
+    padding: 46px;
     box-shadow:
       0 30px 80px rgba(0, 0, 0, 0.45);
   }
@@ -445,24 +884,27 @@ const businessDetailsStyles = `
       90deg,
       #3DD6F5,
       #8B7CF6,
+      #35D07F,
       #3DD6F5
     );
   }
 
-  .business-details-header {
+  /* HEADER */
+
+  .opportunity-header {
     display: flex;
     align-items: center;
-    gap: 26px;
+    gap: 28px;
   }
 
-  .business-details-logo {
-    width: 96px;
-    height: 96px;
-    min-width: 96px;
+  .opportunity-logo {
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 22px;
+    border-radius: 24px;
     background:
       linear-gradient(
         145deg,
@@ -473,61 +915,78 @@ const businessDetailsStyles = `
     border: 1px solid rgba(61, 214, 245, 0.30);
     color: #6BE3FA;
     font-family: "Fraunces", serif;
-    font-size: 42px;
+    font-size: 44px;
     font-weight: 700;
     box-shadow:
       0 0 35px rgba(61, 214, 245, 0.08);
   }
 
-  .business-details-heading {
+  .opportunity-heading {
     flex: 1;
   }
 
-  .business-details-eyebrow {
+  .opportunity-eyebrow {
     margin-bottom: 8px;
     color: #3DD6F5;
     font-family: "JetBrains Mono", monospace;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.15em;
   }
 
-  .business-details-heading h1 {
+  .opportunity-heading h1 {
     margin: 0 0 12px;
     color: #E7EDF5;
     font-family: "Fraunces", serif;
-    font-size: 40px;
-    line-height: 1.1;
+    font-size: 42px;
+    line-height: 1.08;
     font-weight: 700;
   }
 
-  .business-details-verified {
+  .opportunity-badges {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .verified-badge {
     display: inline-flex;
     align-items: center;
     gap: 7px;
     padding: 6px 11px;
-    margin-bottom: 16px;
     border: 1px solid rgba(53, 208, 127, 0.25);
     border-radius: 999px;
     background: rgba(53, 208, 127, 0.08);
     color: #35D07F;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .business-details-verified span {
+  .verified-badge span {
     font-size: 13px;
   }
 
-  .business-details-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 26px;
+  .opportunity-id {
+    padding: 6px 10px;
+    border: 1px solid rgba(124, 138, 160, 0.18);
+    border-radius: 999px;
+    background: rgba(124, 138, 160, 0.05);
+    color: #7C8AA0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
   }
 
-  .business-details-meta span {
+  .opportunity-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+
+  .opportunity-meta span {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -535,71 +994,80 @@ const businessDetailsStyles = `
     font-size: 14px;
   }
 
-  .business-details-meta strong {
+  .opportunity-meta strong {
     color: #58667A;
     font-family: "JetBrains Mono", monospace;
     font-size: 9px;
     letter-spacing: 0.08em;
   }
 
-  .business-details-stats {
+  /* TRUST */
+
+  .trust-strip {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
     margin-top: 38px;
   }
 
-  .business-stat {
+  .trust-item {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 20px;
+    gap: 12px;
+    padding: 16px;
     background: #09111F;
-    border: 1px solid rgba(61, 214, 245, 0.10);
-    border-radius: 16px;
+    border: 1px solid rgba(61, 214, 245, 0.09);
+    border-radius: 14px;
   }
 
-  .business-stat-icon {
-    width: 42px;
-    height: 42px;
+  .trust-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
-    background: rgba(61, 214, 245, 0.08);
-    color: #3DD6F5;
-    font-size: 20px;
+    border-radius: 10px;
+    background: rgba(53, 208, 127, 0.08);
+    color: #35D07F;
+    font-size: 16px;
   }
 
-  .business-stat.violet .business-stat-icon {
+  .violet-icon {
     background: rgba(139, 124, 246, 0.08);
     color: #A99EFF;
   }
 
-  .business-stat.green .business-stat-icon {
-    background: rgba(53, 208, 127, 0.08);
-    color: #35D07F;
+  .green-icon {
+    background: rgba(61, 214, 245, 0.08);
+    color: #3DD6F5;
   }
 
-  .business-stat p {
-    margin: 0 0 5px;
-    color: #58667A;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+  .gold-icon {
+    background: rgba(241, 199, 91, 0.08);
+    color: #F1C75B;
   }
 
-  .business-stat h3 {
-    margin: 0;
-    color: #E7EDF5;
+  .trust-item strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #C8D3E1;
     font-family: "JetBrains Mono", monospace;
-    font-size: 20px;
+    font-size: 8px;
+    letter-spacing: 0.06em;
   }
+
+  .trust-item small {
+    display: block;
+    color: #7C8AA0;
+    font-size: 11px;
+  }
+
+  /* GENERAL */
 
   .business-details-divider {
     height: 1px;
-    margin: 38px 0;
+    margin: 40px 0;
     background: linear-gradient(
       90deg,
       transparent,
@@ -610,7 +1078,7 @@ const businessDetailsStyles = `
   }
 
   .business-details-section {
-    margin-top: 40px;
+    margin-top: 44px;
   }
 
   .section-heading {
@@ -624,8 +1092,8 @@ const businessDetailsStyles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 35px;
+    height: 35px;
     border: 1px solid rgba(61, 214, 245, 0.20);
     border-radius: 9px;
     background: rgba(61, 214, 245, 0.05);
@@ -647,11 +1115,13 @@ const businessDetailsStyles = `
     margin: 0;
     color: #E7EDF5;
     font-family: "Fraunces", serif;
-    font-size: 25px;
+    font-size: 26px;
   }
 
+  /* OVERVIEW */
+
   .business-description-box {
-    padding: 24px;
+    padding: 25px;
     background: #09111F;
     border: 1px solid rgba(61, 214, 245, 0.10);
     border-radius: 16px;
@@ -664,10 +1134,41 @@ const businessDetailsStyles = `
     line-height: 1.85;
   }
 
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .overview-item {
+    padding: 18px;
+    background: #09111F;
+    border: 1px solid rgba(124, 138, 160, 0.10);
+    border-radius: 14px;
+  }
+
+  .overview-item span {
+    display: block;
+    margin-bottom: 8px;
+    color: #58667A;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .overview-item strong {
+    color: #E7EDF5;
+    font-size: 14px;
+  }
+
+  /* FINANCIALS */
+
   .financial-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 15px;
   }
 
   .financial-card {
@@ -689,11 +1190,11 @@ const businessDetailsStyles = `
     background: #8B7CF6;
   }
 
-  .financial-card:nth-child(2)::before {
+  .cyan-financial::before {
     background: #3DD6F5;
   }
 
-  .financial-card:nth-child(3)::before {
+  .green-financial::before {
     background: #35D07F;
   }
 
@@ -708,15 +1209,56 @@ const businessDetailsStyles = `
   }
 
   .financial-card strong {
+    display: block;
+    margin-bottom: 9px;
     color: #E7EDF5;
     font-family: "JetBrains Mono", monospace;
-    font-size: 19px;
+    font-size: 20px;
   }
+
+  .financial-card small {
+    color: #58667A;
+    font-size: 11px;
+  }
+
+  .financial-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 15px 17px;
+    border: 1px solid rgba(241, 199, 91, 0.12);
+    border-radius: 12px;
+    background: rgba(241, 199, 91, 0.035);
+  }
+
+  .financial-note > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 19px;
+    height: 19px;
+    min-width: 19px;
+    border: 1px solid rgba(241, 199, 91, 0.35);
+    border-radius: 50%;
+    color: #F1C75B;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+  }
+
+  .financial-note p {
+    margin: 0;
+    color: #7C8AA0;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  /* FUNDING */
 
   .funding-request {
     position: relative;
     overflow: hidden;
-    padding: 32px;
+    padding: 30px;
     background:
       linear-gradient(
         135deg,
@@ -730,8 +1272,8 @@ const businessDetailsStyles = `
 
   .funding-glow {
     position: absolute;
-    width: 180px;
-    height: 180px;
+    width: 190px;
+    height: 190px;
     right: -70px;
     top: -70px;
     border-radius: 50%;
@@ -742,6 +1284,10 @@ const businessDetailsStyles = `
   .funding-content {
     position: relative;
     z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 30px;
   }
 
   .funding-label {
@@ -754,14 +1300,39 @@ const businessDetailsStyles = `
     letter-spacing: 0.10em;
   }
 
-  .funding-content h2 {
-    margin: 0 0 24px;
+  .funding-main h2 {
+    margin: 0;
     color: #E7EDF5;
     font-family: "JetBrains Mono", monospace;
-    font-size: 32px;
+    font-size: 34px;
+  }
+
+  .funding-structure {
+    min-width: 170px;
+    padding: 15px 18px;
+    border: 1px solid rgba(139, 124, 246, 0.18);
+    border-radius: 12px;
+    background: rgba(139, 124, 246, 0.05);
+  }
+
+  .funding-structure span {
+    display: block;
+    margin-bottom: 5px;
+    color: #58667A;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .funding-structure strong {
+    color: #A99EFF;
+    font-size: 14px;
   }
 
   .funding-purpose {
+    position: relative;
+    z-index: 1;
+    margin-top: 25px;
     padding-top: 18px;
     border-top: 1px solid rgba(139, 124, 246, 0.15);
   }
@@ -783,29 +1354,179 @@ const businessDetailsStyles = `
     font-size: 14px;
   }
 
-  .matchmaking-section {
+  /* GROWTH */
+
+  .growth-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 17px;
+    padding: 24px;
+    border: 1px solid rgba(53, 208, 127, 0.14);
+    border-radius: 16px;
+    background:
+      linear-gradient(
+        135deg,
+        rgba(53, 208, 127, 0.06),
+        rgba(61, 214, 245, 0.025)
+      ),
+      #09111F;
+  }
+
+  .growth-icon {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(53, 208, 127, 0.09);
+    color: #35D07F;
+    font-size: 20px;
+  }
+
+  .growth-box h3 {
+    margin: 0 0 7px;
+    color: #E7EDF5;
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+  }
+
+  .growth-box p {
+    margin: 0;
+    color: #7C8AA0;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* STRUCTURE */
+
+  .structure-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .structure-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 22px;
+    background: #09111F;
+    border: 1px solid rgba(124, 138, 160, 0.12);
+    border-radius: 16px;
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .active-structure {
+    border-color: rgba(61, 214, 245, 0.28);
+    background:
+      linear-gradient(
+        135deg,
+        rgba(61, 214, 245, 0.06),
+        rgba(139, 124, 246, 0.035)
+      ),
+      #09111F;
+  }
+
+  .structure-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(139, 124, 246, 0.08);
+    color: #A99EFF;
+    font-size: 19px;
+  }
+
+  .debt-icon {
+    background: rgba(61, 214, 245, 0.08);
+    color: #3DD6F5;
+  }
+
+  .structure-card h3 {
+    margin: 0 0 7px;
+    color: #E7EDF5;
+    font-size: 15px;
+  }
+
+  .structure-card p {
+    margin: 0;
+    color: #7C8AA0;
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .structure-note {
+    margin-top: 13px;
+    padding: 15px 17px;
+    border: 1px solid rgba(124, 138, 160, 0.10);
+    border-radius: 12px;
+    background: rgba(124, 138, 160, 0.025);
+  }
+
+  .structure-note span {
+    display: block;
+    margin-bottom: 6px;
+    color: #58667A;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .structure-note p {
+    margin: 0;
+    color: #7C8AA0;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  /* INTRODUCTION */
+
+  .introduction-section {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 30px;
-    margin-top: 42px;
-    padding: 28px;
+    margin-top: 48px;
+    padding: 30px;
     background:
       linear-gradient(
         135deg,
-        rgba(61, 214, 245, 0.07),
-        rgba(139, 124, 246, 0.07)
+        rgba(61, 214, 245, 0.08),
+        rgba(139, 124, 246, 0.08)
       ),
       #09111F;
-    border: 1px solid rgba(61, 214, 245, 0.15);
-    border-radius: 18px;
+    border: 1px solid rgba(61, 214, 245, 0.17);
+    border-radius: 20px;
   }
 
-  .matchmaking-copy {
+  .introduction-glow {
+    position: absolute;
+    width: 230px;
+    height: 230px;
+    left: -100px;
+    bottom: -130px;
+    border-radius: 50%;
+    background: rgba(61, 214, 245, 0.08);
+    filter: blur(45px);
+  }
+
+  .introduction-copy {
+    position: relative;
+    z-index: 1;
     flex: 1;
   }
 
-  .matchmaking-copy > span {
+  .introduction-label {
     color: #3DD6F5;
     font-family: "JetBrains Mono", monospace;
     font-size: 9px;
@@ -813,24 +1534,45 @@ const businessDetailsStyles = `
     letter-spacing: 0.10em;
   }
 
-  .matchmaking-copy h2 {
-    margin: 7px 0 6px;
+  .introduction-copy h2 {
+    margin: 7px 0 8px;
     color: #E7EDF5;
     font-family: "Fraunces", serif;
-    font-size: 24px;
+    font-size: 27px;
   }
 
-  .matchmaking-copy p {
-    max-width: 560px;
+  .introduction-copy > p {
+    max-width: 620px;
     margin: 0;
     color: #7C8AA0;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.65;
   }
 
-  .matchmaking-button {
+  .introduction-points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 13px;
+    margin-top: 17px;
+  }
+
+  .introduction-points span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #9BA9BB;
+    font-size: 10px;
+  }
+
+  .introduction-points b {
+    color: #35D07F;
+  }
+
+  .introduction-button {
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
-    padding: 15px 22px;
+    padding: 16px 23px;
     border: 1px solid rgba(61, 214, 245, 0.35);
     border-radius: 11px;
     background: linear-gradient(
@@ -840,7 +1582,7 @@ const businessDetailsStyles = `
     );
     color: #060911;
     font-family: "Space Grotesk", sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.02em;
     cursor: pointer;
@@ -852,16 +1594,23 @@ const businessDetailsStyles = `
       opacity 0.2s ease;
   }
 
-  .matchmaking-button:hover {
+  .introduction-button:hover {
     transform: translateY(-2px);
     box-shadow:
       0 8px 30px rgba(61, 214, 245, 0.20);
   }
 
-  .matchmaking-button:disabled {
+  .introduction-button:disabled {
     opacity: 0.55;
     cursor: not-allowed;
     transform: none;
+  }
+
+  .introduction-status {
+    max-width: 240px;
+    color: #a9b6c8;
+    font-size: 13px;
+    line-height: 1.6;
   }
 
   .business-details-message {
@@ -869,19 +1618,76 @@ const businessDetailsStyles = `
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 18px;
+    margin-top: 16px;
     padding: 14px 18px;
     border: 1px solid rgba(53, 208, 127, 0.20);
     border-radius: 12px;
     background: rgba(53, 208, 127, 0.07);
     color: #35D07F;
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .business-details-message span {
     font-weight: 800;
   }
+
+  .error-message {
+    border-color: rgba(255, 100, 124, 0.20);
+    background: rgba(255, 100, 124, 0.07);
+    color: #FF8093;
+  }
+
+  /* RISK */
+
+  .risk-disclosure {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 35px;
+    padding: 20px;
+    border: 1px solid rgba(241, 199, 91, 0.16);
+    border-radius: 15px;
+    background: rgba(241, 199, 91, 0.035);
+  }
+
+  .risk-icon {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(241, 199, 91, 0.30);
+    border-radius: 10px;
+    color: #F1C75B;
+    font-weight: 800;
+  }
+
+  .risk-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #F1C75B;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .risk-disclosure p {
+    margin: 0 0 8px;
+    color: #7C8AA0;
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .risk-disclosure small {
+    color: #9BA9BB;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  /* LOADING */
 
   .business-details-loading {
     min-height: 70vh;
@@ -896,7 +1702,8 @@ const businessDetailsStyles = `
   .business-details-loading p {
     margin: 0;
     font-family: "JetBrains Mono", monospace;
-    font-size: 13px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
   }
 
   .loading-spinner {
@@ -914,6 +1721,8 @@ const businessDetailsStyles = `
       transform: rotate(360deg);
     }
   }
+
+  /* EMPTY */
 
   .business-details-empty {
     max-width: 600px;
@@ -951,6 +1760,27 @@ const businessDetailsStyles = `
     color: #7C8AA0;
   }
 
+  /* RESPONSIVE */
+
+  @media (max-width: 900px) {
+    .trust-strip {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .overview-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .introduction-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .introduction-button {
+      width: 100%;
+    }
+  }
+
   @media (max-width: 800px) {
     .business-details-page {
       padding: 24px 15px 60px;
@@ -961,49 +1791,63 @@ const businessDetailsStyles = `
       border-radius: 18px;
     }
 
-    .business-details-header {
+    .opportunity-header {
       align-items: flex-start;
       flex-direction: column;
     }
 
-    .business-details-heading h1 {
+    .opportunity-heading h1 {
       font-size: 32px;
     }
 
-    .business-details-stats,
-    .financial-grid {
+    .financial-grid,
+    .structure-grid {
       grid-template-columns: 1fr;
     }
 
-    .matchmaking-section {
+    .funding-content {
       flex-direction: column;
-      align-items: stretch;
+      align-items: flex-start;
     }
 
-    .matchmaking-button {
+    .funding-structure {
       width: 100%;
     }
   }
 
-  @media (max-width: 500px) {
-    .business-details-meta {
+  @media (max-width: 600px) {
+    .trust-strip,
+    .overview-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .opportunity-meta {
       flex-direction: column;
       gap: 12px;
     }
 
-    .business-details-logo {
+    .opportunity-logo {
       width: 76px;
       height: 76px;
       min-width: 76px;
       font-size: 34px;
     }
 
-    .business-details-heading h1 {
+    .opportunity-heading h1 {
       font-size: 28px;
     }
 
-    .funding-content h2 {
-      font-size: 25px;
+    .funding-main h2 {
+      font-size: 27px;
+    }
+
+    .introduction-points {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .risk-disclosure {
+      flex-direction: column;
     }
   }
 `;

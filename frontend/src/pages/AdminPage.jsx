@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../services/api";
+import InvestorMtaaniLogo from "../components/InvestorMtaaniLogo";
 
 const CLOSED_STATUSES = ["completed", "closed", "funded", "successful"];
 const LOST_STATUSES = ["rejected", "declined", "cancelled"];
@@ -117,7 +118,47 @@ const cut = (text, length = 20) =>
     ? String(text).slice(0, length - 1) + "…"
     : String(text);
 
-export default function AdminPage() {
+const PREVIEW_DATA = {
+  profile: {
+    display_name: "Demo Administrator",
+    name: "Demo Administrator",
+    status: "active",
+  },
+  stats: {
+    total_users: 1248,
+    total_businesses: 148,
+    total_investors: 327,
+    total_matches: 6,
+    accepted_matches: 2,
+    pending_matches: 3,
+    declined_matches: 1,
+    total_funding_requested: 186500000,
+    total_amount_raised: 42300000,
+    open_funding_requests: 18,
+  },
+  businesses: [
+    { id: 101, business_name: "Savanna Fresh Foods", industry: "Agriculture", location: "Nakuru", amount_seeking: 12000000, created_at: "2026-09-18T10:00:00Z" },
+    { id: 102, business_name: "Mtaa Solar Works", industry: "Clean energy", location: "Nairobi", amount_seeking: 18500000, created_at: "2026-09-12T10:00:00Z" },
+    { id: 103, business_name: "Jirani Health Labs", industry: "Healthcare", location: "Kisumu", amount_seeking: 8500000, created_at: "2026-09-06T10:00:00Z" },
+    { id: 104, business_name: "Coastline Craft Co.", industry: "Manufacturing", location: "Mombasa", amount_seeking: 6400000, created_at: "2026-08-29T10:00:00Z" },
+  ],
+  investors: [
+    { id: 201, display_name: "Acacia Growth Partners", investor_type: "Angel network", location: "Nairobi", sector: "Agriculture", min_check_size: 1000000, max_check_size: 12000000, created_at: "2026-09-17T10:00:00Z" },
+    { id: 202, display_name: "Rift Valley Ventures", investor_type: "Venture fund", location: "Nakuru", sector: "Clean energy", min_check_size: 5000000, max_check_size: 25000000, created_at: "2026-09-10T10:00:00Z" },
+    { id: 203, display_name: "Lakeview Capital Circle", investor_type: "Investor group", location: "Kisumu", sector: "Healthcare", min_check_size: 750000, max_check_size: 8000000, created_at: "2026-09-02T10:00:00Z" },
+    { id: 204, display_name: "Coast Impact Fund", investor_type: "Impact fund", location: "Mombasa", sector: "Manufacturing", min_check_size: 2000000, max_check_size: 15000000, created_at: "2026-08-25T10:00:00Z" },
+  ],
+  matches: [
+    { id: 301, business_id: 101, investor_id: 201, investment_amount: 9000000, fee_amount: 225000, fee_status: "paid", status: "accepted", created_at: "2026-10-02T10:00:00Z" },
+    { id: 302, business_id: 102, investor_id: 202, investment_amount: 15000000, fee_amount: 375000, fee_status: "pending", status: "pending", created_at: "2026-09-28T10:00:00Z" },
+    { id: 303, business_id: 103, investor_id: 203, investment_amount: 6000000, fee_amount: 150000, fee_status: "paid", status: "accepted", created_at: "2026-09-22T10:00:00Z" },
+    { id: 304, business_id: 104, investor_id: 204, investment_amount: 5000000, fee_amount: 125000, fee_status: "pending", status: "pending", created_at: "2026-09-16T10:00:00Z" },
+    { id: 305, business_id: 101, investor_id: 203, investment_amount: 3000000, fee_amount: 75000, fee_status: "pending", status: "pending", created_at: "2026-09-09T10:00:00Z" },
+    { id: 306, business_id: 102, investor_id: 201, investment_amount: 7000000, fee_amount: 175000, fee_status: "not recorded", status: "declined", created_at: "2026-09-01T10:00:00Z" },
+  ],
+};
+
+export default function AdminPage({ preview = false }) {
   const [tab, setTab] = useState("overview");
 
   const [stats, setStats] = useState(null);
@@ -141,6 +182,17 @@ export default function AdminPage() {
   });
 
   const load = useCallback(async () => {
+    if (preview) {
+      setAdminProfile(PREVIEW_DATA.profile);
+      setStats(PREVIEW_DATA.stats);
+      setMatches(PREVIEW_DATA.matches);
+      setBusinesses(PREVIEW_DATA.businesses);
+      setInvestors(PREVIEW_DATA.investors);
+      setErrors({});
+      setLoading(false);
+      return;
+    }
+
     const calls = {
       profile: api.get("/admin/profile"),
       stats: api.get("/admin/stats"),
@@ -196,7 +248,7 @@ export default function AdminPage() {
 
     setErrors(nextErrors);
     setLoading(false);
-  }, []);
+  }, [preview]);
 
   useEffect(() => {
     // This effect starts a data request; state changes happen after the requests settle.
@@ -584,7 +636,7 @@ export default function AdminPage() {
     row,
     status
   ) => {
-    if (status === row.status) return;
+    if (preview || status === row.status) return;
 
     setUpdatingId(row.id);
 
@@ -646,14 +698,29 @@ export default function AdminPage() {
       <Styles />
 
       <main className="ad-page">
+        {preview && (
+          <div
+            role="status"
+            style={{
+              margin: "0 auto 18px",
+              maxWidth: 1400,
+              padding: "11px 16px",
+              color: "#b8f5ff",
+              background: "rgba(61, 214, 245, .08)",
+              border: "1px solid rgba(61, 214, 245, .28)",
+              font: '600 11px "JetBrains Mono", monospace',
+              letterSpacing: "1px",
+            }}
+          >
+            READ-ONLY PREVIEW · ILLUSTRATIVE SAMPLE DATA · NO LIVE ACCOUNT OR CUSTOMER DATA
+          </div>
+        )}
         <div className="ad-grid" />
 
         <header className="ad-head">
           <div className="ad-brand-block">
             <div className="ad-brand-line">
-              <span className="ad-brand-mark">
-                IM
-              </span>
+              <InvestorMtaaniLogo className="ad-brand-mark" size={36} />
 
               <span>
                 INVESTOR MTAANI
@@ -686,7 +753,7 @@ export default function AdminPage() {
           </div>
 
           <div className="ad-head-actions">
-            <a href="/admin/kyc" className="ad-btn ad-btn-ghost">Review identity submissions</a>
+            {!preview && <a href="/admin/kyc" className="ad-btn ad-btn-ghost">Review identity submissions</a>}
             <div className="ad-admin-badge">
               <span className="ad-live-ring" />
               <span>
@@ -704,9 +771,7 @@ export default function AdminPage() {
                 ↻
               </span>
 
-              {loading
-                ? "Refreshing..."
-                : "Refresh data"}
+              {preview ? "Sample data" : loading ? "Refreshing..." : "Refresh data"}
             </button>
           </div>
         </header>
@@ -1405,8 +1470,7 @@ Only fees explicitly recorded as paid are included.
                           className={`ad-status ad-st-${row.status}`}
                           value={row.status}
                           disabled={
-                            updatingId ===
-                            row.id
+                            preview || updatingId === row.id
                           }
                           onChange={(event) =>
                             setStatus(
@@ -1765,8 +1829,7 @@ Only fees explicitly recorded as paid are included.
                     <button
                       key={status}
                       disabled={
-                        updatingId ===
-                        selected.id
+                        preview || updatingId === selected.id
                       }
                       className={
                         status ===
@@ -2861,29 +2924,11 @@ function Styles() {
       }
 
       .ad-brand-mark {
-        display: grid;
-        place-items: center;
-
-        width: 31px;
-        height: 31px;
-
-        color: #02050b;
-
-        font:
-          800 11px
-          "Space Grotesk",
-          sans-serif;
-
-        background:
-          linear-gradient(
-            135deg,
-            var(--cyan),
-            var(--violet)
-          );
-
-        box-shadow:
-          0 0 20px
-            rgba(61, 214, 245, .4);
+        display: block;
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        filter: drop-shadow(0 3px 16px rgba(73, 221, 202, .22));
       }
 
       .ad-brand-separator {

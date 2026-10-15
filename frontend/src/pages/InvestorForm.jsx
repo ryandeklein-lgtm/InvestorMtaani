@@ -14,20 +14,29 @@ function InvestorForm() {
     geographic_focus: "",
     investing_status: "",
     portfolio_highlights: "",
+    preferred_structure: "",
+    risk_acknowledged: false,
   };
 
   const [investor, setInvestor] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
+    const { name, type, value, checked } = e.target;
+
     setInvestor({
       ...investor,
-      [e.target.name]: e.target.value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!investor.risk_acknowledged) {
+      alert("Please confirm the investor acknowledgement to continue.");
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -65,8 +74,8 @@ function InvestorForm() {
           <span style={styles.eyebrow}>INVESTOR PROFILE</span>
           <h1 style={styles.title}>Tell businesses what you look for</h1>
           <p style={styles.subtitle}>
-            Set your investment criteria so the right businesses can find
-            and pitch you.
+            Set your investment criteria so Investor Mtaani can introduce
+            you to relevant, verified businesses.
           </p>
         </div>
 
@@ -189,6 +198,15 @@ function InvestorForm() {
                 value={investor.geographic_focus}
                 onChange={handleChange}
               />
+
+              <SelectField
+                label="Preferred Investment Structure"
+                name="preferred_structure"
+                value={investor.preferred_structure}
+                onChange={handleChange}
+                options={["Debt", "Equity", "Both"]}
+                required
+              />
             </div>
 
             <label style={styles.label}>
@@ -233,13 +251,34 @@ function InvestorForm() {
             </label>
           </section>
 
+          <section style={styles.ackBox}>
+            <label style={styles.ackLabel}>
+              <input
+                type="checkbox"
+                name="risk_acknowledged"
+                checked={investor.risk_acknowledged}
+                onChange={handleChange}
+                style={styles.checkbox}
+              />
+
+              <span>
+                I understand that investments carry risk, including the
+                possible loss of invested capital. I understand that Investor
+                Mtaani does not guarantee investment returns, repayment,
+                profitability or future business performance. I am
+                responsible for making my own investment decision and may
+                seek independent professional advice.
+              </span>
+            </label>
+          </section>
+
           <button
             type="submit"
             style={{
               ...styles.submitButton,
-              opacity: submitting ? 0.7 : 1,
+              opacity: submitting || !investor.risk_acknowledged ? 0.7 : 1,
             }}
-            disabled={submitting}
+            disabled={submitting || !investor.risk_acknowledged}
           >
             {submitting
               ? "Creating Profile..."
@@ -444,6 +483,31 @@ const styles = {
     fontSize: "13px",
     fontWeight: "400",
     lineHeight: "1.5",
+  },
+
+  ackBox: {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "16px",
+    padding: "24px 32px",
+  },
+
+  ackLabel: {
+    display: "flex",
+    gap: "14px",
+    alignItems: "flex-start",
+    color: "#334155",
+    fontSize: "14px",
+    lineHeight: "1.7",
+    cursor: "pointer",
+  },
+
+  checkbox: {
+    marginTop: "5px",
+    width: "18px",
+    height: "18px",
+    accentColor: "#16a34a",
+    flexShrink: 0,
   },
 
   submitButton: {

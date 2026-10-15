@@ -5,10 +5,14 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const {
   createMatchmakingRequest,
+  getInvestorSuggestions,
   getMyInvestorMatches,
   getMyBusinessMatches,
   updateMatchStatus,
 } = require("../controllers/matchmakingController");
+
+// Rule-based opportunity suggestions from a saved investor profile.
+router.get("/suggestions", authMiddleware, getInvestorSuggestions);
 
 // Send a matchmaking request
 router.post(

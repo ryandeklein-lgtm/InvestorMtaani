@@ -1,0 +1,26 @@
+.im-not-found {
+  position: relative;
+  display: grid;
+  min-height: 76vh;
+  overflow: hidden;
+  place-items: center;
+  padding: 56px 20px;
+  background: radial-gradient(ellipse at 50% 42%,rgba(73,221,202,.1),transparent 34rem),#070b13;
+  color: #e7edf5;
+}
+.im-not-found-content { position: relative; z-index: 1; width: min(100%,660px); text-align: center; }
+.im-not-found-eyebrow { display: inline-flex; align-items: center; gap: 9px; color: #86e9dc; font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+.im-not-found-eyebrow span { width: 7px; height: 7px; border-radius: 50%; background: #49ddca; box-shadow: 0 0 14px rgba(73,221,202,.75); }
+.im-not-found-code { margin: 25px 0 8px; color: transparent; background: linear-gradient(120deg,#eaf4f8 12%,#6be5d3 55%,#9aabff); background-clip: text; -webkit-background-clip: text; font: 700 clamp(86px,17vw,156px)/.9 "Space Grotesk",sans-serif; letter-spacing: -.09em; }
+.im-not-found h1 { margin: 20px 0 0; color: #eef4f9; font-size: clamp(25px,4vw,36px); letter-spacing: -.035em; }
+.im-not-found-copy { max-width: 520px; margin: 12px auto 0; color: #a9b8c9; font-size: 15px; line-height: 1.75; }
+.im-not-found-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 11px; margin-top: 28px; }
+.im-not-found-primary, .im-not-found-secondary { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 10px; padding: 0 18px; border: 1px solid rgba(73,221,202,.32); border-radius: 9px; font-size: 13px; font-weight: 750; }
+.im-not-found-primary { background: linear-gradient(110deg,#45e4d1,#63d7fb); color: #06131a; }
+.im-not-found-primary:hover { color: #06131a; filter: brightness(1.06); }
+.im-not-found-secondary { background: rgba(15,23,42,.45); color: #dce8f2; border-color: rgba(148,163,184,.24); }
+.im-not-found-secondary:hover { border-color: rgba(73,221,202,.5); color: #8af1e1; }
+.im-not-found-orbit { position: absolute; left: 50%; top: 48%; border: 1px solid rgba(73,221,202,.11); border-radius: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+.im-not-found-orbit-one { width: 300px; height: 300px; }
+.im-not-found-orbit-two { width: 470px; height: 470px; border-style: dashed; border-color: rgba(154,171,255,.09); }
+@media (max-width: 520px) { .im-not-found { min-height: 68vh; padding: 42px 18px; } .im-not-found-actions { flex-direction: column; } }

@@ -1,36 +1,44 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 
 export default function Matchmaking() {
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  });
   const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionError, setSuggestionError] = useState("");
+  const [loading, setLoading] = useState(Boolean(user));
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
-  let user = null;
-  try {
-    user = JSON.parse(localStorage.getItem("user"));
-  } catch {
-    user = null;
-  }
-
-  useEffect(() => {
-    if (user) {
-      fetchMatches();
-    } else {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
+    if (!user) return;
     setError(null);
     try {
       const endpoint =
         user.role === "business" ? "/matchmaking/business" : "/matchmaking/investor";
       const response = await api.get(endpoint);
       setMatches(response.data.data || []);
+
+      if (user.role === "investor") {
+        try {
+          const suggestionResponse = await api.get("/matchmaking/suggestions");
+          setSuggestions(suggestionResponse.data.data || []);
+          setSuggestionError("");
+        } catch (suggestionFetchError) {
+          setSuggestions([]);
+          setSuggestionError(
+            suggestionFetchError.response?.data?.message ||
+              "Could not load opportunity suggestions."
+          );
+        }
+      }
     } catch (err) {
       console.error(err);
       setError(
@@ -39,7 +47,12 @@ export default function Matchmaking() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchMatches, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchMatches]);
 
   const updateStatus = async (id, status) => {
     setUpdatingId(id);
@@ -421,6 +434,57 @@ export default function Matchmaking() {
                     {error}
                   </div>
                 ) : null}
+
+                {user.role === "investor" && (
+                  <section style={{ marginBottom: 34 }}>
+                    <span className="mm-empty-tag">rules-based discovery</span>
+                    <h2 className="mm-empty-title">Opportunities suggested for you</h2>
+                    <p className="mm-empty-text" style={{ marginBottom: 18 }}>
+                      Suggestions compare your saved sector, location, and funding-size preferences where available. They are for discovery only, not investment recommendations.
+                    </p>
+                    {suggestionError ? (
+                      <div className="mm-error">
+                        <span className="mm-error-dot" />
+                        {suggestionError}
+                      </div>
+                    ) : suggestions.length === 0 ? (
+                      <div className="mm-empty">
+                        <h3 className="mm-empty-title">No approved opportunities are available yet.</h3>
+                        <p className="mm-empty-text">
+                          Complete your investor profile to personalize future suggestions.
+                        </p>
+                        <Link to="/investor/create" className="mm-empty-link">
+                          Update investor profile
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="mm-card-list">
+                        {suggestions.map((opportunity) => (
+                          <article key={opportunity.id} className="mm-card">
+                            <h3 className="mm-name">{opportunity.business_name}</h3>
+                            <p className="mm-sub">
+                              {opportunity.industry || "Sector not listed"} · {opportunity.location || "Location not listed"}
+                              {opportunity.turnover_band ? ` · ${opportunity.turnover_band} annual turnover` : ""}
+                            </p>
+                            <p className="mm-sub" style={{ marginTop: 12 }}>
+                              {opportunity.match_score == null
+                                ? "Add sector, location, and investment-size preferences to see profile alignment."
+                                : `${opportunity.match_score}% of the available profile criteria align.`}
+                            </p>
+                            {opportunity.match_reasons?.length > 0 && (
+                              <p className="mm-sub" style={{ marginTop: 8 }}>
+                                Matching criteria: {opportunity.match_reasons.join(", ")}
+                              </p>
+                            )}
+                            <Link to={`/business/${opportunity.id}`} className="mm-empty-link">
+                              Review opportunity
+                            </Link>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                )}
 
                 {matches.length === 0 ? (
                   <div className="mm-empty">

@@ -11,13 +11,8 @@ function Notifications() {
   const [markingId, setMarkingId] = useState(null);
   const [filter, setFilter] = useState("all");
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
   const fetchNotifications = async () => {
     try {
-      setLoading(true);
       const response = await api.get("/notifications");
       setNotifications(response.data.data || []);
     } catch (err) {
@@ -30,6 +25,11 @@ function Notifications() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timer = window.setTimeout(fetchNotifications, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const markAsRead = async (id) => {
     setMarkingId(id);
@@ -77,9 +77,11 @@ function Notifications() {
     }
   };
 
+  const [currentTime] = useState(() => Date.now());
+
   const timeAgo = (dateStr) => {
     const diffMs =
-      Date.now() - new Date(dateStr).getTime();
+      currentTime - new Date(dateStr).getTime();
 
     const mins = Math.floor(diffMs / 60000);
 

@@ -1,819 +1,1047 @@
-/* ==========================================================
+/* =========================================================
    INVESTOR MTAANI
-   REGISTER PAGE
-   Futuristic Theme
-========================================================== */
-
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
-
-:root {
-  --void: #060911;
-  --void-alt: #080d17;
-  --panel: #0e1626;
-  --panel-alt: #0b1220;
-  --panel-border: rgba(61, 214, 245, 0.16);
-  --cyan: #3dd6f5;
-  --violet: #8b7cf6;
-  --text: #e7edf5;
-  --muted: #7c8aa0;
-  --success: #4ade80;
-  --danger: #f2545b;
-}
-
-
-/* ==========================================================
-   PAGE
-========================================================== */
+   FUTURISTIC REGISTER EXPERIENCE
+   ========================================================= */
 
 .register-page {
-  min-height: 100vh;
-  width: 100%;
-  display: flex;
-
-  background: var(--void);
-  color: var(--text);
-
-  font-family: "Space Grotesk", sans-serif;
-}
-
-
-/* ==========================================================
-   LEFT BRAND PANEL
-========================================================== */
-
-.register-page .register-left {
-  flex: 1;
-  min-height: 100vh;
-
   position: relative;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 55px 24px 80px;
   overflow: hidden;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  padding: 70px;
-
-  background: var(--void);
-  color: var(--text);
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(61, 214, 245, 0.13),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(139, 124, 246, 0.12),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      rgba(61, 214, 245, 0.06),
+      transparent 40%
+    ),
+    #060911;
 }
 
+/* FUTURISTIC GRID */
 
-/* Grid overlay + glow, replacing the old diagonal stripe pattern */
+.register-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 
-.register-page .register-left::before {
+  background-image:
+    linear-gradient(
+      rgba(61, 214, 245, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(61, 214, 245, 0.035) 1px,
+      transparent 1px
+    );
+
+  background-size: 55px 55px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.8),
+    transparent 90%
+  );
+}
+
+/* GLOWING ORBS */
+
+.register-page::after {
+  content: "";
+  position: absolute;
+
+  width: 500px;
+  height: 500px;
+
+  right: -180px;
+  bottom: -220px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(139, 124, 246, 0.14),
+      transparent 65%
+    );
+
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.register-card {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: 820px;
+
+  padding: 46px 52px;
+
+  border: 1px solid rgba(61, 214, 245, 0.18);
+  border-radius: 26px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(14, 22, 38, 0.96),
+      rgba(7, 13, 25, 0.94)
+    );
+
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.55),
+    0 0 80px rgba(61, 214, 245, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  backdrop-filter: blur(24px);
+
+  overflow: hidden;
+}
+
+/* TOP NEON LINE */
+
+.register-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 8%;
+  right: 8%;
+
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #3dd6f5,
+    #8b7cf6,
+    transparent
+  );
+
+  box-shadow:
+    0 0 18px rgba(61, 214, 245, 0.7);
+}
+
+/* CORNER GLOW */
+
+.register-card::after {
+  content: "";
+
+  position: absolute;
+
+  width: 280px;
+  height: 280px;
+
+  top: -170px;
+  right: -130px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(61, 214, 245, 0.1),
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.register-brand {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  margin-bottom: 38px;
+}
+
+.brand-logo {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #3dd6f5,
+      #8b7cf6
+    );
+
+  color: #050911;
+
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 20px rgba(61, 214, 245, 0.25);
+
+  overflow: hidden;
+}
+
+.brand-logo::after {
   content: "";
 
   position: absolute;
   inset: 0;
 
-  background-image:
-    linear-gradient(rgba(61, 214, 245, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(61, 214, 245, 0.07) 1px, transparent 1px);
-  background-size: 46px 46px;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.55),
+      transparent 65%
+    );
 
-  -webkit-mask-image: radial-gradient(circle at 25% 25%, black, transparent 68%);
-  mask-image: radial-gradient(circle at 25% 25%, black, transparent 68%);
-
-  pointer-events: none;
+  transform: translateX(-100%);
+  animation: logoSweep 4s infinite;
 }
 
-.register-page .register-left::after {
-  content: "";
-
-  position: absolute;
-  top: -240px;
-  left: -120px;
-
-  width: 720px;
-  height: 480px;
-
-  background: radial-gradient(circle, rgba(61, 214, 245, 0.16), transparent 70%);
-
-  pointer-events: none;
-}
-
-
-.register-page .register-left > * {
-  position: relative;
-  z-index: 2;
-}
-
-
-/* Brand title */
-
-.register-page .register-left h1 {
-  margin: 0 0 14px;
-
-  font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(38px, 5vw, 58px);
-  font-weight: 700;
-  line-height: 1.1;
-
-  color: var(--text);
-}
-
-
-.register-page .register-left h2 {
-  margin: 0 0 24px;
+.brand-name {
+  color: #f3f7fb;
 
   font-family: "JetBrains Mono", monospace;
-  font-size: 18px;
-  font-weight: 500;
-  font-style: normal;
+  font-size: 11px;
+  font-weight: 800;
 
-  color: var(--cyan);
+  letter-spacing: 0.14em;
 }
 
+.brand-tagline {
+  margin-top: 4px;
 
-.register-page .register-left p {
+  color: #68778d;
+
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.register-heading {
+  position: relative;
+  z-index: 2;
+
   max-width: 620px;
+
+  margin-bottom: 34px;
+}
+
+.register-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #3dd6f5;
+
+  font-family: "JetBrains Mono", monospace;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.register-eyebrow::before {
+  content: "";
+
+  width: 26px;
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    #3dd6f5,
+    #8b7cf6
+  );
+
+  box-shadow:
+    0 0 10px rgba(61, 214, 245, 0.8);
+}
+
+.register-heading h1 {
+  margin: 12px 0 10px;
+
+  color: #f7faff;
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: clamp(36px, 5vw, 50px);
+
+  font-weight: 750;
+
+  line-height: 0.98;
+
+  letter-spacing: -0.045em;
+
+  text-shadow:
+    0 0 30px rgba(255, 255, 255, 0.04);
+}
+
+.register-heading p {
+  max-width: 560px;
 
   margin: 0;
 
-  color: var(--muted);
+  color: #8391a5;
 
-  font-size: 16.5px;
-  line-height: 1.8;
-}
+  font-size: 14px;
 
-
-/* ==========================================================
-   FEATURES
-========================================================== */
-
-.register-page .feature-list {
-  margin-top: 38px;
-}
-
-
-.register-page .feature {
-  display: flex;
-  align-items: center;
-
-  margin-bottom: 18px;
-
-  color: var(--text);
-
-  font-size: 15.5px;
-  font-weight: 500;
-}
-
-
-.register-page .feature::before {
-  content: "✓";
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 26px;
-  height: 26px;
-
-  margin-right: 12px;
-
-  border-radius: 3px;
-  border: 1px solid rgba(61, 214, 245, 0.4);
-
-  background: rgba(61, 214, 245, 0.1);
-  color: var(--cyan);
-
-  font-family: "JetBrains Mono", monospace;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-
-/* ==========================================================
-   QUOTE
-========================================================== */
-
-.register-page .quote-box {
-  max-width: 560px;
-
-  margin-top: 55px;
-  padding: 20px 22px;
-
-  border-left: 2px solid var(--violet);
-  border-radius: 0 4px 4px 0;
-
-  background: rgba(139, 124, 246, 0.07);
-
-  color: var(--muted);
-
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 16px;
-  font-style: normal;
   line-height: 1.7;
 }
 
-
-/* ==========================================================
-   RIGHT PANEL
-========================================================== */
-
-.register-page .register-right {
-  flex: 1;
-
-  min-height: 100vh;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 50px;
-
-  background: var(--void-alt);
-}
-
-
-/* ==========================================================
-   REGISTER CARD
-========================================================== */
-
-.register-page .register-card {
-  width: 100%;
-  max-width: 560px;
-
-  padding: 42px;
-
-  background: var(--panel);
-
-  border: 1px solid var(--panel-border);
-  border-top: 2px solid var(--cyan);
-  border-radius: 6px;
-
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42);
-
-  color: var(--text);
-}
-
-
-.register-page .register-card h2 {
-  margin: 0 0 10px;
-
-  text-align: center;
-
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-
-  color: var(--text);
-}
-
-
-.register-page .subtitle {
-  margin: 0 0 30px;
-
-  text-align: center;
-
-  color: var(--muted);
-
-  font-size: 13.5px;
-  line-height: 1.6;
-}
-
-
-/* ==========================================================
+/* =========================================================
    ROLE SELECTION
-========================================================== */
+   ========================================================= */
 
-.register-page .role-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-
-  gap: 14px;
+.role-section {
+  position: relative;
+  z-index: 2;
 
   margin-bottom: 30px;
 }
 
+.field-label {
+  margin-bottom: 11px;
 
-.register-page .role-buttons button {
-  min-height: 56px;
+  color: #aeb9c8;
 
-  padding: 14px 18px;
+  font-size: 11px;
+  font-weight: 700;
 
-  border: 1px solid var(--panel-border);
-  border-radius: 4px;
-
-  background: var(--panel-alt);
-  color: var(--text);
-
-  font-family: "JetBrains Mono", monospace;
-  font-size: 13.5px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+  letter-spacing: 0.04em;
 }
 
+.role-buttons {
+  display: grid;
 
-.register-page .role-buttons button:hover {
-  border-color: rgba(61, 214, 245, 0.45);
-  background: rgba(61, 214, 245, 0.06);
+  grid-template-columns: 1fr 1fr;
+
+  gap: 15px;
 }
 
-
-/* Business — cyan */
-
-.register-page .role-buttons .active-business {
-  border-color: var(--cyan);
-
-  background: rgba(61, 214, 245, 0.12);
-
-  color: var(--cyan);
-
-  box-shadow: 0 0 0 1px rgba(61, 214, 245, 0.2);
-}
-
-
-/* Investor — violet */
-
-.register-page .role-buttons .active-investor {
-  border-color: var(--violet);
-
-  background: rgba(139, 124, 246, 0.14);
-
-  color: var(--violet);
-
-  box-shadow: 0 0 0 1px rgba(139, 124, 246, 0.2);
-}
-
-
-/* ==========================================================
-   FORM
-========================================================== */
-
-.register-page .register-form {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-}
-
-
-/* Form group */
-
-.register-page .form-group {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-
-  margin-bottom: 18px;
-}
-
-
-/* Labels */
-
-.register-page .form-label {
-  margin-bottom: 8px;
-
-  color: var(--muted);
-
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12.5px;
-  font-weight: 500;
-}
-
-
-.register-page .required {
-  margin-left: 4px;
-
-  color: var(--cyan);
-}
-
-
-/* ==========================================================
-   INPUTS
-========================================================== */
-
-.register-page .form-input,
-.register-page .register-form input,
-.register-page .form-select,
-.register-page .register-form select {
-  width: 100%;
-
-  min-height: 48px;
-
-  padding: 13px 15px;
-
-  border: 1px solid var(--panel-border);
-  border-radius: 3px;
-
-  background: var(--panel-alt);
-  color: var(--text);
-
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 14px;
-
-  outline: none;
-
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-
-/* Placeholder */
-
-.register-page .form-input::placeholder,
-.register-page .register-form input::placeholder {
-  color: var(--muted);
-}
-
-
-/* Focus */
-
-.register-page .form-input:focus,
-.register-page .register-form input:focus,
-.register-page .form-select:focus,
-.register-page .register-form select:focus {
-  border-color: var(--cyan);
-
-  background: var(--panel);
-
-  box-shadow: 0 0 0 3px rgba(61, 214, 245, 0.16);
-}
-
-
-/* Select */
-
-.register-page .form-select,
-.register-page .register-form select {
-  cursor: pointer;
-}
-
-
-.register-page .form-select option,
-.register-page .register-form select option {
-  background: var(--panel);
-  color: var(--text);
-}
-
-
-/* ==========================================================
-   PASSWORD
-========================================================== */
-
-.register-page .password-wrapper {
+.role-button {
   position: relative;
-  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  min-height: 88px;
+
+  padding: 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.012)
+    );
+
+  color: #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+.role-button::before {
+  content: "";
 
-.register-page .password-input {
-  padding-right: 58px !important;
-}
-
-
-.register-page .password-toggle {
   position: absolute;
 
-  top: 50%;
-  right: 12px;
+  inset: 0;
 
-  transform: translateY(-50%);
+  border-radius: inherit;
 
-  width: 36px;
-  height: 36px;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(61, 214, 245, 0.06),
+      transparent 70%
+    );
+
+  opacity: 0;
+
+  transition: opacity 0.25s ease;
+}
+
+.role-button:hover {
+  transform: translateY(-3px);
+
+  border-color: rgba(61, 214, 245, 0.4);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(61, 214, 245, 0.07),
+      rgba(139, 124, 246, 0.035)
+    );
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.3),
+    0 0 25px rgba(61, 214, 245, 0.04);
+}
+
+.role-button:hover::before {
+  opacity: 1;
+}
+
+.role-button.selected {
+  border-color: rgba(61, 214, 245, 0.85);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(61, 214, 245, 0.105),
+      rgba(139, 124, 246, 0.075)
+    );
+
+  box-shadow:
+    0 0 0 1px rgba(61, 214, 245, 0.08),
+    0 0 35px rgba(61, 214, 245, 0.08),
+    inset 0 0 25px rgba(61, 214, 245, 0.025);
+}
+
+.role-icon {
+  position: relative;
+  z-index: 1;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0;
+  width: 44px;
+  height: 44px;
 
-  border: none;
-  border-radius: 3px;
+  flex-shrink: 0;
 
-  background: transparent;
-  color: var(--cyan);
+  border-radius: 12px;
 
-  font-size: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(61, 214, 245, 0.12),
+      rgba(139, 124, 246, 0.1)
+    );
 
-  cursor: pointer;
+  border: 1px solid rgba(61, 214, 245, 0.16);
 
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+  font-size: 19px;
+
+  box-shadow:
+    0 0 20px rgba(61, 214, 245, 0.05);
 }
 
+.role-button:nth-child(2) .role-icon {
+  border-color: rgba(139, 124, 246, 0.2);
 
-.register-page .password-toggle:hover {
-  background: rgba(61, 214, 245, 0.1);
-
-  transform: translateY(-50%) scale(1.05);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(139, 124, 246, 0.13),
+      rgba(61, 214, 245, 0.06)
+    );
 }
 
+.role-text {
+  position: relative;
+  z-index: 1;
 
-/* ==========================================================
-   CHECKBOX
-========================================================== */
-
-.register-page .checkbox {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
 
-  margin: 4px 0 25px;
+  flex-direction: column;
 
-  color: var(--muted);
-
-  font-size: 13px;
-  line-height: 1.5;
+  gap: 5px;
 }
 
+.role-text strong {
+  color: #edf3fa;
 
-.register-page .checkbox input {
-  width: 17px !important;
-  height: 17px;
+  font-family: "Space Grotesk", sans-serif;
 
-  min-height: 17px !important;
+  font-size: 14px;
 
-  margin: 2px 0 0 !important;
-
-  padding: 0 !important;
-
-  accent-color: var(--cyan);
-
-  cursor: pointer;
+  font-weight: 700;
 }
 
+.role-text small {
+  color: #738298;
 
-/* ==========================================================
-   REGISTER BUTTON
-========================================================== */
+  font-size: 10px;
 
-.register-page .register-btn {
-  width: 100%;
+  line-height: 1.45;
+}
 
-  min-height: 52px;
+.role-check {
+  position: absolute;
 
-  padding: 15px 20px;
+  top: 11px;
+  right: 12px;
 
-  border: none;
-  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  background: var(--cyan);
-  color: #06111a;
+  width: 21px;
+  height: 21px;
+
+  border-radius: 50%;
+
+  background: #3dd6f5;
+
+  color: #06101a;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 15px rgba(61, 214, 245, 0.45);
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.register-form {
+  position: relative;
+  z-index: 2;
+
+  padding-top: 29px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.form-heading {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 20px;
+}
+
+.form-heading h2 {
+  margin: 0;
+
+  color: #edf2f8;
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.form-heading span {
+  color: #526177;
 
   font-family: "JetBrains Mono", monospace;
-  font-size: 14px;
-  font-weight: 600;
+
+  font-size: 8px;
+
+  letter-spacing: 0.12em;
+}
+
+/* FORM LAYOUT */
+
+.register-form form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 17px;
+}
+
+/* INPUTS */
+
+.register-form input,
+.register-form select,
+.register-form textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  min-height: 50px;
+
+  padding: 0 15px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+
+  border-radius: 11px;
+
+  outline: none;
+
+  background:
+    rgba(5, 10, 19, 0.7);
+
+  color: #eef4fb;
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.register-form input::placeholder,
+.register-form textarea::placeholder {
+  color: #4f5f75;
+}
+
+.register-form input:hover,
+.register-form select:hover,
+.register-form textarea:hover {
+  border-color: rgba(61, 214, 245, 0.22);
+}
+
+.register-form input:focus,
+.register-form select:focus,
+.register-form textarea:focus {
+  border-color: rgba(61, 214, 245, 0.75);
+
+  background:
+    rgba(7, 15, 27, 0.95);
+
+  box-shadow:
+    0 0 0 3px rgba(61, 214, 245, 0.07),
+    0 0 25px rgba(61, 214, 245, 0.045);
+}
+
+.register-form select {
+  cursor: pointer;
+}
+
+/* LABELS */
+
+.register-form label {
+  color: #9daabd;
+
+  font-size: 10px;
+
+  font-weight: 650;
+
+  letter-spacing: 0.025em;
+}
+
+/* =========================================================
+   SUBMIT BUTTON
+   ========================================================= */
+
+.submit-button {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  min-height: 54px;
+
+  margin-top: 7px;
+
+  padding: 0 20px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      100deg,
+      #16d9ef 0%,
+      #3dd6f5 35%,
+      #8b7cf6 72%,
+      #9b68f4 100%
+    );
+
+  color: #040810;
+
+  font-family: "Space Grotesk", sans-serif;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.01em;
 
   cursor: pointer;
 
+  overflow: hidden;
+
+  box-shadow:
+    0 10px 35px rgba(61, 214, 245, 0.13),
+    0 0 25px rgba(139, 124, 246, 0.08);
+
   transition:
-    opacity 0.2s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
+.submit-button::before {
+  content: "";
 
-.register-page .register-btn:hover {
-  opacity: 0.88;
+  position: absolute;
 
-  box-shadow: 0 10px 24px rgba(61, 214, 245, 0.2);
+  top: 0;
+  left: -120%;
+
+  width: 70%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.35),
+      transparent
+    );
+
+  transform: skewX(-20deg);
+
+  transition: left 0.5s ease;
 }
 
-
-.register-page .register-btn:active {
-  opacity: 1;
+.submit-button:hover::before {
+  left: 150%;
 }
 
+.submit-button:hover {
+  transform: translateY(-2px);
 
-.register-page .register-btn:disabled {
+  box-shadow:
+    0 15px 45px rgba(61, 214, 245, 0.2),
+    0 0 35px rgba(139, 124, 246, 0.13);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
   opacity: 0.5;
+
   cursor: not-allowed;
+
+  transform: none;
+
   box-shadow: none;
 }
 
+/* =========================================================
+   SUCCESS
+   ========================================================= */
 
-/* ==========================================================
-   SUCCESS / ERROR
-========================================================== */
+.success-box {
+  display: flex;
 
-.register-page .success {
-  margin-bottom: 16px;
+  gap: 12px;
 
-  padding: 12px 14px;
+  margin-bottom: 18px;
 
-  border: 1px solid rgba(74, 222, 128, 0.35);
-  border-radius: 4px;
+  padding: 15px;
 
-  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(53, 208, 127, 0.25);
 
-  color: var(--success);
+  border-radius: 12px;
 
-  text-align: center;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(53, 208, 127, 0.08),
+      rgba(53, 208, 127, 0.025)
+    );
 
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12.5px;
+  box-shadow:
+    0 0 25px rgba(53, 208, 127, 0.04);
 }
 
+.success-icon {
+  display: flex;
 
-.register-page .error {
-  margin-bottom: 16px;
+  align-items: center;
+  justify-content: center;
 
-  padding: 12px 14px;
+  width: 28px;
+  height: 28px;
 
-  border: 1px solid rgba(242, 84, 91, 0.35);
-  border-radius: 4px;
+  flex-shrink: 0;
 
-  background: rgba(242, 84, 91, 0.1);
+  border-radius: 50%;
 
-  color: var(--danger);
+  background: #35d07f;
 
-  text-align: center;
+  color: #06110b;
 
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12.5px;
+  font-size: 13px;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 18px rgba(53, 208, 127, 0.25);
 }
 
+.success-box strong {
+  color: #e4ffef;
 
-/* ==========================================================
-   LOGIN LINK
-========================================================== */
-
-.register-page .login-link {
-  margin-top: 24px;
-
-  text-align: center;
-
-  color: var(--muted);
-
-  font-size: 14px;
+  font-size: 13px;
 }
 
+.success-box p {
+  margin: 4px 0 0;
 
-.register-page .login-link a {
-  color: var(--cyan);
+  color: #8ea798;
 
-  font-weight: 600;
+  font-size: 11px;
+
+  line-height: 1.5;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.error-box {
+  margin-bottom: 18px;
+
+  padding: 13px 14px;
+
+  border: 1px solid rgba(255, 91, 91, 0.25);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 91, 91, 0.06);
+
+  color: #ffb9b9;
+
+  font-size: 12px;
+
+  box-shadow:
+    0 0 20px rgba(255, 91, 91, 0.025);
+}
+
+/* =========================================================
+   FORM HINT
+   ========================================================= */
+
+.form-hint {
+  max-width: 500px;
+
+  margin: 13px auto 0;
+
+  color: #56657a;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+
+  text-align: center;
+}
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+.login-footer {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  margin-top: 25px;
+
+  color: #657389;
+
+  font-size: 12px;
+}
+
+.login-footer a {
+  color: #3dd6f5;
+
+  font-weight: 700;
 
   text-decoration: none;
 
   transition: color 0.2s ease;
 }
 
+.login-footer a:hover {
+  color: #8b7cf6;
 
-.register-page .login-link a:hover {
-  color: var(--text);
+  text-decoration: none;
 
-  text-decoration: underline;
+  text-shadow:
+    0 0 12px rgba(61, 214, 245, 0.4);
 }
 
+/* =========================================================
+   FOOTER
+   ========================================================= */
 
-/* ==========================================================
-   DYNAMIC FORM GRID
-========================================================== */
+.register-footer {
+  display: flex;
 
-.register-page .dynamic-form-grid {
-  display: grid;
+  justify-content: center;
 
-  grid-template-columns: repeat(12, 1fr);
+  gap: 8px;
 
-  gap: 20px;
+  margin-top: 29px;
+
+  color: #3f4b5d;
+
+  font-family: "JetBrains Mono", monospace;
+
+  font-size: 8px;
+
+  letter-spacing: 0.14em;
 }
 
+/* =========================================================
+   ANIMATION
+   ========================================================= */
 
-.register-page .grid-col {
-  width: 100%;
+@keyframes logoSweep {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  45%,
+  100% {
+    transform: translateX(160%);
+  }
 }
 
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
-.register-page .grid-12 {
-  grid-column: span 12;
-}
-
-
-.register-page .grid-6 {
-  grid-column: span 6;
-}
-
-
-.register-page .grid-4 {
-  grid-column: span 4;
-}
-
-
-.register-page .grid-3 {
-  grid-column: span 3;
-}
-
-
-/* ==========================================================
-   RESPONSIVE
-========================================================== */
-
-@media (max-width: 1000px) {
-
+@media (max-width: 700px) {
   .register-page {
-    flex-direction: column;
+    min-height: 100vh;
+
+    padding:
+      25px
+      14px
+      50px;
+
+    align-items: flex-start;
   }
 
-  .register-page .register-left {
-    min-height: auto;
+  .register-card {
+    padding: 32px 20px;
 
-    padding: 55px 40px;
+    border-radius: 20px;
   }
 
-  .register-page .register-right {
-    min-height: auto;
-
-    padding: 40px 25px;
+  .register-brand {
+    margin-bottom: 30px;
   }
 
-}
+  .register-heading h1 {
+    font-size: 34px;
+  }
 
+  .register-heading p {
+    font-size: 13px;
+  }
 
-@media (max-width: 768px) {
+  .role-buttons {
+    grid-template-columns: 1fr;
+  }
 
-  .register-page .register-left {
-    padding: 45px 25px;
+  .role-button {
+    min-height: 76px;
+  }
+
+  .form-heading {
+    align-items: flex-start;
+
+    gap: 10px;
+  }
+
+  .form-heading span {
+    text-align: right;
+  }
+
+  .register-footer {
+    flex-wrap: wrap;
 
     text-align: center;
   }
-
-  .register-page .register-left h1 {
-    font-size: 38px;
-  }
-
-  .register-page .register-left h2 {
-    font-size: 17px;
-  }
-
-  .register-page .register-left p {
-    font-size: 15px;
-  }
-
-  .register-page .feature {
-    justify-content: center;
-  }
-
-  .register-page .quote-box {
-    margin-top: 35px;
-
-    text-align: left;
-  }
-
-  .register-page .register-right {
-    padding: 25px 16px;
-  }
-
-  .register-page .register-card {
-    padding: 28px 22px;
-
-    border-radius: 4px;
-  }
-
-  .register-page .role-buttons {
-    grid-template-columns: 1fr;
-  }
-
-  .register-page .dynamic-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .register-page .grid-12,
-  .register-page .grid-6,
-  .register-page .grid-4,
-  .register-page .grid-3 {
-    grid-column: span 1;
-  }
-
 }
 
-
-@media (max-width: 480px) {
-
-  .register-page .register-left {
-    padding: 35px 20px;
+@media (max-width: 420px) {
+  .register-card {
+    padding: 27px 17px;
   }
 
-  .register-page .register-left h1 {
-    font-size: 32px;
+  .register-heading h1 {
+    font-size: 30px;
   }
 
-  .register-page .register-left h2 {
-    font-size: 16px;
+  .brand-name {
+    font-size: 10px;
   }
 
-  .register-page .register-right {
-    padding: 18px 12px;
-  }
+  .role-button {
+    padding: 13px;
 
-  .register-page .register-card {
-    padding: 24px 18px;
+    gap: 11px;
   }
-
-  .register-page .register-card h2 {
-    font-size: 24px;
-  }
-
 }

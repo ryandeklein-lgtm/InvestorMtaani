@@ -71,6 +71,7 @@ export default function useRegisterForm() {
         email: formData.email,
         password: formData.password,
         role: formData.role,
+        acceptedTerms: formData.agree,
         profile: {
           businessName: formData.businessName,
           industry: formData.industry,
