@@ -34,7 +34,9 @@ function Legal({ doc }) {
         <span style={styles.eyebrow}>LEGAL</span>
         <h1 style={styles.title}>{content.title}</h1>
 
-        {SHOW_DRAFT_NOTICE && <div style={styles.draft}>{DRAFT_NOTICE}</div>}
+        {SHOW_DRAFT_NOTICE && (
+          <div style={styles.draft}>{DRAFT_NOTICE}</div>
+        )}
 
         {content.intro && <p style={styles.intro}>{content.intro}</p>}
 
@@ -160,4 +162,7 @@ const styles = {
   },
   link: {
     color: "#16a34a",
+  },
+};
+
 export default Legal;
