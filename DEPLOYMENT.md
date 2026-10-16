@@ -22,6 +22,8 @@ The repository includes a baseline schema for a new PostgreSQL database and incr
 3. Install with `npm ci` and build with `npm run build`.
 4. Publish the generated `dist` directory as a static site. Configure history fallback so direct visits to routes such as `/terms` and `/business/123` serve `index.html`.
 
+For Vercel, set the project root directory to `frontend` (recommended) or the repository root with the output directory set to `frontend/dist`. The root and frontend Vercel configurations both rewrite app routes to `index.html`, allowing React Router to load nested links and browser refreshes. Redeploy after changing this configuration.
+
 ## Local setup
 
 Copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env`. Fill in local PostgreSQL credentials and generate a private JWT secret. Then install dependencies in each app directory, run the backend migrations, and start each dev server in its own terminal.

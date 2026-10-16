@@ -1,29 +1,78 @@
-/* Shared narrow-screen layout rules for pages with both CSS and inline styles. */
+/* Shared responsive rules for pages that mix component CSS and inline styles. */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* Keep flexible content from forcing its grid or flex parent wider. */
+#root main,
+#root main > *,
+#root main section,
+#root main article,
+#root main form,
+#root main [class*="container"],
+#root main [class*="inner"],
+#root main [class*="card"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Keep tables readable while allowing deliberate, contained horizontal scroll. */
+.table-wrapper,
+.table-container,
+[class*="table-wrap"],
+[class*="table-container"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+button,
+input,
+select,
+textarea,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+button,
+[role="button"] {
+  min-height: 44px;
+}
+
+@media (max-width: 1024px) {
+  .page {
+    padding-inline: clamp(20px, 4vw, 40px);
+  }
+
+  .grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section {
+    margin-block: 48px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 760px) {
-  html,
-  body,
-  #root {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  body {
-    overflow-x: hidden;
-  }
-
-  #root main,
-  #root main > *,
-  #root main section,
-  #root main article,
-  #root main form,
-  #root main [class*="container"],
-  #root main [class*="inner"],
-  #root main [class*="card"] {
-    min-width: 0;
-    max-width: 100%;
-  }
-
   #root main [style*="grid-template-columns"] {
     grid-template-columns: minmax(0, 1fr) !important;
   }
@@ -34,21 +83,57 @@
     max-width: 100% !important;
   }
 
+  .page {
+    padding: 24px 18px;
+  }
+
+  .section {
+    margin-block: 36px;
+  }
+
+  .grid,
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .dashboard-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .flex-between {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .hero-banner {
+    padding: 24px 20px;
+  }
+
+  .hero-banner-actions {
+    flex-wrap: wrap;
+  }
+
+  .role-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   #root main input,
   #root main select,
   #root main textarea {
     width: 100%;
     min-width: 0;
     max-width: 100%;
+    min-height: 48px;
     font-size: 16px;
   }
 
-  #root main table {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  #root main [role="dialog"] {
+    width: min(100% - 24px, 720px) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   #root main p,
@@ -57,23 +142,94 @@
   #root main h3,
   #root main h4,
   #root main label,
-  #root main a,
-  #root main button {
+  #root main a {
     overflow-wrap: anywhere;
+  }
+
+  .admin-dashboard {
+    min-width: 0;
+  }
+
+  .admin-nav {
+    max-width: 100%;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .admin-nav-link {
+    min-height: 44px;
+  }
+
+  .admin-main {
+    min-width: 0;
+    padding-inline: 18px;
+  }
+
+  .admin-topbar,
+  .admin-footer {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .im-hero-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #root main section[style*="padding: 76px"],
+  #root main section[style*="padding: 76px 24px"] {
+    padding: 48px 20px !important;
   }
 }
 
 @media (max-width: 480px) {
+  h1 {
+    font-size: clamp(28px, 9vw, 36px);
+  }
+
+  h2 {
+    font-size: clamp(23px, 7vw, 29px);
+  }
+
   #root main .page {
-    padding-left: 14px !important;
-    padding-right: 14px !important;
+    padding: 20px 14px;
   }
 
   #root main .card,
   #root main .tech-panel,
   #root main .empty-state,
   #root main .dashboard-header {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-inline: 16px !important;
+  }
+
+  .role-buttons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-main {
+    padding: 20px 14px;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .im-hero-layout {
+    gap: 30px;
+  }
+
+  #root main section[style*="padding: 76px"],
+  #root main section[style*="padding: 48px 20px"] {
+    padding: 38px 16px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
