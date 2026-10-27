@@ -20,10 +20,10 @@ router.post("/", authMiddleware, createInvestor);
 router.get("/me", authMiddleware, getMyInvestor);
 
 // Get all investors
-router.get("/", getAllInvestors);
+router.get("/", authMiddleware, getAllInvestors);
 
 // Get one investor by ID
-router.get("/:id", getInvestorById);
+router.get("/:id", authMiddleware, getInvestorById);
 
 // Update investor profile
 router.put("/:id", authMiddleware, updateInvestor);

@@ -68,11 +68,31 @@ td, th { border-color: rgba(148, 163, 184, .14); }
 }
 .card, .tech-panel, .action-card {
   background-image: linear-gradient(145deg, rgba(18, 31, 49, .96), rgba(10, 18, 31, .97));
-  box-shadow: 0 14px 38px rgba(0, 0, 0, .2);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, .24), inset 0 1px rgba(255, 255, 255, .025);
+  transition: transform .24s cubic-bezier(.2,.75,.25,1), border-color .24s ease, box-shadow .24s ease, background .24s ease;
+}
+.card:hover, .tech-panel:hover, .action-card:hover {
+  border-color: rgba(73, 221, 202, .28);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .3), 0 0 28px rgba(73, 221, 202, .045), inset 0 1px rgba(255, 255, 255, .04);
 }
 .action-card { min-height: 150px; }
 .action-card:focus-visible { border-color: rgba(73, 221, 202, .7); }
 .badge, .eyebrow { letter-spacing: .08em; }
+
+.btn-primary {
+  background-image: linear-gradient(115deg, #49ddca, #5bd9f3);
+  border-color: rgba(132, 255, 235, .72);
+  box-shadow: 0 8px 24px rgba(73, 221, 202, .15), inset 0 1px rgba(255, 255, 255, .28);
+}
+.btn-primary:hover {
+  box-shadow: 0 12px 32px rgba(73, 221, 202, .26), inset 0 1px rgba(255, 255, 255, .36);
+}
+.btn-accent {
+  background-image: linear-gradient(115deg, #7666e9, #a08fff);
+  border-color: rgba(193, 183, 255, .55);
+  box-shadow: 0 8px 24px rgba(139, 124, 246, .16), inset 0 1px rgba(255, 255, 255, .2);
+}
+.btn-accent:hover { box-shadow: 0 12px 32px rgba(139, 124, 246, .28), inset 0 1px rgba(255, 255, 255, .28); }
 
 .im-route-loader {
   display: flex;

@@ -13,6 +13,15 @@ const listKycSubmissions = async (req, res) => {
   }
 };
 
+const getKycSummary = async (req, res) => {
+  try {
+    res.json({ success: true, data: await kycService.getAdminKycSummary() });
+  } catch (error) {
+    console.error("Admin KYC summary failed:", error.message);
+    res.status(500).json({ success: false, message: "Could not load the KYC review summary." });
+  }
+};
+
 const getKycSubmission = async (req, res) => {
   try {
     const data = await kycService.getSubmissionForAdmin(req.params.id, req.user.id);
@@ -59,4 +68,4 @@ const reviewKycSubmission = async (req, res) => {
   }
 };
 
-module.exports = { listKycSubmissions, getKycSubmission, downloadKycDocument, reviewKycSubmission };
+module.exports = { listKycSubmissions, getKycSummary, getKycSubmission, downloadKycDocument, reviewKycSubmission };

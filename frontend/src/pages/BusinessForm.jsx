@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import businessService from "../services/business";
+import useSecureDraft from "../hooks/useSecureDraft";
+import FormProgress from "../components/FormProgress";
 
 function BusinessForm() {
+  const navigate = useNavigate();
   const initialState = {
     business_name: "",
     industry: "",
@@ -18,12 +22,14 @@ function BusinessForm() {
 
   const [business, setBusiness] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const draft = useSecureDraft("/drafts/business", { value: business, setValue: setBusiness, enabled: !submitting });
+  const requiredValues = [business.business_name, business.industry, business.location, business.description, business.amount_seeking, business.funding_reason];
+  const completedRequired = requiredValues.filter((value) => String(value || "").trim()).length;
 
   const handleChange = (e) => {
-    setBusiness({
-      ...business,
-      [e.target.name]: e.target.value,
-    });
+    setBusiness((current) => ({ ...current, [e.target.name]: e.target.value }));
+    setSubmitError("");
   };
 
   const handleSubmit = async (e) => {
@@ -32,16 +38,12 @@ function BusinessForm() {
     try {
       setSubmitting(true);
 
+      await draft.saveNow(business).catch(() => {});
       await businessService.createBusiness(business);
-
-      alert("Business profile created successfully!");
-      setBusiness(initialState);
+      await draft.clearDraft().catch(() => {});
+      navigate("/business-profile", { replace: true });
     } catch (error) {
-      console.error(error);
-      alert(
-        error.response?.data?.message ||
-          "Could not create business profile"
-      );
+      setSubmitError(error.response?.data?.message || "We couldn’t create the business profile. Check the highlighted required fields and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -57,10 +59,27 @@ function BusinessForm() {
             Create a clear business profile and explain what funding you
             are looking for.
           </p>
+          <FormProgress completed={completedRequired} total={requiredValues.length} sections={[{ id: "business-info", label: "Business" }, { id: "business-financials", label: "Financials" }, { id: "business-funding", label: "Funding" }]} />
+          <p role="status" aria-live="polite" style={{ color: "#476174", marginTop: 12, fontSize: 13 }}>
+            {draft.status === "loading" && "Checking for your saved draft…"}
+            {draft.status === "restored" && "Your saved draft has been restored. Changes save securely as you work."}
+            {draft.status === "empty" && "Your progress saves securely as you work, so you can return later."}
+            {draft.status === "saving" && "Saving your draft…"}
+            {draft.status === "saved" && `Draft saved${draft.updatedAt ? ` at ${new Date(draft.updatedAt).toLocaleTimeString()}` : ""}.`}
+            {draft.status === "save-error" && "We couldn’t save your draft. Your work is still on this page; check your connection and retry."}
+            {draft.status === "unavailable" && "Secure draft saving is unavailable. Your work will not be saved if you leave this page."}
+          </p>
+          {(draft.status === "unavailable" || draft.status === "save-error") && (
+            <button type="button" onClick={() => draft.status === "unavailable" ? draft.retryLoad() : draft.saveNow().catch(() => {})} style={{ marginTop: 8, color: "#166534", background: "transparent", textDecoration: "underline" }}>
+              {draft.status === "unavailable" ? "Retry draft connection" : "Retry saving"}
+            </button>
+          )}
+          {submitError && <p role="alert" style={{ marginTop: 12, padding: 12, borderRadius: 8, color: "#991b1b", background: "#fee2e2" }}>{submitError}</p>}
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          <section style={styles.section}>
+          <fieldset disabled={draft.status === "loading"} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+          <section id="business-info" style={styles.section}>
             <div style={styles.sectionHeader}>
               <span style={styles.step}>01</span>
 
@@ -132,7 +151,7 @@ function BusinessForm() {
             </label>
           </section>
 
-          <section style={styles.section}>
+          <section id="business-financials" style={styles.section}>
             <div style={styles.sectionHeader}>
               <span style={styles.step}>02</span>
 
@@ -175,7 +194,7 @@ function BusinessForm() {
             </div>
           </section>
 
-          <section style={styles.fundingSection}>
+          <section id="business-funding" style={styles.fundingSection}>
             <div style={styles.sectionHeader}>
               <span style={styles.fundingStep}>03</span>
 
@@ -236,6 +255,7 @@ function BusinessForm() {
               ? "Creating Profile..."
               : "Create Business Profile"}
           </button>
+          </fieldset>
         </form>
       </div>
     </div>

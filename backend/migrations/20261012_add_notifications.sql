@@ -8,6 +8,18 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Older installations used title/is_read and do not have the newer fields.
+-- Keep those rows readable while moving the app to type/action_url/read_at.
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'system';
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS action_url TEXT;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS read_at TIMESTAMPTZ;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS is_read BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT 'Platform update';
+ALTER TABLE notifications ALTER COLUMN title SET DEFAULT 'Platform update';
+UPDATE notifications
+   SET read_at = COALESCE(read_at, created_at, NOW())
+ WHERE is_read = TRUE AND read_at IS NULL;
+
 CREATE INDEX IF NOT EXISTS notifications_user_created_idx
   ON notifications (user_id, created_at DESC);
 

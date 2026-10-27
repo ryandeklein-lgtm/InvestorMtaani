@@ -10,6 +10,8 @@ function Notifications() {
   const [error, setError] = useState("");
   const [markingId, setMarkingId] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [actionFeedback, setActionFeedback] = useState("");
+  const [actionFeedbackError, setActionFeedbackError] = useState(false);
 
   const fetchNotifications = async () => {
     try {
@@ -33,37 +35,51 @@ function Notifications() {
 
   const markAsRead = async (id) => {
     setMarkingId(id);
+    setActionFeedback("");
+    setActionFeedbackError(false);
 
     try {
       await api.patch(`/notifications/${id}/read`);
+      window.dispatchEvent(new Event("investor-mtaani:notifications-changed"));
 
       setNotifications((current) =>
         current.map((n) =>
           n.id === id ? { ...n, read: true } : n
         )
       );
+      setActionFeedback("Notification marked as read.");
+      return true;
     } catch (err) {
       console.error(
         "Error marking notification as read:",
         err
       );
+      setActionFeedback("We couldn’t update that notification. Please try again.");
+      setActionFeedbackError(true);
+      return false;
     } finally {
       setMarkingId(null);
     }
   };
 
   const markAllAsRead = async () => {
+    setActionFeedback("");
+    setActionFeedbackError(false);
     try {
       await api.patch("/notifications/read-all");
+      window.dispatchEvent(new Event("investor-mtaani:notifications-changed"));
 
       setNotifications((current) =>
         current.map((n) => ({ ...n, read: true }))
       );
+      setActionFeedback("All notifications are marked as read.");
     } catch (err) {
       console.error(
         "Error marking all notifications as read:",
         err
       );
+      setActionFeedback("We couldn’t update your notifications. Please try again.");
+      setActionFeedbackError(true);
     }
   };
 
@@ -147,6 +163,14 @@ function Notifications() {
           label: "Match declined",
         };
 
+      case "message":
+        return {
+          icon: "✉",
+          accent: "#3DD6F5",
+          category: "matches",
+          label: "New message",
+        };
+
       case "profile_view":
         return {
           icon: "◉",
@@ -155,7 +179,16 @@ function Notifications() {
           label: "Profile activity",
         };
 
+      case "business_follow":
+        return {
+          icon: "♡",
+          accent: "#3DD6F5",
+          category: "community",
+          label: "New follower",
+        };
+
       case "verification":
+      case "kyc_update":
         return {
           icon: "✓",
           accent: "#35D07F",
@@ -195,6 +228,10 @@ function Notifications() {
         );
       }
 
+      if (filter === "community") {
+        return typeMeta(n.type).category === "community";
+      }
+
       return true;
     });
   }, [notifications, filter]);
@@ -228,6 +265,10 @@ function Notifications() {
     {
       key: "matches",
       label: "Matches",
+    },
+    {
+      key: "community",
+      label: "Community",
     },
     {
       key: "system",
@@ -421,6 +462,23 @@ function Notifications() {
           margin: 13px 0 23px;
         }
 
+        .notifications-action-feedback {
+          width: fit-content;
+          margin: -12px 0 16px;
+          padding: 8px 11px;
+          border: 1px solid rgba(73,221,202,.2);
+          border-radius: 8px;
+          background: rgba(73,221,202,.06);
+          color: #9ceee0;
+          font-size: 12px;
+        }
+
+        .notifications-action-feedback.is-error {
+          border-color: rgba(255,100,124,.28);
+          background: rgba(255,100,124,.07);
+          color: #ff9aa9;
+        }
+
         .notifications-tabs {
           display: flex;
           gap: 8px;
@@ -588,7 +646,6 @@ function Notifications() {
           border-left: 2px solid var(--accent, #3DD6F5);
           border-radius: 10px;
           padding: 17px 18px;
-          cursor: pointer;
           transition:
             transform 0.2s ease,
             border-color 0.2s ease,
@@ -609,6 +666,34 @@ function Notifications() {
               rgba(10, 19, 34, 0.98)
             );
         }
+
+        .notifications-item:focus-visible {
+          outline: 3px solid rgba(73,221,202,.65);
+          outline-offset: 3px;
+        }
+
+        .notifications-open {
+          display: flex;
+          flex: 1;
+          min-width: 0;
+          align-items: flex-start;
+          gap: 15px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: inherit;
+          font: inherit;
+          text-align: left;
+          cursor: pointer;
+        }
+
+        .notifications-open:focus-visible {
+          outline: 2px solid rgba(73,221,202,.7);
+          outline-offset: 4px;
+          border-radius: 6px;
+        }
+
+        .notifications-open:disabled { cursor: default; }
 
         .notifications-item-unread {
           background:
@@ -668,6 +753,7 @@ function Notifications() {
         }
 
         .notifications-category {
+          display: block;
           color: var(--accent, #3DD6F5);
           font-family: "JetBrains Mono", monospace;
           font-size: 9px;
@@ -678,6 +764,7 @@ function Notifications() {
         }
 
         .notifications-message {
+          display: block;
           margin: 0 0 7px;
           font-size: 13px;
           line-height: 1.6;
@@ -859,6 +946,7 @@ function Notifications() {
 
             {unreadCount > 0 && (
               <button
+                type="button"
                 className="notifications-mark-all"
                 onClick={markAllAsRead}
               >
@@ -874,6 +962,7 @@ function Notifications() {
                 }.`
               : "You're all caught up."}
           </p>
+          {actionFeedback && <p role={actionFeedbackError ? "alert" : "status"} aria-live={actionFeedbackError ? "assertive" : "polite"} className={`notifications-action-feedback${actionFeedbackError ? " is-error" : ""}`}>{actionFeedback}</p>}
 
           <div className="notifications-tabs">
             {filters.map((f) => (
@@ -940,54 +1029,23 @@ function Notifications() {
                         const meta = typeMeta(n.type);
 
                         return (
-                          <div
+                          <article
                             key={n.id}
-                            className={`notifications-item${
-                              !n.read
-                                ? " notifications-item-unread"
-                                : ""
-                            }`}
-                            style={{
-                              "--accent": meta.accent,
-                            }}
-                            onClick={() =>
-                              handleOpen(n)
-                            }
+                            className={`notifications-item${!n.read ? " notifications-item-unread" : ""}`}
+                            style={{ "--accent": meta.accent }}
                           >
-                            <div className="notifications-avatar">
-                              {meta.icon}
-                            </div>
-
-                            <div className="notifications-content">
-                              <p className="notifications-category">
-                                {meta.label}
-                              </p>
-
-                              <p className="notifications-message">
-                                {n.message}
-                              </p>
-
-                              <div className="notifications-meta">
-                                <span className="notifications-time">
-                                  {timeAgo(n.created_at)}
+                            <button type="button" className="notifications-open" onClick={() => handleOpen(n)} disabled={!n.action_url && n.read} aria-label={`${meta.label}. ${n.message}`}>
+                              <span className="notifications-avatar">{meta.icon}</span>
+                              <span className="notifications-content">
+                                <span className="notifications-category">{meta.label}</span>
+                                <span className="notifications-message">{n.message}</span>
+                                <span className="notifications-meta">
+                                  <span className="notifications-time">{timeAgo(n.created_at)}</span>
+                                  {n.action_url && <span className="notifications-cta">View details →</span>}
+                                  {!n.action_url && !n.read && <span className="notifications-cta">Mark as read →</span>}
                                 </span>
-
-                                {n.sender_name && (
-                                  <span className="notifications-sender">
-                                    from{" "}
-                                    <strong>
-                                      {n.sender_name}
-                                    </strong>
-                                  </span>
-                                )}
-
-                                {n.action_url && (
-                                  <span className="notifications-cta">
-                                    View details →
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+                              </span>
+                            </button>
 
                             <div className="notifications-side">
                               {!n.read && (
@@ -1014,7 +1072,7 @@ function Notifications() {
                                 </button>
                               )}
                             </div>
-                          </div>
+                          </article>
                         );
                       })}
                     </div>

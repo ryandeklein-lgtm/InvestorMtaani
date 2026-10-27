@@ -49,8 +49,8 @@ export default function NewsFeed() {
         <h2 style={styles.title}>Latest Business News</h2>
 
         <p style={styles.subtitle}>
-          Stay updated with African startups, investment trends and business
-          opportunities.
+          Follow African business news, like the stories that matter and share
+          useful reads with your network.
         </p>
 
         <div style={styles.categories}>

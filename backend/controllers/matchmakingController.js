@@ -31,6 +31,15 @@ const scoreOpportunity = (investor, business) => {
     if (checks.at(-1)) reasons.push("Sector preference");
   }
 
+  const preferredStages = asTerms(investor.preferred_stage);
+  const businessStage = String(business.business_stage || "").trim().toLowerCase();
+  if (preferredStages.length) {
+    checks.push(preferredStages.some((preferredStage) =>
+      businessStage && (preferredStage.includes(businessStage) || businessStage.includes(preferredStage))
+    ));
+    if (checks.at(-1)) reasons.push("Business stage preference");
+  }
+
   const geography = asTerms(investor.geographic_focus || investor.location);
   const location = String(business.location || "").trim().toLowerCase();
   if (geography.length) {
@@ -76,7 +85,7 @@ const getInvestorSuggestions = async (req, res) => {
     if (!isKycApproved(investor)) {
       return res.status(403).json({
         success: false,
-        message: "Investor KYC approval is required before personalized suggestions are available. Secure investor KYC submission is not available yet.",
+        message: "Investor verification approval is required before personalized suggestions are available. Submit your verification from your account and wait for review.",
       });
     }
     const businesses = await businessService.getPublicBusinesses(50, 0);
@@ -102,7 +111,7 @@ const createMatchmakingRequest = async (req, res) => {
     }
 
     const { businessId } = req.params;
-    const { message, proposedAmount } = req.body;
+    const { proposedAmount } = req.body;
     const business = await businessService.getPublicBusinessById(businessId);
 
     if (!business) {
@@ -123,21 +132,7 @@ const createMatchmakingRequest = async (req, res) => {
     if (!isKycApproved(investorProfile)) {
       return res.status(403).json({
         success: false,
-        message: "Investor KYC approval is required before requesting an introduction. Secure investor KYC submission is not available yet.",
-      });
-    }
-
-    if (message != null && typeof message !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "Message must be text.",
-      });
-    }
-
-    if (message && message.length > 1000) {
-      return res.status(400).json({
-        success: false,
-        message: "Message must be 1,000 characters or fewer.",
+        message: "Investor verification approval is required before requesting an introduction. Submit your verification from your account and wait for review.",
       });
     }
 
@@ -170,7 +165,7 @@ const createMatchmakingRequest = async (req, res) => {
       {
         investment_amount: investmentAmount,
         investment_type: business.investment_structure || null,
-        message: message?.trim() || null,
+        message: null,
       }
     );
 
@@ -179,6 +174,7 @@ const createMatchmakingRequest = async (req, res) => {
         type: "match_request",
         message: `An investor requested an introduction to ${business.business_name}.`,
         actionUrl: "/business-matches",
+        actorId: req.user.id,
       });
     } catch (notificationError) {
       console.error("Could not create introduction notification:", notificationError);
@@ -288,20 +284,22 @@ const updateMatchStatus = async (req, res) => {
       await notificationService.createForUser(updatedMatch.investor_id, {
         type: status === "accepted" ? "match_accepted" : "match_declined",
         message: status === "accepted"
-          ? "Your introduction request was accepted. You can continue the conversation through the platform."
+          ? "Your introduction request was accepted. Investor Mtaani will coordinate the next step."
           : "Your introduction request was declined.",
         actionUrl: "/matchmaking",
+        actorId: req.user.id,
       });
     } catch (notificationError) {
       console.error("Could not create introduction status notification:", notificationError);
     }
 
+    const { investor_id: _investorId, message: _legacyMessage, ...safeMatch } = updatedMatch;
     res.json({
       success: true,
       message: status === "accepted"
-        ? "Introduction request accepted. Contact details remain private."
+        ? "Introduction accepted. Investor Mtaani will coordinate the next step."
         : "Introduction request declined.",
-      data: updatedMatch,
+      data: safeMatch,
     });
   } catch (error) {
     console.error("Update matchmaking status error:", error);

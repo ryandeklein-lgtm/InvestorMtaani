@@ -27,7 +27,7 @@ const investorSteps = [
 
 function ActionLink({ to = "/register", children, secondary = false }) {
   return (
-    <Link to={to} style={secondary ? styles.secondaryButton : styles.button}>
+    <Link className={`im-landing-action${secondary ? " is-secondary" : ""}`} to={to} style={secondary ? styles.secondaryButton : styles.button}>
       {children}
     </Link>
   );
@@ -54,8 +54,8 @@ function StepList({ title, steps }) {
 
 export default function Landing() {
   return (
-    <main style={styles.page}>
-      <section style={styles.hero}>
+    <main className="im-landing-page" style={styles.page}>
+      <section className="im-landing-hero" style={styles.hero}>
         <div className="im-hero-layout" style={styles.heroInner}>
           <div className="im-hero-copy">
             <p style={styles.eyebrow}><span className="im-live-dot" /> INVESTOR MTAANI · KENYA</p>
@@ -67,8 +67,8 @@ export default function Landing() {
             </p>
             <p style={styles.supporting}>Real Businesses. Local Capital. Bigger Possibilities.</p>
             <div style={styles.actions}>
-              <ActionLink>I need capital <span aria-hidden="true">↗</span></ActionLink>
-              <ActionLink secondary>I want to invest <span aria-hidden="true">↗</span></ActionLink>
+              <ActionLink to="/register?role=business">I need capital <span aria-hidden="true">↗</span></ActionLink>
+              <ActionLink to="/register?role=investor" secondary>I want to invest <span aria-hidden="true">↗</span></ActionLink>
             </div>
             <p style={styles.heroNote}>
               Investor Mtaani facilitates discovery and introductions. It does not
@@ -231,8 +231,8 @@ export default function Landing() {
             opportunities beyond traditional investments? Create an investor profile.
           </p>
           <div style={styles.actions}>
-            <ActionLink>List your business</ActionLink>
-            <ActionLink secondary>Create your investor profile</ActionLink>
+            <ActionLink to="/register?role=business">List your business</ActionLink>
+            <ActionLink to="/register?role=investor" secondary>Create your investor profile</ActionLink>
           </div>
           <p style={styles.smallNote}>
             Applying does not guarantee approval or access to investment.

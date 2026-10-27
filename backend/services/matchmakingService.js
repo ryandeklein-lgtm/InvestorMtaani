@@ -9,7 +9,6 @@ const createMatchmakingRequest = async (
   const {
     investment_amount = null,
     investment_type = null,
-    message = null,
     special_request = false,
   } = requestData;
 
@@ -21,19 +20,18 @@ const createMatchmakingRequest = async (
       business_id,
       investment_amount,
       investment_type,
-      message,
       status,
       special_request
     )
-    VALUES ($1, $2, $3, $4, $5, 'pending', $6)
-    RETURNING *
+    VALUES ($1, $2, $3, $4, 'pending', $5)
+    RETURNING id, business_id, investment_amount, investment_type,
+              status, special_request, created_at
     `,
     [
       investorId,
       businessId,
       investment_amount,
       investment_type,
-      message,
       special_request,
     ]
   );
@@ -61,10 +59,16 @@ const getInvestorMatches = async (investorId) => {
   const result = await pool.query(
     `
     SELECT
-      mr.*,
-      b.business_name,
+      mr.id,
+      mr.business_id,
+      mr.investment_amount,
+      mr.investment_type,
+      mr.status,
+      mr.special_request,
+      mr.created_at,
+      ('Opportunity #' || b.id::text) AS business_name,
       b.industry,
-      b.location
+      'Kenya'::text AS location
     FROM matchmaking_requests mr
     JOIN businesses b
       ON mr.business_id = b.id
@@ -82,9 +86,15 @@ const getBusinessMatches = async (userId) => {
   const result = await pool.query(
     `
     SELECT
-      mr.*,
-      'Investor' AS investor_name,
-      b.business_name
+      mr.id,
+      mr.business_id,
+      mr.investment_amount,
+      mr.investment_type,
+      mr.status,
+      mr.special_request,
+      mr.created_at,
+      'Verified investor' AS investor_name,
+      ('Opportunity #' || b.id::text) AS business_name
     FROM matchmaking_requests mr
     JOIN businesses b
       ON mr.business_id = b.id

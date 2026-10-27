@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import "./BusinessProfile.css";
 
 function BusinessProfile() {
   const navigate = useNavigate();
@@ -57,7 +58,8 @@ function BusinessProfile() {
     if (
       business?.verified === true ||
       business?.is_verified === true ||
-      normalized === "verified"
+      normalized === "verified" ||
+      normalized === "approved"
     ) {
       return "VERIFIED";
     }
@@ -134,6 +136,7 @@ function BusinessProfile() {
   const fundingStructure =
     fundingRequest?.funding_type ||
     business?.funding_structure ||
+    business?.investment_structure ||
     business?.investment_type ||
     business?.structure ||
     "Not specified";
@@ -189,10 +192,10 @@ function BusinessProfile() {
   }
 
   return (
-    <div style={styles.page}>
+    <div className="im-business-profile" style={styles.page}>
       <div style={styles.gridBackground}></div>
 
-      <div style={styles.container}>
+      <div className="im-business-profile-container" style={styles.container}>
         <button
           style={styles.backButton}
           onClick={() => navigate(-1)}
@@ -205,7 +208,7 @@ function BusinessProfile() {
             HEADER
         ====================================================== */}
 
-        <section style={styles.hero}>
+        <section className="im-business-profile-hero" style={styles.hero}>
           <div style={styles.heroGlow}></div>
 
           <div style={styles.heroContent}>
@@ -326,7 +329,7 @@ function BusinessProfile() {
             </div>
           </div>
 
-          <div style={styles.steps}>
+          <div className="im-business-profile-steps" style={styles.steps}>
             <JourneyStep
               number="01"
               title="Register"
@@ -390,7 +393,7 @@ function BusinessProfile() {
           </div>
         </section>
 
-        <div style={styles.layout}>
+        <div className="im-business-profile-layout" style={styles.layout}>
           <main style={styles.mainContent}>
             {/* =================================================
                 PROFILE

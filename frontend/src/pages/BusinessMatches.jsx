@@ -194,24 +194,6 @@ function BusinessMatches() {
         .bm-detail-row strong { color: #14110D; }
         .bm-amount { font-family: 'Space Mono', monospace; color: #15402B; font-weight: 700; }
 
-        .bm-message {
-          margin-top: 18px;
-          padding: 18px 20px;
-          background: #FBF6EA;
-          border-radius: 10px;
-          border: 1px solid rgba(20,17,13,0.06);
-        }
-        .bm-message-label {
-          font-family: 'Space Mono', monospace;
-          font-size: 11px;
-          letter-spacing: 1px;
-          text-transform: uppercase;
-          color: #B9832A;
-          display: block;
-          margin-bottom: 8px;
-        }
-        .bm-message p { margin: 0; font-size: 14.5px; line-height: 1.65; color: #443F32; }
-
         .bm-date { margin-top: 18px; color: #8A8371; font-size: 13.5px; }
 
         .bm-actions {
@@ -259,9 +241,6 @@ function BusinessMatches() {
         .bm-amount { color: #7ce9d8; }
         .bm-status { background: color-mix(in srgb,var(--accent,#49ddca) 15%,#0b1422); color: var(--accent,#49ddca); border: 1px solid color-mix(in srgb,var(--accent,#49ddca) 28%,transparent); }
         .bm-divider { border-top-color: rgba(148,163,184,.14); }
-        .bm-message { background: rgba(7,13,23,.72); border: 1px solid rgba(148,163,184,.14); }
-        .bm-message-label { color: #79e8d8; }
-        .bm-message p { color: #c5d1dd; }
         .bm-date { color: #8292a7; }
         .bm-actions { border-top-color: rgba(148,163,184,.14); }
         .bm-btn-accept { background: linear-gradient(110deg,#45e4d1,#63d7fb); color: #06131a; }
@@ -399,22 +378,14 @@ function BusinessMatches() {
                           </p>
                         )}
 
-                        {match.message && (
-                          <div className="bm-message">
-                            <span className="bm-message-label">Investor Message</span>
-                            <p>{match.message}</p>
-                          </div>
-                        )}
-
                         <p className="bm-date">
                           Requested: {new Date(match.created_at).toLocaleDateString()}
                         </p>
 
                         {match.status === "accepted" && (
-                          <p className="bm-detail-row">
-                            Introduction accepted. This records interest only; it does not
-                            complete a transaction or provide direct contact details.
-                          </p>
+                          <div className="bm-detail-row">
+                            <p>Introduction accepted. Investor Mtaani will coordinate the next step. Acceptance does not complete a transaction.</p>
+                          </div>
                         )}
 
                         {match.status === "pending" && (

@@ -1,6 +1,8 @@
 import { useAuthContext } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import NewsFeed from "../components/NewsFeed";
+import JourneyTracker from "../components/JourneyTracker";
+import RecentActivity from "../components/RecentActivity";
 
 export default function Home() {
   const { user } = useAuthContext();
@@ -264,13 +266,15 @@ export default function Home() {
             </h1>
             <p className="im-home-subtitle">
               {isBusiness
-                ? "Your workspace for verification, your business profile and funding applications."
+                ? "Build your business story, share progress with the community and connect with investors."
                 : isInvestor
-                  ? "Your workspace for discovering businesses and managing introductions."
-                  : "Your workspace for exploring the Investor Mtaani marketplace."}
+                  ? "Discover businesses, follow their progress and request introductions when there’s a fit."
+                  : "Discover local businesses, their stories and the people building them."}
             </p>
           </div>
         </section>
+
+        {user && <JourneyTracker />}
 
         {/* Role-based next steps */}
         <section className="im-home-section">
@@ -294,7 +298,15 @@ export default function Home() {
 
         {/* News */}
         <section className="im-home-section">
-          <h2>Market pulse</h2>
+          <h2 className="im-home-section-title">Recent activity</h2>
+          <p className="im-home-section-description">The latest updates on your account and introductions.</p>
+          <div className="im-panel im-news-card">
+            <RecentActivity />
+          </div>
+        </section>
+
+        <section className="im-home-section">
+          <h2>Business news</h2>
 
           <div className="im-panel im-news-card">
             <span className="im-corner im-corner-tl" />

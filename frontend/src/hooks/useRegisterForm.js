@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import authService from "../services/auth";
 
 export default function useRegisterForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialRole = searchParams.get("role") === "investor" ? "investor" : "business";
 
-  const [selectedRole, setSelectedRole] = useState("business");
+  const [selectedRole, setSelectedRole] = useState(initialRole);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +23,7 @@ export default function useRegisterForm() {
     investmentRange: "",
     password: "",
     confirmPassword: "",
-    role: "business",
+    role: initialRole,
     agree: false,
   });
 

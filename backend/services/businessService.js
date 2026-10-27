@@ -12,9 +12,10 @@ const BUSINESS_STATUSES = [
 // Columns safe to show publicly. Raw revenue/profit figures are NOT included;
 // a turnover band is shown instead.
 const PUBLIC_COLUMNS = `
-  id, business_name, industry, location, description,
-  year_established, employees, amount_seeking, funding_reason,
-  use_of_funds, investment_structure, business_stage,
+  id, ('Opportunity #' || id::text) AS business_name,
+  industry, 'Kenya'::text AS location,
+  ('An approved business in ' || COALESCE(NULLIF(industry, ''), 'a growing sector') || ' is seeking capital to grow.') AS description,
+  amount_seeking, investment_structure, business_stage,
   verified_at, views, created_at,
   CASE
     WHEN annual_revenue < 2000000  THEN 'Below KSh 2M'

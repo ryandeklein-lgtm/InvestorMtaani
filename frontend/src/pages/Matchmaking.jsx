@@ -544,6 +544,8 @@ export default function Matchmaking() {
                               </button>
                             </div>
                           ) : null}
+                          {match.status === "accepted" && <p className="mm-sub" style={{ marginTop:14 }}>Introduction accepted. Investor Mtaani will coordinate the next step.</p>}
+                          {user.role === "investor" && match.status === "pending" && <p className="mm-sub" style={{ marginTop:14 }}>Your request is waiting for the business to review it.</p>}
                         </div>
                       );
                     })}

@@ -3,16 +3,21 @@ import { Link, useParams } from "react-router-dom";
 import api from "../services/api";
 import BackButton from "../components/BackButton";
 import { useAuthContext } from "../contexts/AuthContext";
+import CommunityFeed from "../components/CommunityFeed";
 
 function BusinessDetails() {
   const { id } = useParams();
   const { user } = useAuthContext();
+  const requestKey = `${user?.id || user?.email || "anonymous"}:${id}`;
 
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [matchLoading, setMatchLoading] = useState(false);
+  const [requestLookup, setRequestLookup] = useState({ key: null, value: null });
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("success");
+  const existingRequest = requestLookup.key === requestKey ? requestLookup.value : null;
+  const requestLoading = user?.role === "investor" && requestLookup.key !== requestKey;
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -35,6 +40,19 @@ function BusinessDetails() {
     fetchBusiness();
   }, [id]);
 
+  useEffect(() => {
+    if (user?.role !== "investor") return undefined;
+    let active = true;
+    api.get("/matchmaking/investor")
+      .then(({ data }) => {
+        if (active) setRequestLookup({ key: requestKey, value: (data.data || []).find((request) => String(request.business_id) === String(id)) || null });
+      })
+      .catch(() => {
+        if (active) setRequestLookup({ key: requestKey, value: null });
+      });
+    return () => { active = false; };
+  }, [id, user?.role, requestKey]);
+
   async function handleRequestIntroduction() {
     try {
       setMatchLoading(true);
@@ -43,11 +61,10 @@ function BusinessDetails() {
 
       const response = await api.post(
         "/matchmaking/business/" + id,
-        {
-          message:
-            "I would like to request an introduction and explore a potential investment opportunity with this business.",
-        }
+        {}
       );
+
+      setRequestLookup({ key: requestKey, value: response.data?.data || { status: "pending", business_id: id } });
 
       setMessage(
         response.data?.message ||
@@ -354,6 +371,12 @@ function BusinessDetails() {
             </div>
           </section>
 
+          <section className="opportunity-summary" aria-label="Funding summary">
+            <div><span>CAPITAL SEEKING</span><strong>{amountSeeking > 0 ? `KES ${formatCurrency(amountSeeking)}` : "Not disclosed"}</strong></div>
+            <div><span>PROPOSED STRUCTURE</span><strong>{structure}</strong></div>
+            <a href="#opportunity-introduction">Explore introduction options <span aria-hidden="true">↓</span></a>
+          </section>
+
           {/* TRUST STRIP */}
 
           <section className="trust-strip">
@@ -610,6 +633,10 @@ function BusinessDetails() {
 
           </section>
 
+          <section className="business-details-section opportunity-owner-tools" aria-label="Manage business updates">
+            <CommunityFeed businessId={id} ownerOnly />
+          </section>
+
           {/* STRUCTURE EXPLANATION */}
 
           <section className="business-details-section">
@@ -694,7 +721,7 @@ function BusinessDetails() {
 
           {/* REQUEST INTRODUCTION */}
 
-          <section className="introduction-section">
+          <section id="opportunity-introduction" className="introduction-section">
 
             <div className="introduction-glow"></div>
 
@@ -709,11 +736,7 @@ function BusinessDetails() {
               </h2>
 
               <p>
-                Send an introduction request for the
-                business to review. Direct contact details
-                and sensitive documents are not shared here;
-                secure messaging and document access are not
-                available in this prototype yet.
+                Request a confidential introduction. If the business accepts, Investor Mtaani will coordinate the next step while both parties’ identities stay protected.
               </p>
 
               <div className="introduction-points">
@@ -725,7 +748,7 @@ function BusinessDetails() {
 
                 <span>
                   <b>✓</b>
-                  Controlled communication
+                  Identity-protected process
                 </span>
 
                 <span>
@@ -745,17 +768,19 @@ function BusinessDetails() {
               <p className="introduction-status">
                 Introduction requests are available to investor accounts.
               </p>
+            ) : requestLoading ? (
+              <p className="introduction-status" role="status">Checking your existing request…</p>
+            ) : existingRequest?.status === "accepted" ? (
+              <p className="introduction-status">Your introduction was accepted. Investor Mtaani will coordinate the next step.</p>
+            ) : existingRequest?.status === "pending" ? (
+              <p className="introduction-status">Your request is waiting for the business to review it. <Link to="/matchmaking">View status</Link></p>
+            ) : existingRequest?.status === "declined" ? (
+              <p className="introduction-status">This business declined your request. <Link to="/matchmaking">View introductions</Link></p>
             ) : (
-              <button
-                type="button"
-                className="introduction-button"
-                onClick={handleRequestIntroduction}
-                disabled={matchLoading}
-              >
-                {matchLoading
-                  ? "REQUESTING..."
-                  : "REQUEST INTRODUCTION →"}
-              </button>
+              <form className="introduction-form" onSubmit={(event) => { event.preventDefault(); handleRequestIntroduction(); }}>
+                <p className="introduction-status">Send your introduction request with one tap. No contact details or private message are sent to the other party.</p>
+                <div className="introduction-form-footer"><button type="submit" className="introduction-button" disabled={matchLoading}>{matchLoading ? "SENDING…" : "REQUEST INTRODUCTION →"}</button></div>
+              </form>
             )}
 
           </section>
@@ -1000,6 +1025,24 @@ const businessDetailsStyles = `
     font-size: 9px;
     letter-spacing: 0.08em;
   }
+
+  .opportunity-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    align-items: center;
+    gap: 14px;
+    margin-top: 26px;
+    padding: 17px 20px;
+    border: 1px solid rgba(73,221,202,.2);
+    border-radius: 13px;
+    background: linear-gradient(100deg, rgba(73,221,202,.07), rgba(139,124,246,.06) 70%, rgba(11,18,32,.7));
+  }
+  .opportunity-summary > div { display: grid; gap: 5px; min-width: 0; }
+  .opportunity-summary > div > span { color:#8292a7; font:700 9px "JetBrains Mono",monospace; letter-spacing:.1em; }
+  .opportunity-summary strong { color:#e7edf5; font-size:17px; overflow-wrap:anywhere; }
+  .opportunity-summary a { display:inline-flex; min-height:44px; align-items:center; gap:8px; padding:0 13px; border:1px solid rgba(73,221,202,.32); border-radius:8px; background:rgba(73,221,202,.08); color:#9ceee0; font-size:11px; font-weight:700; text-decoration:none; }
+  .opportunity-summary a:hover { background:rgba(73,221,202,.15); }
+  #opportunity-introduction { scroll-margin-top: 90px; }
 
   /* TRUST */
 
@@ -1594,6 +1637,15 @@ const businessDetailsStyles = `
       opacity 0.2s ease;
   }
 
+  .introduction-form { position: relative; z-index: 1; flex: 0 1 360px; min-width: 250px; }
+  .introduction-form label { display:block; margin-bottom:7px; color:#dce7f2; font-size:12px; font-weight:700; }
+  .introduction-form label span { color:#7c8aa0; font-weight:400; }
+  .introduction-form textarea { display:block; width:100%; min-height:86px; padding:11px; border:1px solid rgba(148,163,184,.25); border-radius:9px; background:#080d17; color:#e7edf5; font:inherit; font-size:13px; resize:vertical; }
+  .introduction-form textarea:focus-visible { outline:3px solid rgba(61,214,245,.4); outline-offset:2px; }
+  .introduction-form-footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:9px; color:#7c8aa0; font-size:10px; }
+  .introduction-form-footer .introduction-button { padding:13px 16px; }
+  .introduction-status a { color:#67e8f9; }
+
   .introduction-button:hover {
     transform: translateY(-2px);
     box-shadow:
@@ -1779,6 +1831,9 @@ const businessDetailsStyles = `
     .introduction-button {
       width: 100%;
     }
+
+    .opportunity-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .opportunity-summary a { grid-column:1 / -1; justify-content:center; }
   }
 
   @media (max-width: 800px) {
@@ -1825,6 +1880,9 @@ const businessDetailsStyles = `
       flex-direction: column;
       gap: 12px;
     }
+
+    .opportunity-summary { gap:11px; padding:14px; }
+    .opportunity-summary strong { font-size:15px; }
 
     .opportunity-logo {
       width: 76px;

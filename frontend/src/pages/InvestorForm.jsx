@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import investorService from "../services/investor";
+import useSecureDraft from "../hooks/useSecureDraft";
+import FormProgress from "../components/FormProgress";
 
 function InvestorForm() {
+  const navigate = useNavigate();
   const initialState = {
     display_name: "",
     investor_type: "",
@@ -20,21 +24,26 @@ function InvestorForm() {
 
   const [investor, setInvestor] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const draft = useSecureDraft("/drafts/investor", { value: investor, setValue: setInvestor, enabled: !submitting });
+  const requiredValues = [investor.display_name, investor.investor_type, investor.location, investor.thesis, investor.preferred_structure, investor.risk_acknowledged];
+  const completedRequired = requiredValues.filter((value) => typeof value === "boolean" ? value : String(value || "").trim()).length;
 
   const handleChange = (e) => {
     const { name, type, value, checked } = e.target;
 
-    setInvestor({
-      ...investor,
+    setInvestor((current) => ({
+      ...current,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
+    setSubmitError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!investor.risk_acknowledged) {
-      alert("Please confirm the investor acknowledgement to continue.");
+      setSubmitError("Please confirm the investor acknowledgement to continue.");
       return;
     }
 
@@ -52,16 +61,13 @@ function InvestorForm() {
           : [],
       };
 
+      // Keep the draft in the form's editable shape (comma-separated sectors).
+      await draft.saveNow(investor).catch(() => {});
       await investorService.createInvestor(payload);
-
-      alert("Investor profile created successfully!");
-      setInvestor(initialState);
+      await draft.clearDraft().catch(() => {});
+      navigate("/investor-profile", { replace: true });
     } catch (error) {
-      console.error(error);
-      alert(
-        error.response?.data?.message ||
-          "Could not create investor profile"
-      );
+      setSubmitError(error.response?.data?.message || "We couldn’t create the investor profile. Check the required fields and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -77,10 +83,27 @@ function InvestorForm() {
             Set your investment criteria so Investor Mtaani can introduce
             you to relevant, verified businesses.
           </p>
+          <FormProgress completed={completedRequired} total={requiredValues.length} sections={[{ id: "investor-info", label: "About you" }, { id: "investor-criteria", label: "Criteria" }, { id: "investor-track-record", label: "Track record" }]} />
+          <p role="status" aria-live="polite" style={{ color: "#476174", marginTop: 12, fontSize: 13 }}>
+            {draft.status === "loading" && "Checking for your saved draft…"}
+            {draft.status === "restored" && "Your saved draft has been restored. Changes save securely as you work."}
+            {draft.status === "empty" && "Your progress saves securely as you work, so you can return later."}
+            {draft.status === "saving" && "Saving your draft…"}
+            {draft.status === "saved" && `Draft saved${draft.updatedAt ? ` at ${new Date(draft.updatedAt).toLocaleTimeString()}` : ""}.`}
+            {draft.status === "save-error" && "We couldn’t save your draft. Your work is still on this page; check your connection and retry."}
+            {draft.status === "unavailable" && "Secure draft saving is unavailable. Your work will not be saved if you leave this page."}
+          </p>
+          {(draft.status === "unavailable" || draft.status === "save-error") && (
+            <button type="button" onClick={() => draft.status === "unavailable" ? draft.retryLoad() : draft.saveNow().catch(() => {})} style={{ marginTop: 8, color: "#166534", background: "transparent", textDecoration: "underline" }}>
+              {draft.status === "unavailable" ? "Retry draft connection" : "Retry saving"}
+            </button>
+          )}
+          {submitError && <p role="alert" style={{ marginTop: 12, padding: 12, borderRadius: 8, color: "#991b1b", background: "#fee2e2" }}>{submitError}</p>}
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          <section style={styles.section}>
+          <fieldset disabled={draft.status === "loading"} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+          <section id="investor-info" style={styles.section}>
             <div style={styles.sectionHeader}>
               <span style={styles.step}>01</span>
 
@@ -151,7 +174,7 @@ function InvestorForm() {
             </label>
           </section>
 
-          <section style={styles.fundingSection}>
+          <section id="investor-criteria" style={styles.fundingSection}>
             <div style={styles.sectionHeader}>
               <span style={styles.fundingStep}>02</span>
 
@@ -226,7 +249,7 @@ function InvestorForm() {
             </label>
           </section>
 
-          <section style={styles.section}>
+          <section id="investor-track-record" style={styles.section}>
             <div style={styles.sectionHeader}>
               <span style={styles.step}>03</span>
 
@@ -284,6 +307,7 @@ function InvestorForm() {
               ? "Creating Profile..."
               : "Create Investor Profile"}
           </button>
+          </fieldset>
         </form>
       </div>
     </div>

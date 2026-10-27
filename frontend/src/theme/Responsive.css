@@ -12,6 +12,15 @@ body {
   overflow-x: clip;
 }
 
+#business-info,
+#business-financials,
+#business-funding,
+#investor-info,
+#investor-criteria,
+#investor-track-record {
+  scroll-margin-top: 88px;
+}
+
 /* Keep flexible content from forcing its grid or flex parent wider. */
 #root main,
 #root main > *,

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import BackButton from "../components/BackButton";
+import useSavedBusinesses from "../hooks/useSavedBusinesses";
 
 const SECTORS = [
   "All sectors",
@@ -41,20 +42,131 @@ const FUNDING_RANGES = [
   { label: "Over KES 10M", value: "over-10m" },
 ];
 
+const FOLLOWED_STORAGE_PREFIX = "investor-mtaani:followed-businesses:v1:";
+const FOLLOWED_UPDATES_PREFIX = "investor-mtaani:followed-updates:v1:";
+const FOLLOWED_UPDATES_SEEN_PREFIX = "investor-mtaani:followed-updates-seen:v1:";
+
+function readFollowedIds(storageKey) {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(storageKey) || "[]");
+    return Array.isArray(value) ? value.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readStoredJson(storageKey, fallback) {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(storageKey) || "null");
+    return value && typeof value === "object" ? value : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function BrowseBusinesses() {
   const [businesses, setBusinesses] = useState([]);
+  const [communityPosts, setCommunityPosts] = useState([]);
+  const [communityPostsLoaded, setCommunityPostsLoaded] = useState(false);
+  const [investorSuggestions, setInvestorSuggestions] = useState([]);
+  const [investorMatchStatus, setInvestorMatchStatus] = useState("idle");
+  const [investorMatchMessage, setInvestorMatchMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [shareStatus, setShareStatus] = useState({ businessId: null, message: "" });
+  const [shareOpenFor, setShareOpenFor] = useState(null);
+  const [followFeedback, setFollowFeedback] = useState("");
+  const [followPendingId, setFollowPendingId] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const [viewer] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("user") || "null"); } catch { return null; }
+  });
+  const followStorageKey = `${FOLLOWED_STORAGE_PREFIX}${viewer?.id ?? viewer?.user_id ?? "guest"}`;
+  const [followedIds, setFollowedIds] = useState(() => readFollowedIds(followStorageKey));
+  const updatesStorageKey = `${FOLLOWED_UPDATES_PREFIX}${viewer?.id ?? viewer?.user_id ?? "guest"}`;
+  const updatesSeenStorageKey = `${FOLLOWED_UPDATES_SEEN_PREFIX}${viewer?.id ?? viewer?.user_id ?? "guest"}`;
+  const [followedUpdates, setFollowedUpdates] = useState(() => {
+    const saved = readStoredJson(updatesStorageKey, []);
+    return Array.isArray(saved) ? saved : [];
+  });
+  const [showFollowing, setShowFollowing] = useState(false);
+  useEffect(() => {
+    if (viewer?.role !== "investor") return undefined;
+    let active = true;
+    api.get("/businesses/following")
+      .then(({ data }) => {
+        if (!active) return;
+        const ids = Array.isArray(data?.data) ? data.data.map(String) : [];
+        setFollowedIds(ids);
+        try { window.localStorage.setItem(followStorageKey, JSON.stringify(ids)); } catch { /* State remains available for this visit. */ }
+      })
+      .catch(() => {
+        if (active) setFollowFeedback("Follow status could not be refreshed. Try again shortly.");
+      });
+    return () => { active = false; };
+  }, [viewer?.role, followStorageKey]);
+  useEffect(() => {
+    const syncFromStorage = (event) => {
+      if (event.key === followStorageKey) setFollowedIds(readFollowedIds(followStorageKey));
+    };
+    window.addEventListener("storage", syncFromStorage);
+    return () => window.removeEventListener("storage", syncFromStorage);
+  }, [followStorageKey]);
+  const followedIdSet = useMemo(() => new Set(followedIds), [followedIds]);
+  const isFollowed = useCallback((businessId) => followedIdSet.has(String(businessId)), [followedIdSet]);
+  const toggleFollowed = useCallback(async (businessId) => {
+    if (viewer?.role !== "investor") {
+      setFollowFeedback("Sign in with an investor account to follow businesses and receive activity notifications.");
+      return;
+    }
+    const normalizedId = String(businessId);
+    const wasFollowing = followedIdSet.has(normalizedId);
+    setFollowFeedback("");
+    setFollowPendingId(normalizedId);
+    try {
+      await (wasFollowing
+        ? api.delete(`/businesses/${encodeURIComponent(normalizedId)}/follow`)
+        : api.post(`/businesses/${encodeURIComponent(normalizedId)}/follow`));
+      setFollowedIds((current) => {
+        const next = wasFollowing
+          ? current.filter((id) => id !== normalizedId)
+          : [normalizedId, ...current];
+        try { window.localStorage.setItem(followStorageKey, JSON.stringify(next)); } catch { /* Keep follow state available for this visit. */ }
+        return next;
+      });
+      if (!wasFollowing) {
+        window.dispatchEvent(new Event("investor-mtaani:notifications-changed"));
+      }
+    } catch (error) {
+      setFollowFeedback(error.response?.data?.message || "We couldn’t update this follow. Please try again.");
+    } finally {
+      setFollowPendingId(null);
+    }
+  }, [followStorageKey, followedIdSet, viewer]);
   const selectedIndustry = searchParams.get("industry");
-
-  const [search, setSearch] = useState("");
-  const [sector, setSector] = useState(selectedIndustry || "All sectors");
-  const [location, setLocation] = useState("All locations");
-  const [structure, setStructure] = useState("All structures");
-  const [fundingRange, setFundingRange] = useState("all");
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const readFilters = (params) => ({
+    search: params.get("q") || "",
+    sector: SECTORS.includes(params.get("industry")) ? params.get("industry") : "All sectors",
+    location: LOCATIONS.includes(params.get("location")) ? params.get("location") : "All locations",
+    structure: STRUCTURES.includes(params.get("structure")) ? params.get("structure") : "All structures",
+    stage: params.get("stage") || "All stages",
+    fundingRange: FUNDING_RANGES.some(({ value }) => value === params.get("amount")) ? params.get("amount") : "all",
+    verifiedOnly: params.get("verified") === "1",
+  });
+  const [initialFilters] = useState(() => readFilters(searchParams));
+  const [search, setSearch] = useState(initialFilters.search);
+  const [sector, setSector] = useState(initialFilters.sector);
+  const [location, setLocation] = useState(initialFilters.location);
+  const [structure, setStructure] = useState(initialFilters.structure);
+  const [stage, setStage] = useState(initialFilters.stage);
+  const [fundingRange, setFundingRange] = useState(initialFilters.fundingRange);
+  const [verifiedOnly, setVerifiedOnly] = useState(initialFilters.verifiedOnly);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [compareIds, setCompareIds] = useState([]);
+  const [comparisonMessage, setComparisonMessage] = useState("");
+  const { toggleSaved, isSaved } = useSavedBusinesses();
+  const [copyMessage, setCopyMessage] = useState("");
 
   useEffect(() => {
     const fetchBusinesses = async () => {
@@ -63,8 +175,6 @@ function BrowseBusinesses() {
 
       try {
         const response = await api.get("/businesses");
-
-        console.log("Businesses API Response:", response.data);
 
         let data = [];
 
@@ -77,8 +187,7 @@ function BrowseBusinesses() {
         }
 
         setBusinesses(data);
-      } catch (err) {
-        console.error("Error loading businesses:", err);
+      } catch {
         setBusinesses([]);
         setError(
           "We could not load the current opportunities. Please try again."
@@ -92,12 +201,114 @@ function BrowseBusinesses() {
   }, []);
 
   useEffect(() => {
-    if (selectedIndustry) {
-      // Sync a new URL filter into the editable filter control.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSector(selectedIndustry);
-    }
-  }, [selectedIndustry]);
+    let active = true;
+    api.get("/community/posts")
+      .then((response) => {
+        if (active) {
+          setCommunityPosts(Array.isArray(response.data?.data) ? response.data.data : []);
+          setCommunityPostsLoaded(true);
+        }
+      })
+      .catch(() => { if (active) { setCommunityPosts([]); setCommunityPostsLoaded(true); } });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!communityPostsLoaded) return;
+    const seenByBusiness = readStoredJson(updatesSeenStorageKey, {});
+    const updates = readStoredJson(updatesStorageKey, []);
+    const nextUpdates = Array.isArray(updates) ? [...updates] : [];
+    const followed = new Set(followedIds.map(String));
+    const postsByBusiness = new Map();
+    [...communityPosts]
+      .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0))
+      .forEach((post) => {
+        const id = String(post.business_id ?? "");
+        if (id && followed.has(id)) {
+          if (!postsByBusiness.has(id)) postsByBusiness.set(id, []);
+          postsByBusiness.get(id).push(post);
+        }
+      });
+
+    const nextSeen = {};
+    postsByBusiness.forEach((posts, businessId) => {
+      const latest = posts[posts.length - 1];
+      const lastSeenId = seenByBusiness[businessId];
+      if (!lastSeenId) {
+        nextSeen[businessId] = String(latest.id);
+        return;
+      }
+      const previousIndex = posts.findIndex((post) => String(post.id) === String(lastSeenId));
+      const freshPosts = previousIndex >= 0 ? posts.slice(previousIndex + 1) : [latest];
+      freshPosts.forEach((post) => {
+        if (nextUpdates.some((item) => String(item.postId) === String(post.id))) return;
+        const business = businesses.find((item) => String(item.id) === businessId);
+        nextUpdates.unshift({
+          postId: String(post.id),
+          businessId,
+          businessName: business?.name || business?.business_name || post.business_name || "A business you follow",
+          text: post.content || post.body || post.message || post.text || "Shared a new business update.",
+          createdAt: post.created_at || null,
+        });
+      });
+      nextSeen[businessId] = String(latest.id);
+    });
+
+    try {
+      window.localStorage.setItem(updatesStorageKey, JSON.stringify(nextUpdates.slice(0, 30)));
+      window.localStorage.setItem(updatesSeenStorageKey, JSON.stringify(nextSeen));
+    } catch { /* Keep update notices available for this visit. */ }
+    const timer = window.setTimeout(() => setFollowedUpdates(nextUpdates.slice(0, 30)), 0);
+    return () => window.clearTimeout(timer);
+  }, [businesses, communityPosts, communityPostsLoaded, followedIds, updatesSeenStorageKey, updatesStorageKey]);
+
+  const dismissFollowedUpdate = useCallback((postId) => {
+    setFollowedUpdates((current) => {
+      const next = current.filter((update) => String(update.postId) !== String(postId));
+      try { window.localStorage.setItem(updatesStorageKey, JSON.stringify(next)); } catch { /* Keep the current view responsive. */ }
+      return next;
+    });
+  }, [updatesStorageKey]);
+
+  const clearFollowedUpdates = useCallback(() => {
+    setFollowedUpdates([]);
+    try { window.localStorage.setItem(updatesStorageKey, "[]"); } catch { /* Keep the current view responsive. */ }
+  }, [updatesStorageKey]);
+
+  useEffect(() => {
+    if (viewer?.role !== "investor" || !window.localStorage.getItem("token")) return undefined;
+    let active = true;
+    const loadingTimer = window.setTimeout(() => {
+      if (active) setInvestorMatchStatus("loading");
+    }, 0);
+    api.get("/matchmaking/suggestions")
+      .then((response) => {
+        if (!active) return;
+        setInvestorSuggestions(Array.isArray(response.data?.data) ? response.data.data : []);
+        setInvestorMatchStatus("ready");
+        setInvestorMatchMessage("");
+      })
+      .catch((matchError) => {
+        if (!active) return;
+        setInvestorSuggestions([]);
+        setInvestorMatchStatus("unavailable");
+        if (matchError.response?.status === 404) {
+          setInvestorMatchMessage("Create an investor profile to see personalized profile-overlap notes.");
+        } else if (matchError.response?.status === 403) {
+          setInvestorMatchMessage("Personalized profile-overlap notes require an approved investor profile. You can continue browsing public opportunities.");
+        } else {
+          setInvestorMatchMessage("Personalized profile-overlap notes are temporarily unavailable.");
+        }
+      });
+    return () => { active = false; window.clearTimeout(loadingTimer); };
+  }, [viewer]);
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    const values = { q: search.trim(), industry: sector === "All sectors" ? "" : sector, location: location === "All locations" ? "" : location, structure: structure === "All structures" ? "" : structure, stage: stage === "All stages" ? "" : stage, amount: fundingRange === "all" ? "" : fundingRange, verified: verifiedOnly ? "1" : "" };
+    Object.entries(values).forEach(([key, value]) => value ? next.set(key, value) : next.delete(key));
+    if (next.toString() !== searchParams.toString()) setSearchParams(next, { replace: true });
+  }, [search, sector, location, structure, stage, fundingRange, verifiedOnly, searchParams, setSearchParams]);
 
   const getNumber = useCallback((value) => {
     if (value === null || value === undefined || value === "") {
@@ -192,7 +403,6 @@ function BrowseBusinesses() {
     return (
       normalized === "verified" ||
       normalized === "approved" ||
-      normalized === "active" ||
       Boolean(business.verified_at || business.last_verified_at || business.verification_date)
     );
   };
@@ -239,6 +449,7 @@ function BrowseBusinesses() {
       const industry = String(business.industry || "").toLowerCase();
       const locationValue = String(business.location || "").toLowerCase();
       const description = String(business.description || "").toLowerCase();
+      const businessStage = String(business.business_stage || business.stage || "").trim();
 
       const matchesSearch =
         !query ||
@@ -261,6 +472,8 @@ function BrowseBusinesses() {
         structure === "All structures" ||
         businessStructure === structure;
 
+      const matchesStage = stage === "All stages" || businessStage.toLowerCase() === stage.toLowerCase();
+
       const fundingAmount = getFundingAmount(business);
 
       const matchesFunding = matchesFundingRange(
@@ -270,14 +483,17 @@ function BrowseBusinesses() {
 
       const matchesVerification =
         !verifiedOnly || isVerified(business);
+      const matchesFollowing = !showFollowing || isFollowed(business.id);
 
       return (
         matchesSearch &&
         matchesSector &&
         matchesLocation &&
         matchesStructure &&
+        matchesStage &&
         matchesFunding &&
-        matchesVerification
+        matchesVerification &&
+        matchesFollowing
       );
     });
   }, [
@@ -286,33 +502,115 @@ function BrowseBusinesses() {
     sector,
     location,
     structure,
+    stage,
     fundingRange,
     verifiedOnly,
+    showFollowing,
+    isFollowed,
     getFundingAmount,
   ]);
+
+  const latestPostByBusiness = useMemo(() => {
+    const latest = new Map();
+    [...communityPosts]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .forEach((post) => {
+        const id = String(post.business_id);
+        if (!latest.has(id)) latest.set(id, post);
+      });
+    return latest;
+  }, [communityPosts]);
+
+  const investorSuggestionsByBusiness = useMemo(() => new Map(
+    investorSuggestions.map((suggestion) => [String(suggestion.id), suggestion])
+  ), [investorSuggestions]);
+
+  const togglePostLike = async (post) => {
+    const wasLiked = Boolean(post.viewer_liked);
+    setCommunityPosts((current) => current.map((item) => item.id === post.id
+      ? { ...item, viewer_liked: !wasLiked, likes_count: Math.max(0, item.likes_count + (wasLiked ? -1 : 1)) }
+      : item));
+    try {
+      if (wasLiked) await api.delete(`/community/posts/${post.id}/likes`);
+      else await api.post(`/community/posts/${post.id}/likes`);
+    } catch (likeError) {
+      setCommunityPosts((current) => current.map((item) => item.id === post.id
+        ? { ...item, viewer_liked: wasLiked, likes_count: Math.max(0, item.likes_count + (wasLiked ? 1 : -1)) }
+        : item));
+      setError(likeError.response?.data?.message || "Your reaction couldn’t be saved. Please try again.");
+    }
+  };
+
+  const shareOpportunity = async (business) => {
+    const url = `${window.location.origin}/business/${business.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: business.business_name, text: business.description || `Explore ${business.business_name} on Investor Mtaani.`, url });
+        setShareStatus({ businessId: String(business.id), message: "Opportunity shared" });
+      } else {
+        setShareStatus({ businessId: String(business.id), message: "Choose a sharing option below." });
+      }
+    } catch (shareError) {
+      if (shareError.name !== "AbortError") setShareStatus({ businessId: String(business.id), message: "Could not share this opportunity" });
+    }
+    window.setTimeout(() => setShareStatus({ businessId: null, message: "" }), 3000);
+  };
+
+  const copyOpportunityLink = async (business) => {
+    const url = `${window.location.origin}/business/${business.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareStatus({ businessId: String(business.id), message: "Opportunity link copied" });
+    } catch {
+      setShareStatus({ businessId: String(business.id), message: "Copy this opportunity’s link from your browser address bar" });
+    }
+    window.setTimeout(() => setShareStatus({ businessId: null, message: "" }), 3000);
+  };
 
   const clearFilters = () => {
     setSearch("");
     setSector("All sectors");
     setLocation("All locations");
     setStructure("All structures");
+    setStage("All stages");
     setFundingRange("all");
     setVerifiedOnly(false);
-    if (searchParams.has("industry")) {
-      setSearchParams((current) => {
-        const next = new URLSearchParams(current);
-        next.delete("industry");
-        return next;
-      }, { replace: true });
+    setShowFollowing(false);
+  };
+
+  const toggleCompare = (business) => {
+    const id = String(business.id);
+    if (compareIds.includes(id)) {
+      setCompareIds((current) => current.filter((item) => item !== id));
+      setComparisonMessage("");
+      return;
     }
+    if (compareIds.length >= 3) {
+      setComparisonMessage("Compare up to three opportunities at a time. Remove one to add another.");
+      return;
+    }
+    setCompareIds((current) => [...current, id]);
+    setComparisonMessage("");
+  };
+
+  const copySearchLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopyMessage("Search link copied");
+    } catch {
+      setCopyMessage("Copy this page link from your browser address bar");
+    }
+    window.setTimeout(() => setCopyMessage(""), 2500);
   };
 
   const activeFilterCount = [
     sector !== "All sectors",
     location !== "All locations",
     structure !== "All structures",
+    stage !== "All stages",
     fundingRange !== "all",
     verifiedOnly,
+    showFollowing,
   ].filter(Boolean).length;
 
   if (loading) {
@@ -383,6 +681,7 @@ function BrowseBusinesses() {
 
               <input
                 type="text"
+                aria-label="Search businesses, sectors, and locations"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search businesses, sectors, locations..."
@@ -414,6 +713,16 @@ function BrowseBusinesses() {
                 )}
               </div>
 
+              <button
+                type="button"
+                className="im-filter-toggle"
+                aria-expanded={filtersOpen}
+                aria-controls="im-business-filters"
+                onClick={() => setFiltersOpen((open) => !open)}
+              >
+                {filtersOpen ? "Hide filters" : `Show filters${activeFilterCount ? ` · ${activeFilterCount}` : ""}`}
+              </button>
+
               {(activeFilterCount > 0 || search) && (
                 <button
                   type="button"
@@ -425,7 +734,7 @@ function BrowseBusinesses() {
               )}
             </div>
 
-            <div className="im-filters">
+            <div id="im-business-filters" className={`im-filters${filtersOpen ? "" : " is-collapsed"}`}>
               <label className="im-field">
                 <span>Sector</span>
 
@@ -472,6 +781,17 @@ function BrowseBusinesses() {
               </label>
 
               <label className="im-field">
+                <span>Business stage</span>
+                <select value={stage} onChange={(event) => setStage(event.target.value)}>
+                  <option value="All stages">All stages</option>
+                  {[...new Set(businesses.map((business) => String(business.business_stage || business.stage || "").trim()).filter(Boolean))]
+                    .sort((a, b) => a.localeCompare(b))
+                    .map((item) => <option key={item} value={item}>{item}</option>)}
+                  {stage !== "All stages" && !businesses.some((business) => String(business.business_stage || business.stage || "").trim().toLowerCase() === stage.toLowerCase()) && <option value={stage}>{stage}</option>}
+                </select>
+              </label>
+
+              <label className="im-field">
                 <span>Funding requirement</span>
 
                 <select
@@ -490,6 +810,7 @@ function BrowseBusinesses() {
 
               <button
                 type="button"
+                aria-pressed={verifiedOnly}
                 className={`im-verified-toggle ${
                   verifiedOnly ? "active" : ""
                 }`}
@@ -507,7 +828,7 @@ function BrowseBusinesses() {
             </div>
           </section>
 
-          <section className="im-results-header">
+          <section className="im-results-header" aria-live="polite" aria-atomic="true">
             <div>
               <span className="im-results-number">
                 {filteredBusinesses.length}
@@ -521,13 +842,55 @@ function BrowseBusinesses() {
               </span>
             </div>
 
-            {selectedIndustry && sector === selectedIndustry && (
-              <div className="im-url-filter">
-                Sector:
-                <strong>{selectedIndustry}</strong>
-              </div>
-            )}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              {selectedIndustry && sector === selectedIndustry && <div className="im-url-filter">Sector:<strong>{selectedIndustry}</strong></div>}
+              <button type="button" className="im-view-btn" disabled={compareIds.length < 2} onClick={() => document.getElementById("im-opportunity-comparison")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" })}>
+                Compare ({compareIds.length}/3)
+              </button>
+              <button type="button" className="im-view-btn" aria-label={showFollowing ? "Show all businesses" : "Show only businesses you follow"} aria-pressed={showFollowing} onClick={() => setShowFollowing((current) => !current)}>
+                {showFollowing ? "Show all businesses" : `Following (${followedIds.length})`}
+              </button>
+              <button type="button" className="im-view-btn" onClick={copySearchLink}>Copy search link</button>
+              {copyMessage && <span role="status" className="im-url-filter">{copyMessage}</span>}
+            </div>
           </section>
+
+          {followFeedback && <p role="alert" className="im-follow-feedback">{followFeedback}</p>}
+
+          {followedUpdates.length > 0 && <section className="im-followed-updates" aria-labelledby="im-followed-updates-title">
+            <div className="im-followed-updates-heading">
+              <div>
+                <span className="im-followed-updates-eyebrow">YOUR NETWORK</span>
+                <h2 id="im-followed-updates-title">New updates from businesses you follow <span>{followedUpdates.length}</span></h2>
+              </div>
+              <button type="button" onClick={clearFollowedUpdates}>Clear all</button>
+            </div>
+            <div className="im-followed-updates-list">
+              {followedUpdates.map((update) => <article className="im-followed-update" key={update.postId}>
+                <div className="im-followed-update-copy">
+                  <strong>{businesses.find((business) => String(business.id) === String(update.businessId))?.business_name || update.businessName}</strong>
+                  <p>{update.text}</p>
+                  {update.createdAt && <time dateTime={update.createdAt}>{new Date(update.createdAt).toLocaleDateString()}</time>}
+                </div>
+                <div className="im-followed-update-actions">
+                  <Link to={`/business/${update.businessId}`}>View business <span aria-hidden="true">→</span></Link>
+                  <button type="button" aria-label={`Dismiss update from ${businesses.find((business) => String(business.id) === String(update.businessId))?.business_name || update.businessName}`} onClick={() => dismissFollowedUpdate(update.postId)}>Dismiss</button>
+                </div>
+              </article>)}
+            </div>
+          </section>}
+
+          {comparisonMessage && <p role="status" className="im-compare-notice">{comparisonMessage}</p>}
+          {compareIds.length >= 2 && <ComparisonTable businesses={businesses.filter((business) => compareIds.includes(String(business.id)))} getFundingAmount={getFundingAmount} getRevenue={getRevenue} getStructure={getStructure} getBusinessAge={getBusinessAge} formatKES={formatKES} isVerified={isVerified} onRemove={toggleCompare} />}
+          {viewer?.role === "investor" && investorMatchStatus === "ready" && <div className="im-profile-match-note" role="status">
+            <span>PERSONALIZED DISCOVERY</span>
+            <p>Opportunity notes compare your saved preferences with published business details. They are informational only, not investment recommendations.</p>
+            <Link to="/investor-profile">Review your preferences <span aria-hidden="true">→</span></Link>
+          </div>}
+          {viewer?.role === "investor" && investorMatchMessage && <div className="im-profile-match-note" role="status">
+            <span>PERSONALIZED DISCOVERY</span><p>{investorMatchMessage}</p>
+            <Link to="/investor-profile">Investor profile <span aria-hidden="true">→</span></Link>
+          </div>}
 
           {error ? (
             <div className="im-message">
@@ -552,7 +915,11 @@ function BrowseBusinesses() {
               <h2>No matching opportunities</h2>
 
               <p>
-                {businesses.length === 0
+                {showFollowing && followedIds.length === 0
+                  ? "You are not following any businesses yet. Follow a business to find its latest updates here."
+                  : showFollowing
+                    ? "No followed businesses match these filters. Clear filters or show all businesses to keep exploring."
+                    : businesses.length === 0
                   ? "There are no published business opportunities available yet."
                   : "Try adjusting your search or filters to see more businesses."}
               </p>
@@ -571,10 +938,18 @@ function BrowseBusinesses() {
             <div className="im-cards">
               {filteredBusinesses.map((business) => {
                 const verified = isVerified(business);
+                const latestPost = latestPostByBusiness.get(String(business.id));
+                const investorSuggestion = investorSuggestionsByBusiness.get(String(business.id));
                 const fundingAmount = getFundingAmount(business);
                 const revenue = getRevenue(business);
                 const businessAge = getBusinessAge(business);
                 const businessStructure = getStructure(business);
+                const businessStage = String(business.business_stage || business.stage || "").trim();
+                const opportunityShareUrl = `${window.location.origin}/business/${business.id}`;
+                const opportunityShareText = `Explore ${business.business_name || "this business"} on Investor Mtaani.`;
+                const mediaSource = latestPost?.media_url
+                  ? new URL(latestPost.media_url, api.defaults.baseURL || window.location.origin).toString()
+                  : null;
 
                 return (
                   <article
@@ -610,10 +985,53 @@ function BrowseBusinesses() {
                         "Location not disclosed"}
                     </div>
 
-                    <p className="im-description">
-                      {business.description ||
-                        "Business information is available inside this opportunity profile."}
-                    </p>
+                    <div className="im-opportunity-post">
+                      <div className="im-opportunity-post-label">
+                        <span aria-hidden="true">✳</span>{latestPost ? "LATEST BUSINESS UPDATE" : "BUSINESS STORY"}
+                      </div>
+                      <p className="im-opportunity-post-text">
+                        {latestPost?.body || business.description || "Business information is available inside this opportunity profile."}
+                      </p>
+                      {mediaSource && (latestPost.media_mime?.startsWith("video/")
+                        ? <video className="im-opportunity-post-media" src={mediaSource} controls playsInline preload="metadata" crossOrigin="anonymous" aria-label={`Video update from ${business.business_name}`} />
+                        : <img className="im-opportunity-post-media" src={mediaSource} alt={`Latest update from ${business.business_name}`} loading="lazy" crossOrigin="anonymous" />)}
+                      <div className="im-opportunity-post-actions">
+                        {latestPost ? <button type="button" className={`im-opportunity-like${latestPost.viewer_liked ? " is-liked" : ""}`} aria-pressed={Boolean(latestPost.viewer_liked)} onClick={() => togglePostLike(latestPost)}>
+                          <span aria-hidden="true">{latestPost.viewer_liked ? "♥" : "♡"}</span>{latestPost.likes_count || 0} likes
+                        </button> : <span className="im-opportunity-post-note">No updates shared yet</span>}
+                        <button type="button" className={`im-opportunity-follow${isFollowed(business.id) ? " is-following" : ""}`} aria-pressed={isFollowed(business.id)} disabled={followPendingId === String(business.id)} title="Follow this business to get its updates and activity notifications" aria-label={`${isFollowed(business.id) ? "Unfollow" : "Follow"} ${business.business_name || "business"}`} onClick={() => toggleFollowed(business.id)}>
+                          <span aria-hidden="true">{isFollowed(business.id) ? "✓" : "+"}</span>{followPendingId === String(business.id) ? "Saving…" : isFollowed(business.id) ? "Following" : "Follow"}
+                        </button>
+                        {latestPost && <OpportunityDiscussion postId={latestPost.id} businessName={business.business_name || "This business"} />}
+                        <div className="im-share-menu-wrap">
+                          <button type="button" className="im-opportunity-share" aria-expanded={shareOpenFor === String(business.id)} aria-controls={`im-share-menu-${business.id}`} onClick={() => setShareOpenFor((current) => current === String(business.id) ? null : String(business.id))}>
+                            <span aria-hidden="true">↗</span> Share opportunity
+                          </button>
+                          {shareOpenFor === String(business.id) && <div id={`im-share-menu-${business.id}`} className="im-share-menu" role="group" aria-label={`Share ${business.business_name || "business opportunity"}`}>
+                            <span className="im-share-menu-title">SHARE THIS OPPORTUNITY</span>
+                            <div className="im-share-options">
+                              <button type="button" onClick={() => copyOpportunityLink(business)}>Copy link</button>
+                              {typeof navigator.share === "function" && <button type="button" onClick={() => shareOpportunity(business)}>More apps…</button>}
+                              <a href={`https://wa.me/?text=${encodeURIComponent(`${opportunityShareText} ${opportunityShareUrl}`)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(opportunityShareUrl)}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+                              <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(opportunityShareText)}&url=${encodeURIComponent(opportunityShareUrl)}`} target="_blank" rel="noopener noreferrer">X</a>
+                              <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(opportunityShareUrl)}`} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                              <a href={`https://t.me/share/url?url=${encodeURIComponent(opportunityShareUrl)}&text=${encodeURIComponent(opportunityShareText)}`} target="_blank" rel="noopener noreferrer">Telegram</a>
+                              <a href={`https://www.reddit.com/submit?url=${encodeURIComponent(opportunityShareUrl)}&title=${encodeURIComponent(opportunityShareText)}`} target="_blank" rel="noopener noreferrer">Reddit</a>
+                              {mediaSource && !latestPost?.media_mime?.startsWith("video/") && <a href={`https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(opportunityShareUrl)}&media=${encodeURIComponent(mediaSource)}&description=${encodeURIComponent(opportunityShareText)}`} target="_blank" rel="noopener noreferrer">Pinterest</a>}
+                              <a href={`mailto:?subject=${encodeURIComponent(`Investor Mtaani opportunity: ${business.business_name || "Business"}`)}&body=${encodeURIComponent(`${opportunityShareText}\n${opportunityShareUrl}`)}`}>Email</a>
+                              <a href={`sms:?body=${encodeURIComponent(`${opportunityShareText} ${opportunityShareUrl}`)}`}>Text message</a>
+                            </div>
+                            {shareStatus.businessId === String(business.id) && <span className="im-opportunity-share-status" role="status">{shareStatus.message}</span>}
+                          </div>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {investorSuggestion?.match_reasons?.length > 0 && <div className="im-profile-overlap">
+                      <span><span aria-hidden="true">✳</span> WHY THIS MAY FIT YOUR INTERESTS</span>
+                      <p>{investorSuggestion.match_reasons.join(" · ")}</p>
+                    </div>}
 
                     <div className="im-opportunity-grid">
                       <div className="im-opportunity">
@@ -663,6 +1081,10 @@ function BrowseBusinesses() {
                             : "Not disclosed"}
                         </strong>
                       </div>
+                      {businessStage && <div className="im-opportunity im-opportunity-stage">
+                        <span className="im-opportunity-label">BUSINESS STAGE</span>
+                        <strong>{businessStage}</strong>
+                      </div>}
                     </div>
 
                     <div className="im-use">
@@ -687,13 +1109,15 @@ function BrowseBusinesses() {
                         </strong>
                       </div>
 
-                      <Link
-                        to={`/business/${business.id}`}
-                        className="im-view-btn"
-                      >
-                        View opportunity
-                        <span>→</span>
-                      </Link>
+                      <div className="im-card-actions">
+                        <button type="button" className={`im-save-btn${isSaved(business.id) ? " is-saved" : ""}`} aria-pressed={isSaved(business.id)} onClick={() => toggleSaved(business)}>
+                          <span aria-hidden="true">{isSaved(business.id) ? "★" : "☆"}</span>{isSaved(business.id) ? "Saved" : "Save"}
+                        </button>
+                        <button type="button" className={`im-compare-btn${compareIds.includes(String(business.id)) ? " is-selected" : ""}`} aria-pressed={compareIds.includes(String(business.id))} onClick={() => toggleCompare(business)}>
+                          {compareIds.includes(String(business.id)) ? "Remove from compare" : "Compare"}
+                        </button>
+                        <Link to={`/business/${business.id}`} className="im-view-btn">View opportunity <span>→</span></Link>
+                      </div>
                     </div>
                   </article>
                 );
@@ -719,6 +1143,129 @@ function BrowseBusinesses() {
       </div>
     </>
   );
+}
+
+const DEMO_DISCUSSION_PREFIX = "investor-mtaani:demo-discussion:v1:";
+
+function containsPrivateDetails(value, protectedNames = []) {
+  const text = String(value || "");
+  const contactDetails = /(?:[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|https?:\/\/|www\.|@[A-Za-z0-9_.]{3,}|(?:\+|00)\d{1,3}[\s().-]?(?:\d[\s().-]?){7,13}|(?<!\d)0\d{2,3}[\s().-]?\d{3}[\s().-]?\d{3,4}(?!\d)|(?<!\d)7\d{8}(?!\d)|(?<![\d,])\d{7,8}(?![\d,])|\b(?:0?[1-9]|[12]\d|3[01])[./-](?:0?[1-9]|1[0-2])[./-](?:19|20)\d{2}\b|\b(?:reach\s+me|contact\s+me|my\s+(?:name|number|email|address)\s+is|i\s+live\s+at)\b\s*[:#-]?\s*[^,;\n]{3,}|\b(?:national\s*(?:id|identity)(?:\s*(?:number|no\.?))?|id\s*(?:number|no\.?)|passport(?:\s*(?:number|no\.?))?|kra\s*pin|tax\s*pin|home\s+address|residential\s+address|postal\s+address|date\s+of\s+birth|dob)\b\s*[:#-]?\s*[^,;\n]{4,})/i;
+  if (contactDetails.test(text)) return true;
+  return protectedNames.filter((name) => typeof name === "string" && name.trim().length >= 4).some((name) => {
+    const escaped = name.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^\\p{L}\\p{N}])${escaped}($|[^\\p{L}\\p{N}])`, "iu").test(text);
+  });
+}
+
+function makeDemoComments(postId, businessName) {
+  const questionSets = [
+    [
+      ["Demo investor · Nairobi", "What milestones will this funding help the business reach?", `We would use the funding to grow ${businessName}'s capacity and reach more customers.`],
+      ["Demo investor · Kiambu", "Can you share more about your current customers?", null],
+    ],
+    [
+      ["Demo investor · Mombasa", "How long has the business been operating?", `Thanks for asking. The team has shared its background on the opportunity profile.`],
+      ["Demo investor · Nakuru", "What will be the first priority for the funds?", null],
+    ],
+    [
+      ["Demo investor · Kisumu", "How does the team plan to grow over the next year?", `Our next step is to build on ${businessName}'s existing progress and serve more customers.`],
+      ["Demo investor · Nairobi", "Which markets are you currently serving?", null],
+    ],
+  ];
+  const key = String(postId).split("").reduce((sum, character) => sum + character.charCodeAt(0), 0);
+  return questionSets[key % questionSets.length].map(([author, body, reply], index) => ({
+    id: `sample-${postId}-${index + 1}`,
+    author,
+    body,
+    replies: reply ? [{ id: `sample-reply-${postId}-${index + 1}`, author: businessName, body: reply }] : [],
+  }));
+}
+
+function OpportunityDiscussion({ postId, businessName }) {
+  const [comments, setComments] = useState(() => {
+    try {
+      const stored = window.localStorage.getItem(`${DEMO_DISCUSSION_PREFIX}${postId}`);
+      return stored === null ? makeDemoComments(postId, businessName) : JSON.parse(stored);
+    } catch { return makeDemoComments(postId, businessName); }
+  });
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [replyTo, setReplyTo] = useState(null);
+  const [replyDraft, setReplyDraft] = useState("");
+  const [privacyError, setPrivacyError] = useState("");
+  const [viewerName] = useState(() => {
+    try { return JSON.parse(window.localStorage.getItem("user") || "null")?.name || ""; } catch { return ""; }
+  });
+
+  const saveComments = (next) => {
+    setComments(next);
+    try { window.localStorage.setItem(`${DEMO_DISCUSSION_PREFIX}${postId}`, JSON.stringify(next)); } catch { /* Keep demo discussion available for this visit. */ }
+  };
+
+  const addComment = (event) => {
+    event.preventDefault();
+    const body = draft.trim();
+    if (!body) return;
+    if (containsPrivateDetails(body, [businessName, viewerName])) { setPrivacyError("Please remove names, contact details, IDs, addresses, or links. Investor Mtaani coordinates introductions privately."); return; }
+    saveComments([...comments, { id: `${Date.now()}-${Math.random()}`, author: "Demo investor", body, replies: [] }]);
+    setDraft("");
+    setPrivacyError("");
+  };
+
+  const addReply = (event, commentId) => {
+    event.preventDefault();
+    const body = replyDraft.trim();
+    if (!body) return;
+    if (containsPrivateDetails(body, [businessName, viewerName])) { setPrivacyError("Please remove names, contact details, IDs, addresses, or links. Investor Mtaani coordinates introductions privately."); return; }
+    saveComments(comments.map((comment) => comment.id === commentId
+      ? { ...comment, replies: [...(comment.replies || []), { id: `${Date.now()}-${Math.random()}`, author: businessName, body }] }
+      : comment));
+    setReplyDraft("");
+    setReplyTo(null);
+    setPrivacyError("");
+  };
+
+  return <div className="im-discussion">
+    <button type="button" className="im-discussion-toggle" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+      <span aria-hidden="true">▤</span> {comments.length} comments {open ? "−" : "+"}
+    </button>
+    {open && <div className="im-discussion-panel">
+      <div className="im-demo-notice">DEMO DISCUSSION · sample content saved only in this browser</div>
+      {comments.length === 0 && <p className="im-discussion-empty">No demo questions yet. Add one below.</p>}
+      {comments.map((comment) => <div className="im-comment" key={comment.id}>
+        <strong>{comment.author}</strong><p>{comment.body}</p>
+        {(comment.replies || []).map((reply) => <div className="im-business-reply" key={reply.id}><strong>{reply.author} · Business</strong><p>{reply.body}</p></div>)}
+        <button type="button" className="im-reply-link" onClick={() => { setReplyTo(replyTo === comment.id ? null : comment.id); setReplyDraft(""); }}>Reply as business</button>
+        {replyTo === comment.id && <form className="im-reply-form" onSubmit={(event) => addReply(event, comment.id)}><input aria-label="Business reply" value={replyDraft} onChange={(event) => setReplyDraft(event.target.value)} placeholder="Reply as the business…" maxLength={500} /><button type="submit" disabled={!replyDraft.trim()}>Reply</button></form>}
+      </div>)}
+      <form className="im-comment-form" onSubmit={addComment}><input aria-label="Write a demo comment" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask the business a question…" maxLength={500} /><button type="submit" disabled={!draft.trim()}>Comment</button></form>
+      {privacyError && <p role="alert" className="im-discussion-footnote">{privacyError}</p>}
+      <p className="im-discussion-footnote">Sample comments are for testing only. Posting here does not contact the business.</p>
+    </div>}
+  </div>;
+}
+
+function ComparisonTable({ businesses, getFundingAmount, getRevenue, getStructure, getBusinessAge, formatKES, isVerified, onRemove }) {
+  const rows = [
+    ["Sector", (business) => business.industry || "Not disclosed"],
+    ["Location", (business) => business.location || "Not disclosed"],
+    ["Funding sought", (business) => formatKES(getFundingAmount(business))],
+    ["Structure", getStructure],
+    ["Business stage", (business) => business.business_stage || business.stage || "Not disclosed"],
+    ["Annual turnover", (business) => formatKES(getRevenue(business))],
+    ["Operating history", (business) => { const age = getBusinessAge(business); return age === null ? "Not disclosed" : `${age} ${age === 1 ? "year" : "years"}`; }],
+    ["Verification", (business) => isVerified(business) ? "Reviewed" : "Not verified"],
+  ];
+
+  return <section id="im-opportunity-comparison" className="im-compare-panel" aria-labelledby="im-compare-title">
+    <div className="im-compare-heading"><div><span>SHORTLIST REVIEW</span><h2 id="im-compare-title">Compare opportunities</h2><p>Compare the published details side by side. Review each profile before making a decision.</p></div><div className="im-compare-remove-list">{businesses.map((business) => <button key={business.id} type="button" onClick={() => onRemove(business)} aria-label={`Remove ${business.business_name || "business"} from comparison`}>Remove {business.business_name || "business"} ×</button>)}</div></div>
+    <div className="im-comparison-scroll" tabIndex={0} aria-label="Opportunity comparison table. Scroll horizontally to see all columns.">
+      <table className="im-comparison-table">
+        <thead><tr><th scope="col">Details</th>{businesses.map((business) => <th key={business.id} scope="col">{business.business_name || "Unnamed business"}</th>)}</tr></thead>
+        <tbody>{rows.map(([label, valueFor]) => <tr key={label}><th scope="row">{label}</th>{businesses.map((business) => <td key={business.id}>{valueFor(business)}</td>)}</tr>)}</tbody>
+      </table>
+    </div>
+  </section>;
 }
 
 function GlobalStyles() {
@@ -1045,10 +1592,12 @@ function GlobalStyles() {
       .im-filters {
         display: grid;
         grid-template-columns:
-          repeat(4, minmax(150px, 1fr))
-          minmax(180px, 1.15fr);
+          repeat(5, minmax(120px, 1fr))
+          minmax(160px, 1.15fr);
         gap: 12px;
       }
+
+      .im-filter-toggle { display: none; }
 
       .im-field {
         display: flex;
@@ -1311,6 +1860,76 @@ function GlobalStyles() {
         min-height: 41px;
       }
 
+      .im-opportunity-post {
+        margin: 0 0 18px;
+        padding: 14px;
+        border: 1px solid rgba(61, 214, 245, .14);
+        border-radius: 10px;
+        background: linear-gradient(145deg, rgba(6, 12, 22, .9), rgba(13, 22, 36, .88));
+      }
+      .im-opportunity-post-label { display:flex; align-items:center; gap:7px; color:#79dceb; font:700 9px 'JetBrains Mono',monospace; letter-spacing:.1em; }
+      .im-opportunity-post-label span { color:#4bd3c0; font-size:14px; }
+      .im-opportunity-post-text { margin:10px 0 12px; color:#d5deea; font-size:12px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+      .im-opportunity-post-media { display:block; width:100%; max-height:260px; margin:0 0 10px; border:1px solid rgba(255,255,255,.08); border-radius:8px; background:#05080f; object-fit:cover; }
+      .im-opportunity-post-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding-top:8px; border-top:1px solid rgba(255,255,255,.08); }
+      .im-opportunity-like, .im-opportunity-share { display:inline-flex; min-height:34px; align-items:center; gap:6px; padding:0 3px; border:0; background:transparent; color:#9aa8bb; cursor:pointer; font:600 10px 'JetBrains Mono',monospace; }
+      .im-opportunity-like > span { color:#9aa8bb; font-size:16px; }
+      .im-opportunity-like.is-liked, .im-opportunity-like.is-liked > span { color:#ff8395; }
+      .im-opportunity-share { color:#88dfee; }
+      .im-opportunity-follow { display:inline-flex; min-height:34px; align-items:center; gap:5px; padding:0 3px; border:0; background:transparent; color:#91a0b3; cursor:pointer; font:600 10px 'JetBrains Mono',monospace; }
+      .im-opportunity-follow > span { color:#63d6c7; font-size:14px; }
+      .im-opportunity-follow.is-following, .im-opportunity-follow.is-following > span { color:#85e4d6; }
+      .im-share-menu-wrap { position:relative; z-index:3; }
+      .im-share-menu { position:absolute; z-index:20; top:calc(100% + 7px); right:0; width:min(285px,calc(100vw - 56px)); padding:12px; border:1px solid rgba(121,220,235,.25); border-radius:9px; background:#101927; box-shadow:0 16px 34px rgba(0,0,0,.42); }
+      .im-share-menu-title { display:block; margin-bottom:9px; color:#79dceb; font:700 8px 'JetBrains Mono',monospace; letter-spacing:.1em; }
+      .im-share-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+      .im-share-options a, .im-share-options button { display:flex; min-height:36px; align-items:center; justify-content:center; padding:5px 8px; border:1px solid rgba(148,163,184,.17); border-radius:6px; background:rgba(148,163,184,.045); color:#c4d0de; cursor:pointer; font:600 10px 'JetBrains Mono',monospace; text-align:center; text-decoration:none; }
+      .im-share-options a:hover, .im-share-options button:hover { border-color:rgba(73,221,202,.34); background:rgba(73,221,202,.08); color:#9ceee0; }
+      .im-share-options a:focus-visible, .im-share-options button:focus-visible, .im-opportunity-follow:focus-visible { outline:2px solid var(--cyan); outline-offset:2px; }
+      .im-opportunity-post-note, .im-opportunity-share-status { color:#7c8aa0; font-size:10px; }
+      .im-opportunity-share-status { flex-basis:100%; }
+      .im-discussion { position:relative; }
+      .im-discussion-toggle { display:inline-flex; min-height:34px; align-items:center; gap:6px; padding:0 3px; border:0; background:transparent; color:#9aa8bb; cursor:pointer; font:600 10px 'JetBrains Mono',monospace; }
+      .im-discussion-toggle:hover, .im-reply-link:hover { color:#88dfee; }
+      .im-discussion-panel { position:absolute; z-index:5; top:calc(100% + 8px); left:0; width:min(340px, calc(100vw - 64px)); max-height:360px; overflow:auto; padding:12px; border:1px solid rgba(121,220,235,.23); border-radius:10px; background:#101927; box-shadow:0 16px 34px rgba(0,0,0,.38); }
+      .im-demo-notice { margin-bottom:10px; color:#79dceb; font:700 8px 'JetBrains Mono',monospace; letter-spacing:.08em; }
+      .im-discussion-empty, .im-discussion-footnote { color:#8593a7; font-size:10px; line-height:1.5; }
+      .im-comment { padding:9px 0; border-top:1px solid rgba(255,255,255,.07); }
+      .im-comment > strong, .im-business-reply > strong { color:#dbe5ef; font-size:10px; }
+      .im-comment > p, .im-business-reply > p { margin:4px 0 6px; color:#b9c4d2; font-size:11px; line-height:1.45; overflow-wrap:anywhere; }
+      .im-business-reply { margin:8px 0 4px 10px; padding:7px 9px; border-left:2px solid #36bfae; background:rgba(54,191,174,.06); }
+      .im-business-reply > strong { color:#86e3d6; }
+      .im-reply-link { border:0; padding:2px 0; background:transparent; color:#83cbd8; cursor:pointer; font-size:9px; }
+      .im-comment-form, .im-reply-form { display:flex; gap:6px; margin-top:8px; }
+      .im-comment-form input, .im-reply-form input { flex:1; min-width:0; height:34px; padding:0 9px; border:1px solid rgba(255,255,255,.12); border-radius:6px; background:#0a111b; color:#e5edf5; font-size:10px; }
+      .im-comment-form button, .im-reply-form button { min-height:34px; padding:0 10px; border:1px solid rgba(73,221,202,.3); border-radius:6px; background:rgba(73,221,202,.1); color:#a6eee2; cursor:pointer; font-size:10px; font-weight:700; }
+      .im-comment-form button:disabled, .im-reply-form button:disabled { opacity:.45; cursor:not-allowed; }
+      .im-discussion-footnote { margin:9px 0 0; }
+      .im-profile-overlap { margin:-6px 0 16px; padding:11px 13px; border-left:2px solid #8b7cf6; border-radius:0 7px 7px 0; background:rgba(139,124,246,.07); }
+      .im-profile-overlap > span, .im-profile-match-note > span { color:#b9adff; font:700 8px 'JetBrains Mono',monospace; letter-spacing:.08em; }
+      .im-profile-overlap > span span { color:#a89bff; }
+      .im-profile-overlap p, .im-profile-match-note p { margin:5px 0 0; color:#bfc5d7; font-size:10px; line-height:1.5; }
+      .im-profile-match-note { display:flex; align-items:center; flex-wrap:wrap; gap:4px 16px; margin:0 0 18px; padding:12px 14px; border:1px solid rgba(139,124,246,.17); border-radius:8px; background:rgba(139,124,246,.035); }
+      .im-profile-match-note p { flex:1 1 360px; margin:0; }
+      .im-profile-match-note a { color:#c3b9ff; font-size:10px; font-weight:700; text-decoration:none; }
+      .im-profile-match-note a:hover { color:#fff; }
+      .im-followed-updates { margin:0 0 18px; padding:15px; border:1px solid rgba(54,191,174,.24); border-radius:10px; background:linear-gradient(110deg,rgba(54,191,174,.075),rgba(139,124,246,.045)); }
+      .im-followed-updates-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+      .im-followed-updates-eyebrow { color:#79d9cb; font:700 8px 'JetBrains Mono',monospace; letter-spacing:.1em; }
+      .im-followed-updates h2 { margin:4px 0 0; color:#e7f3f1; font-size:14px; }
+      .im-followed-updates h2 span { display:inline-grid; place-items:center; min-width:19px; height:19px; margin-left:5px; padding:0 5px; border-radius:99px; background:rgba(54,191,174,.18); color:#a8f1e5; font-size:10px; }
+      .im-followed-updates-heading > button, .im-followed-update-actions > button { border:0; background:transparent; color:#94a2b4; cursor:pointer; font-size:10px; }
+      .im-followed-updates-heading > button:hover, .im-followed-update-actions > button:hover { color:#fff; }
+      .im-followed-update { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:11px 0; border-top:1px solid rgba(255,255,255,.07); }
+      .im-followed-update-copy { min-width:0; }
+      .im-followed-update-copy > strong { color:#dfe9ef; font-size:11px; }
+      .im-followed-update-copy p { margin:4px 0; color:#aab6c5; font-size:11px; line-height:1.45; overflow-wrap:anywhere; }
+      .im-followed-update-copy time { color:#76859a; font-size:9px; }
+      .im-followed-update-actions { display:flex; flex-shrink:0; align-items:center; gap:12px; }
+      .im-followed-update-actions > a { color:#83ded0; font-size:10px; font-weight:700; text-decoration:none; white-space:nowrap; }
+      .im-followed-update-actions > a:hover { color:#fff; }
+      @media (max-width:560px) { .im-followed-update { align-items:flex-start; flex-direction:column; gap:8px; } .im-followed-update-actions { width:100%; justify-content:space-between; } }
+
       .im-opportunity-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -1333,6 +1952,7 @@ function GlobalStyles() {
       .im-opportunity:nth-child(4) {
         border-bottom: 0;
       }
+      .im-opportunity.im-opportunity-stage { grid-column: 1 / -1; border-right: 0; border-bottom: 0; padding-top: 10px; padding-bottom: 10px; }
 
       .im-opportunity-label {
         display: block;
@@ -1385,6 +2005,38 @@ function GlobalStyles() {
         gap: 14px;
       }
 
+      .im-card-actions { display: flex; flex: 1; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+      .im-save-btn, .im-compare-btn {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 11px;
+        border: 1px solid rgba(148,163,184,.2);
+        border-radius: 4px;
+        background: rgba(148,163,184,.04);
+        color: var(--muted-light);
+        font: 600 10px 'JetBrains Mono', monospace;
+        cursor: pointer;
+      }
+      .im-save-btn:hover, .im-save-btn.is-saved { border-color: rgba(241,199,91,.42); background: rgba(241,199,91,.08); color: var(--gold); }
+      .im-compare-btn:hover, .im-compare-btn.is-selected { border-color: rgba(139,124,246,.45); background: rgba(139,124,246,.09); color: #b9adff; }
+      .im-save-btn:focus-visible, .im-compare-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+      .im-compare-notice { margin: -8px 0 16px; color: #f1c75b; font-size: 12px; }
+      .im-compare-panel { margin: 0 0 22px; padding: 20px; border: 1px solid rgba(139,124,246,.28); border-radius: 10px; background: linear-gradient(145deg,rgba(18,25,47,.96),rgba(10,16,30,.97)); box-shadow: 0 18px 48px rgba(0,0,0,.22); scroll-margin-top: 90px; }
+      .im-compare-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+      .im-compare-heading > div:first-child > span { color: #b9adff; font: 700 9px 'JetBrains Mono',monospace; letter-spacing: .13em; }
+      .im-compare-heading h2 { margin: 5px 0; color: var(--text); font-size: 20px; }
+      .im-compare-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+      .im-compare-remove-list { display:flex; flex-wrap:wrap; gap:6px; }
+      .im-compare-remove-list button { min-height:36px; padding:0 9px; border:1px solid rgba(148,163,184,.2); border-radius:6px; background:transparent; color:#aeb9c9; font:500 10px 'JetBrains Mono',monospace; cursor:pointer; }
+      .im-comparison-scroll { max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; -webkit-overflow-scrolling:touch; }
+      .im-comparison-table { width:100%; min-width:560px; border-collapse:collapse; text-align:left; }
+      .im-comparison-table th, .im-comparison-table td { padding:11px 13px; border:1px solid rgba(148,163,184,.13); color:#b9c6d5; font-size:12px; }
+      .im-comparison-table thead th { color:#dce7f2; background:rgba(148,163,184,.06); }
+      .im-comparison-table tbody th { width:155px; color:#8b7cf6; font-weight:700; }
+
       .im-card-code {
         color: #536175;
         font-family: 'JetBrains Mono', monospace;
@@ -1428,6 +2080,8 @@ function GlobalStyles() {
         border-color: var(--cyan);
         color: #06111a;
       }
+
+      .im-view-btn:disabled { opacity: .45; cursor: not-allowed; }
 
       .im-view-btn span {
         font-size: 15px;
@@ -1561,6 +2215,23 @@ function GlobalStyles() {
       }
 
       @media (max-width: 560px) {
+        .im-filter-toggle {
+          display: inline-flex;
+          min-height: 42px;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          padding: 0 12px;
+          border: 1px solid rgba(73,221,202,.28);
+          border-radius: 9px;
+          background: rgba(73,221,202,.08);
+          color: #9cf1e4;
+          font: inherit;
+          font-size: 12px;
+          font-weight: 700;
+        }
+
+        .im-filters.is-collapsed { display: none; }
         .im-filters {
           grid-template-columns: 1fr;
         }
@@ -1602,6 +2273,10 @@ function GlobalStyles() {
           align-items: flex-start;
           flex-direction: column;
         }
+
+        .im-card-actions { width: 100%; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+        .im-card-actions .im-view-btn { grid-column: 1 / -1; }
+        .im-compare-panel { padding: 15px; }
 
         .im-view-btn {
           width: 100%;

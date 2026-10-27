@@ -9,12 +9,13 @@ function FormInput({
 }) {
   return (
     <div className="form-group">
-      <label className="form-label">
+      <label className="form-label" htmlFor={name}>
         {label}
         {required && <span className="required">*</span>}
       </label>
 
       <input
+        id={name}
         className="form-input"
         type={type}
         name={name}
@@ -22,6 +23,7 @@ function FormInput({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
+        autoComplete={name === "email" ? "email" : name === "phone" ? "tel" : name === "name" ? "name" : name === "businessName" || name === "company" ? "organization" : undefined}
       />
     </div>
   );

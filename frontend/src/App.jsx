@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -21,7 +21,6 @@ const InvestorProfile = lazy(() => import("./pages/InvestorProfile"));
 const InvestorForm = lazy(() => import("./pages/InvestorForm"));
 const Watchlist = lazy(() => import("./pages/Watchlist"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
-const Messages = lazy(() => import("./pages/Messages"));
 const Funding = lazy(() => import("./pages/Funding"));
 const Matchmaking = lazy(() => import("./pages/Matchmaking"));
 const Notifications = lazy(() => import("./pages/Notifications"));
@@ -33,6 +32,17 @@ const Legal = lazy(() => import("./pages/Legal"));
 const BUSINESS_ONLY = ["business"];
 const INVESTOR_ONLY = ["investor"];
 const BUSINESS_OR_INVESTOR = ["business", "investor"];
+
+function LegacyMessagesRedirect() {
+  let destination = "/login";
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.role === "business") destination = "/business-matches";
+    else if (user?.role === "investor") destination = "/matchmaking";
+    else if (user) destination = "/home";
+  } catch { /* Send malformed or missing local sessions to sign-in. */ }
+  return <Navigate to={destination} replace />;
+}
 
 function Layout() {
   const location = useLocation();
@@ -147,14 +157,7 @@ function Layout() {
         />
 
         {/* Shared pages */}
-        <Route
-          path="/messages"
-          element={
-            <ProtectedRoute roles={BUSINESS_OR_INVESTOR}>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/messages" element={<LegacyMessagesRedirect />} />
 
         <Route
           path="/funding"

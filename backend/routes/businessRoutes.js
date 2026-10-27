@@ -14,6 +14,7 @@ const {
 } = require("../controllers/businessController");
 
 const authMiddleware = require("../middleware/authMiddleware");
+const followController = require("../controllers/followController");
 
 // IMPORTANT: fixed paths (/me, /admin/all) must come BEFORE /:id,
 // otherwise Express treats "me" and "admin" as an id.
@@ -23,6 +24,11 @@ router.post("/", authMiddleware, createBusiness);
 
 // Logged-in user's own business (full record)
 router.get("/me", authMiddleware, getMyBusiness);
+
+// Investor follow state and actions. These fixed paths must stay before /:id.
+router.get("/following", authMiddleware, authMiddleware.requireRole("investor"), followController.listFollowing);
+router.post("/:id/follow", authMiddleware, authMiddleware.requireRole("investor"), followController.followBusiness);
+router.delete("/:id/follow", authMiddleware, authMiddleware.requireRole("investor"), followController.unfollowBusiness);
 
 // Owner sends their profile for review
 router.post("/me/submit", authMiddleware, submitForReview);

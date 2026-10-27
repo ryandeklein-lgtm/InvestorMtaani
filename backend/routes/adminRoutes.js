@@ -25,6 +25,7 @@ router.get("/profile", getAdminProfile);
 
 // Sensitive KYC review is restricted to authenticated admins.
 router.get("/kyc", adminKycController.listKycSubmissions);
+router.get("/kyc/summary", adminKycController.getKycSummary);
 router.get("/kyc/:id", adminKycController.getKycSubmission);
 router.get("/kyc/:id/documents/:documentId", adminKycController.downloadKycDocument);
 router.patch("/kyc/:id/status", adminKycController.reviewKycSubmission);

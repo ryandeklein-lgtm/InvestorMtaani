@@ -17,6 +17,8 @@ const newsRoutes = require("./routes/newsRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const kycRoutes = require("./routes/kycRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const draftRoutes = require("./routes/draftRoutes");
+const communityRoutes = require("./routes/communityRoutes");
 
 // Fail early if required settings are missing
 const REQUIRED_ENV = [
@@ -31,6 +33,12 @@ if (!hasDatabaseUrl) {
 }
 if (process.env.NODE_ENV === "production" && !process.env.FRONTEND_URL) {
   missingEnv.push("FRONTEND_URL");
+}
+if (process.env.NODE_ENV === "production" && !/^[a-f0-9]{64}$/i.test(process.env.KYC_ENCRYPTION_KEY || "")) {
+  missingEnv.push("KYC_ENCRYPTION_KEY (64 hexadecimal characters)");
+}
+if (process.env.NODE_ENV === "production" && process.env.DB_SSL !== "true") {
+  missingEnv.push("DB_SSL=true");
 }
 if (missingEnv.length > 0) {
   console.error(
@@ -56,7 +64,26 @@ app.use(helmet());
 // CORS: only allow your frontend(s). Separate several URLs with commas.
 const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
   .split(",")
-  .map((url) => url.trim());
+  .map((origin) => origin.trim());
+
+if (process.env.NODE_ENV === "production") {
+  const invalidOrigins = allowedOrigins.filter((origin) => {
+    try {
+      const parsed = new URL(origin);
+      return parsed.protocol !== "https:" || parsed.origin !== origin || parsed.username || parsed.password;
+    } catch {
+      return true;
+    }
+  });
+  if (invalidOrigins.length) {
+    console.error("🔴 FRONTEND_URL must contain only exact HTTPS origins, separated by commas.");
+    process.exit(1);
+  }
+  if (process.env.DB_SSL_REJECT_UNAUTHORIZED === "false") {
+    console.error("🔴 Do not disable PostgreSQL certificate validation in production.");
+    process.exit(1);
+  }
+}
 
 app.use(
   cors({
@@ -102,6 +129,8 @@ app.use("/api/businesses", businessRoutes);
 app.use("/api/investors", investorRoutes);
 app.use("/api/matchmaking", matchmakingRoutes);
 app.use("/api/kyc", kycRoutes);
+app.use("/api/drafts", draftRoutes);
+app.use("/api/community", communityRoutes);
 app.use("/api/funding", fundingRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/admin", adminRoutes);

@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "migrate": "node scripts/applyMigrations.js"
+    "migrate": "node scripts/applyMigrations.js",
+    "seed:demo": "node scripts/seedDemoData.js"
   },
   "keywords": [
     "investor-mtaani",

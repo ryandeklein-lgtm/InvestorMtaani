@@ -10,6 +10,16 @@ const getNotifications = async (req, res) => {
   }
 };
 
+const getUnreadCount = async (req, res) => {
+  try {
+    const count = await notificationService.unreadCountForUser(req.user.id);
+    res.json({ success: true, data: { count } });
+  } catch (error) {
+    console.error("Get unread notification count error:", error);
+    res.status(500).json({ success: false, message: "Could not load notification count." });
+  }
+};
+
 const markNotificationRead = async (req, res) => {
   try {
     const updated = await notificationService.markRead(req.params.id, req.user.id);
@@ -33,4 +43,4 @@ const markAllNotificationsRead = async (req, res) => {
   }
 };
 
-module.exports = { getNotifications, markNotificationRead, markAllNotificationsRead };
+module.exports = { getNotifications, getUnreadCount, markNotificationRead, markAllNotificationsRead };

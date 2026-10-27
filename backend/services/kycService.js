@@ -125,10 +125,27 @@ const listSubmissionsForAdmin = async (status) => {
        LEFT JOIN kyc_documents d ON d.submission_id = s.id
        ${where}
       GROUP BY s.id, u.name, u.email
-      ORDER BY s.created_at DESC`,
+      ORDER BY CASE WHEN s.status = 'pending' THEN 0 ELSE 1 END,
+               CASE WHEN s.status = 'pending' THEN s.created_at END ASC,
+               s.created_at DESC`,
     values
   );
   return result.rows;
+};
+
+const getAdminKycSummary = async () => {
+  const result = await pool.query(
+    `SELECT status, COUNT(*)::int AS count,
+            COUNT(*) FILTER (WHERE status = 'pending' AND created_at < NOW() - INTERVAL '3 days')::int AS overdue
+       FROM kyc_submissions
+      GROUP BY status`
+  );
+  const summary = { pending: 0, needs_changes: 0, approved: 0, rejected: 0, overdue: 0 };
+  for (const row of result.rows) {
+    summary[row.status] = row.count;
+    summary.overdue += row.overdue;
+  }
+  return summary;
 };
 
 const getSubmissionForAdmin = async (submissionId, actorId) => {
@@ -207,6 +224,9 @@ const reviewSubmission = async (submissionId, actorId, status, reviewNotes) => {
   if (!["approved", "needs_changes", "rejected"].includes(status)) {
     throw Object.assign(new Error("Choose approved, needs changes, or rejected."), { status: 400 });
   }
+  if (["needs_changes", "rejected"].includes(status) && !String(reviewNotes || "").trim()) {
+    throw Object.assign(new Error("Add a clear note so the applicant knows what to do next."), { status: 400 });
+  }
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -228,8 +248,18 @@ const reviewSubmission = async (submissionId, actorId, status, reviewNotes) => {
     await client.query(`UPDATE ${targetTable} SET ${targetColumn} = $1 WHERE user_id = $2`, [status, submission.user_id]);
     await client.query(
       `INSERT INTO kyc_access_logs (submission_id, actor_user_id, action, metadata)
-       VALUES ($1, $2, 'decision', jsonb_build_object('status', $3))`,
+       VALUES ($1, $2, 'decision', jsonb_build_object('status', $3::text))`,
       [submissionId, actorId, status]
+    );
+    const notificationMessage = status === "approved"
+      ? "Your identity verification is approved. You can continue using your Investor Mtaani account."
+      : status === "needs_changes"
+        ? "Your verification needs changes. Read the review note on your KYC page, update your details or documents, then submit again."
+        : "Your verification was not approved. Read the review note on your KYC page for more information.";
+    await client.query(
+      `INSERT INTO notifications (user_id, type, message, action_url)
+       VALUES ($1, 'kyc_update', $2, '/kyc')`,
+      [submission.user_id, notificationMessage]
     );
     await client.query("COMMIT");
     return true;
@@ -245,6 +275,7 @@ module.exports = {
   createSubmission,
   getMySubmissions,
   listSubmissionsForAdmin,
+  getAdminKycSummary,
   getSubmissionForAdmin,
   getDocumentForAdmin,
   reviewSubmission,

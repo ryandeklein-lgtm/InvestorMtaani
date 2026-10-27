@@ -4,7 +4,7 @@ import { useAuthContext } from "../contexts/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useAuthContext();
+  const { login, logout } = useAuthContext();
 
   const [selectedRole, setSelectedRole] = useState("");
   const [formData, setFormData] = useState({
@@ -27,8 +27,9 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedRole) {
-      setError("Please choose Business, Investor or Admin.");
+    const expectedRole = selectedRole;
+    if (!expectedRole) {
+      setError("Choose Investor, Business or Admin to continue.");
       return;
     }
 
@@ -38,28 +39,16 @@ function Login() {
     try {
       const response = await login(formData);
 
-      console.log("Login response:", response);
-
       if (!response || !response.user) {
+        logout();
         setError("Login failed. User information was not returned.");
-        setLoading(false);
         return;
       }
 
       const loggedInRole = String(response.user.role || "").toLowerCase();
-      const chosenRole = String(selectedRole).toLowerCase();
-
-      if (loggedInRole !== chosenRole) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        setError(
-          "This account is registered as " +
-            response.user.role +
-            ". Please choose the correct login option."
-        );
-
-        setLoading(false);
+      if (loggedInRole !== expectedRole) {
+        logout();
+        setError(`This account is registered as ${loggedInRole || "another account type"}. Choose its matching sign-in option.`);
         return;
       }
 
@@ -69,8 +58,6 @@ function Login() {
         navigate("/home", { replace: true });
       }
     } catch (err) {
-      console.error("Login error:", err);
-
       setError(
         err.response?.data?.message || "Invalid email or password."
       );
@@ -100,57 +87,28 @@ function Login() {
 
           <h1 className="im-login-title">Welcome back</h1>
 
-          <p className="im-login-subtitle">Choose how you want to sign in</p>
+          <p className="im-login-subtitle">Choose your account type, then sign in with your email and password.</p>
 
-          <div className="im-role-buttons">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRole("business");
-                setError("");
-              }}
-              className={
-                selectedRole === "business"
-                  ? "im-role-btn im-role-btn-business"
-                  : "im-role-btn"
-              }
-            >
-              <span className="im-role-icon">◈</span>
-              <span>Business</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRole("investor");
-                setError("");
-              }}
-              className={
-                selectedRole === "investor"
-                  ? "im-role-btn im-role-btn-investor"
-                  : "im-role-btn"
-              }
-            >
-              <span className="im-role-icon">◇</span>
-              <span>Investor</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRole("admin");
-                setError("");
-              }}
-              className={
-                selectedRole === "admin"
-                  ? "im-role-btn im-role-btn-admin"
-                  : "im-role-btn"
-              }
-            >
-              <span className="im-role-icon">✦</span>
-              <span>Admin</span>
-            </button>
-          </div>
+          <fieldset className="im-role-buttons" aria-required="true">
+            <legend className="im-role-legend">Sign in as</legend>
+            {[
+              { role: "investor", label: "Investor", icon: "◇" },
+              { role: "business", label: "Business", icon: "◈" },
+              { role: "admin", label: "Admin", icon: "✦" },
+            ].map(({ role, label, icon }) => (
+              <label key={role} className={`im-role-btn${selectedRole === role ? " is-selected" : ""}`}>
+                <input
+                  className="im-role-input"
+                  type="radio"
+                  name="account-role"
+                  value={role}
+                  checked={selectedRole === role}
+                  onChange={() => { setSelectedRole(role); setError(""); }}
+                />
+                <span aria-hidden="true">{icon}</span> {label}
+              </label>
+            ))}
+          </fieldset>
 
           {error && (
             <div className="im-error" role="alert">
@@ -241,11 +199,8 @@ function GlobalStyles() {
         .im-login-page {
           --void: #060911;
           --panel: #0e1626;
-          --panel-alt: #0b1220;
           --panel-border: rgba(61, 214, 245, 0.16);
           --cyan: #3dd6f5;
-          --violet: #8b7cf6;
-          --amber: #f5b13d;
           --text: #e7edf5;
           --muted: #7c8aa0;
           --danger: #f2545b;
@@ -461,87 +416,64 @@ function GlobalStyles() {
         }
 
         .im-role-buttons {
-          display: flex;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 10px;
-          margin-bottom: 24px;
+          margin: -8px 0 22px;
+          padding: 0;
+          border: 0;
+          min-width: 0;
+        }
+
+        .im-role-legend {
+          margin-bottom: 8px;
+          color: var(--muted);
+          font-size: 12px;
         }
 
         .im-role-btn {
-          display: flex;
+          position: relative;
+          display: inline-flex;
+          min-height: 48px;
           align-items: center;
           justify-content: center;
-          gap: 7px;
-
-          flex: 1;
-
-          min-height: 54px;
-
-          padding: 12px 6px;
-
+          gap: 8px;
           border: 1px solid var(--panel-border);
-          border-radius: 5px;
-
-          background: var(--panel-alt);
-
-          color: var(--text);
-
+          border-radius: 6px;
+          background: var(--panel);
+          color: var(--muted);
           cursor: pointer;
-
-          font-family: "JetBrains Mono", monospace;
-          font-size: 12px;
-          font-weight: 600;
-
-          transition:
-            transform 0.2s ease,
-            border-color 0.2s ease,
-            background 0.2s ease,
-            box-shadow 0.2s ease;
+          font: 600 12px "Space Grotesk", sans-serif;
+          white-space: nowrap;
+          transition: border-color .18s ease, color .18s ease, background .18s ease;
         }
 
-        .im-role-btn:hover {
-          transform: translateY(-1px);
-
-          border-color: rgba(61, 214, 245, 0.45);
-
-          background: rgba(61, 214, 245, 0.05);
+        .im-role-btn:hover,
+        .im-role-btn:focus-within {
+          border-color: rgba(61, 214, 245, .55);
+          color: var(--text);
         }
 
-        .im-role-icon {
-          font-size: 16px;
-          opacity: 0.9;
+        .im-role-btn:focus-within {
+          outline: 2px solid var(--cyan);
+          outline-offset: 2px;
         }
 
-        .im-role-btn-business {
+        .im-role-input {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          opacity: 0;
+          cursor: pointer;
+        }
+
+        .im-role-btn.is-selected {
           border-color: var(--cyan);
-
-          background: rgba(61, 214, 245, 0.10);
-
+          background: rgba(61, 214, 245, .1);
           color: var(--cyan);
-
-          box-shadow:
-            0 0 20px rgba(61, 214, 245, 0.07);
-        }
-
-        .im-role-btn-investor {
-          border-color: var(--violet);
-
-          background: rgba(139, 124, 246, 0.11);
-
-          color: var(--violet);
-
-          box-shadow:
-            0 0 20px rgba(139, 124, 246, 0.07);
-        }
-
-        .im-role-btn-admin {
-          border-color: var(--amber);
-
-          background: rgba(245, 177, 61, 0.10);
-
-          color: var(--amber);
-
-          box-shadow:
-            0 0 20px rgba(245, 177, 61, 0.07);
+          box-shadow: 0 0 20px rgba(61, 214, 245, .07);
         }
 
         .im-error {
@@ -764,14 +696,6 @@ function GlobalStyles() {
 
           .im-login-title {
             font-size: 26px;
-          }
-
-          .im-role-buttons {
-            gap: 6px;
-          }
-
-          .im-role-btn {
-            font-size: 11px;
           }
         }
       `}

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import BackButton from "../components/BackButton";
+import "./InvestorProfile.css";
 
 const COLORS = {
   bg: "#060911",
@@ -54,6 +55,7 @@ function getInitials(name) {
 function ProfileStat({ label, value, accent }) {
   return (
     <div
+      className="im-investor-stat"
       style={{
         background: "rgba(255,255,255,0.025)",
         border: "1px solid rgba(255,255,255,0.07)",
@@ -63,6 +65,7 @@ function ProfileStat({ label, value, accent }) {
       }}
     >
       <div
+        className="im-investor-stat-label"
         style={{
           fontSize: 11,
           fontFamily: "'JetBrains Mono', monospace",
@@ -172,6 +175,13 @@ function SectionTitle({ eyebrow, title, description }) {
 }
 
 function Pill({ children, color }) {
+  const colorMatch = color?.match(/^#([\da-f]{6})$/i);
+  const tint = colorMatch
+    ? `rgba(${parseInt(colorMatch[1].slice(0, 2), 16)}, ${parseInt(colorMatch[1].slice(2, 4), 16)}, ${parseInt(colorMatch[1].slice(4, 6), 16)}, 0.12)`
+    : color?.startsWith("rgb(")
+      ? color.replace("rgb(", "rgba(").replace(")", ", 0.12)")
+      : "rgba(61,214,245,0.08)";
+
   return (
     <span
       style={{
@@ -179,9 +189,7 @@ function Pill({ children, color }) {
         alignItems: "center",
         padding: "7px 11px",
         borderRadius: 999,
-        background: color
-          ? color.replace(")", ", 0.10)").replace("rgb(", "rgba(")
-          : "rgba(61,214,245,0.08)",
+        background: tint,
         border: "1px solid rgba(255,255,255,0.08)",
         color: color || COLORS.light,
         fontSize: 12,
@@ -212,7 +220,7 @@ export default function InvestorProfile() {
         const response = await api.get("/investors/me");
 
         if (mounted) {
-          setInvestor(response.data);
+          setInvestor(response.data?.data || response.data || null);
         }
       } catch (err) {
         console.error("Failed to load investor profile:", err);
@@ -242,15 +250,15 @@ export default function InvestorProfile() {
     if (!investor) return 0;
 
     const fields = [
-      investor.name,
+      investor.display_name || investor.name,
       investor.location,
       investor.investor_type,
-      investor.investment_thesis,
+      investor.investment_thesis || investor.thesis,
       investor.investment_criteria,
-      investor.check_size,
+      investor.check_size || investor.min_check_size || investor.max_check_size,
       investor.preferred_stage,
       investor.geographic_focus,
-      investor.sectors,
+      investor.sectors || investor.sectors_of_interest,
       investor.portfolio_highlights,
     ];
 
@@ -476,6 +484,7 @@ export default function InvestorProfile() {
   const name =
     investor.name ||
     investor.investor_name ||
+    investor.display_name ||
     investor.full_name ||
     "Investor";
 
@@ -503,12 +512,14 @@ export default function InvestorProfile() {
     investor.criteria ||
     "No investment criteria have been added yet.";
 
+  const minCheckSize = investor.min_check_size || investor.minimum_investment;
+  const maxCheckSize = investor.max_check_size || investor.max_investment;
   const checkSize =
     investor.check_size ||
     investor.investment_range ||
-    investor.minimum_investment ||
-    investor.max_investment ||
-    "";
+    (minCheckSize || maxCheckSize
+      ? `${minCheckSize ? formatMoney(minCheckSize) : "Any"} – ${maxCheckSize ? formatMoney(maxCheckSize) : "Flexible"}`
+      : "");
 
   const preferredStage =
     investor.preferred_stage ||
@@ -540,7 +551,11 @@ export default function InvestorProfile() {
     investor.status ||
     "Active";
 
-  let sectors = investor.sectors || investor.preferred_sectors || [];
+  let sectors =
+    investor.sectors ||
+    investor.sectors_of_interest ||
+    investor.preferred_sectors ||
+    [];
 
   if (typeof sectors === "string") {
     sectors = sectors
@@ -555,6 +570,7 @@ export default function InvestorProfile() {
 
   return (
     <div
+      className="im-investor-profile"
       style={{
         minHeight: "100vh",
         background: COLORS.bg,
@@ -618,6 +634,7 @@ export default function InvestorProfile() {
         <BackButton />
 
         <section
+          className="im-investor-profile-hero"
           style={{
             marginTop: 25,
             borderRadius: 26,
@@ -818,6 +835,7 @@ export default function InvestorProfile() {
         </section>
 
         <div
+          className="im-investor-profile-layout"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1.55fr) minmax(300px, 0.8fr)",
@@ -1270,7 +1288,7 @@ export default function InvestorProfile() {
                 </button>
 
                 <button
-                  onClick={() => navigate("/messages")}
+                  onClick={() => navigate("/matchmaking")}
                   style={{
                     width: "100%",
                     textAlign: "left",
@@ -1285,7 +1303,7 @@ export default function InvestorProfile() {
                 >
                   <span style={{ color: COLORS.green }}>04</span>
                   <span style={{ marginLeft: 12 }}>
-                    Open Messages
+                    View Introductions
                   </span>
                 </button>
               </div>
@@ -1334,7 +1352,7 @@ export default function InvestorProfile() {
                 }}
               >
                 Explore businesses that match your investment
-                thesis and start meaningful matchmaking conversations.
+                thesis and request confidential introductions to suitable opportunities.
               </p>
 
               <button

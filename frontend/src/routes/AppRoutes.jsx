@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -26,7 +26,6 @@ import InvestorForm from "./pages/InvestorForm";
 // Investor Pages
 import Watchlist from "./pages/Watchlist";
 import Portfolio from "./pages/Portfolio";
-import Messages from "./pages/Messages";
 
 // Other
 import Funding from "./pages/Funding";
@@ -41,6 +40,17 @@ import AdminPage from "./pages/AdminPage";
 const BUSINESS_ONLY = ["business"];
 const INVESTOR_ONLY = ["investor"];
 const BUSINESS_OR_INVESTOR = ["business", "investor"];
+
+function LegacyMessagesRedirect() {
+  let destination = "/login";
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.role === "business") destination = "/business-matches";
+    else if (user?.role === "investor") destination = "/matchmaking";
+    else if (user) destination = "/home";
+  } catch { /* Send malformed or missing local sessions to sign-in. */ }
+  return <Navigate to={destination} replace />;
+}
 
 function Layout() {
   const location = useLocation();
@@ -154,14 +164,7 @@ function Layout() {
         />
 
         {/* Shared pages */}
-        <Route
-          path="/messages"
-          element={
-            <ProtectedRoute roles={BUSINESS_OR_INVESTOR}>
-              <Messages />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/messages" element={<LegacyMessagesRedirect />} />
 
         <Route
           path="/funding"

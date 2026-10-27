@@ -1,5 +1,10 @@
 const investorService = require("../services/investorService");
 
+const privateProfileResponse = (res) => res.status(404).json({
+  success: false,
+  message: "Investor profiles are private. Use Investor Mtaani introductions to connect.",
+});
+
 // Create investor profile
 const createInvestor = async (req, res) => {
   try {
@@ -24,6 +29,7 @@ const createInvestor = async (req, res) => {
 
 // Get all investors
 const getAllInvestors = async (req, res) => {
+  if (req.user?.role !== "admin") return privateProfileResponse(res);
   try {
     const investors = await investorService.getAllInvestors();
 
@@ -43,6 +49,7 @@ const getAllInvestors = async (req, res) => {
 
 // Get investor by ID and count the profile view
 const getInvestorById = async (req, res) => {
+  if (req.user?.role !== "admin") return privateProfileResponse(res);
   try {
     const investor =
       await investorService.getInvestorByIdAndIncrementViews(
@@ -100,6 +107,11 @@ const getMyInvestor = async (req, res) => {
 // Update investor profile
 const updateInvestor = async (req, res) => {
   try {
+    const existing = await investorService.getInvestorById(req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: "Investor profile not found." });
+    if (req.user.role !== "admin" && String(existing.user_id) !== String(req.user.id)) {
+      return res.status(404).json({ success: false, message: "Investor profile not found." });
+    }
     const investor = await investorService.updateInvestor(
       req.params.id,
       req.body
@@ -122,6 +134,11 @@ const updateInvestor = async (req, res) => {
 // Delete investor profile
 const deleteInvestor = async (req, res) => {
   try {
+    const existing = await investorService.getInvestorById(req.params.id);
+    if (!existing) return res.status(404).json({ success: false, message: "Investor profile not found." });
+    if (req.user.role !== "admin" && String(existing.user_id) !== String(req.user.id)) {
+      return res.status(404).json({ success: false, message: "Investor profile not found." });
+    }
     await investorService.deleteInvestor(req.params.id);
 
     res.json({

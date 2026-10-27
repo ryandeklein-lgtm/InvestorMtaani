@@ -1,4 +1,5 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const router = express.Router();
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -11,6 +12,14 @@ const {
   updateMatchStatus,
 } = require("../controllers/matchmakingController");
 
+const introductionLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: "You’ve sent several introduction requests. Please try again later." },
+});
+
 // Rule-based opportunity suggestions from a saved investor profile.
 router.get("/suggestions", authMiddleware, getInvestorSuggestions);
 
@@ -18,6 +27,7 @@ router.get("/suggestions", authMiddleware, getInvestorSuggestions);
 router.post(
   "/business/:businessId",
   authMiddleware,
+  introductionLimiter,
   createMatchmakingRequest
 );
 

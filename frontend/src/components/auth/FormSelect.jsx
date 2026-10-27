@@ -8,12 +8,13 @@ function FormSelect({
 }) {
   return (
     <div className="form-group">
-      <label className="form-label">
+      <label className="form-label" htmlFor={name}>
         {label}
         {required && <span className="required">*</span>}
       </label>
 
       <select
+        id={name}
         className="form-select"
         name={name}
         value={value}

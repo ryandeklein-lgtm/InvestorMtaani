@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuthContext } from "../contexts/AuthContext";
+import useSecureDraft from "../hooks/useSecureDraft";
 
 const ACCEPTED_FILES = ".pdf,.jpg,.jpeg,.png";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -21,6 +22,14 @@ const INVESTOR_DOCUMENTS = [
   ["source_of_funds", "Source of funds document", true],
   ["ownership_record", "Organization registration / ownership", false],
 ];
+
+const formatDate = (value) => value ? new Date(value).toLocaleString() : null;
+const statusHelp = (status) => ({
+  pending: "We’ve received your information and documents. An administrator is reviewing them. You don’t need to submit again; we’ll notify you when there’s an update.",
+  needs_changes: "Please read the reviewer’s note below, correct the listed details or documents, and submit the updated information for another review.",
+  approved: "Your identity verification is complete. You can continue to your profile and explore the platform.",
+  rejected: "This submission was not approved. Read the reviewer’s note below. Correct the issue and submit again if appropriate.",
+}[status] || "Your verification status is available below.");
 
 function Field({ label, value, onChange, required = true, type = "text", multiline = false }) {
   const shared = {
@@ -46,6 +55,8 @@ export default function KYCFlow() {
   const documents = isBusiness ? BUSINESS_DOCUMENTS : INVESTOR_DOCUMENTS;
   const [status, setStatus] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
+  const [statusUnavailable, setStatusUnavailable] = useState(false);
+  const [statusAttempt, setStatusAttempt] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [files, setFiles] = useState({});
   const [accepted, setAccepted] = useState(false);
@@ -61,19 +72,24 @@ export default function KYCFlow() {
     fullName: user?.name || "", investorType: "", country: "Kenya", address: "",
     occupation: "", sourceOfFunds: "",
   });
+  const draft = useSecureDraft("/kyc/draft", {
+    value: isBusiness ? business : investor,
+    setValue: isBusiness ? setBusiness : setInvestor,
+    enabled: !loadingStatus && !statusUnavailable && status?.status !== "pending" && status?.status !== "approved" && !submitting,
+  });
 
   useEffect(() => {
     let active = true;
     api.get("/kyc/me")
       .then(({ data }) => {
-        if (active) setStatus(data.data?.[0] || null);
+        if (active) { setStatus(data.data?.[0] || null); setStatusUnavailable(false); }
       })
       .catch(() => {
-        if (active) setError("KYC status is unavailable. Confirm that the server database migrations have been applied.");
+        if (active) { setStatusUnavailable(true); setError("We couldn’t check your current verification status. Retry before continuing so we don’t create duplicate submissions."); }
       })
       .finally(() => { if (active) setLoadingStatus(false); });
     return () => { active = false; };
-  }, []);
+  }, [statusAttempt]);
 
   const uploadedCount = useMemo(() => Object.keys(files).length, [files]);
   const locked = status?.status === "pending" || status?.status === "approved";
@@ -149,6 +165,7 @@ export default function KYCFlow() {
       });
       setStatus(data.data);
       setFiles({});
+      draft.clearDraft().catch(() => {});
       setMessage(data.message || "Your encrypted KYC submission is awaiting review.");
     } catch (submitError) {
       setError(submitError.response?.data?.message || "KYC submission failed. Please try again.");
@@ -164,7 +181,7 @@ export default function KYCFlow() {
     <main style={pageStyle}>
       <section className="im-kyc-card" style={cardStyle}>
         <style>{`
-          .im-kyc-file-trigger { position: relative; display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border: 1px solid #28485f; border-radius: 8px; background: #101d30; }
+          .im-kyc-file-trigger { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid #28485f; border-radius: 8px; background: #101d30; }
           .im-kyc-file-trigger:hover { border-color: #38bdf8; background: #14243a; }
           .im-kyc-file-trigger:focus-within { outline: 3px solid rgba(56,189,248,.35); outline-offset: 2px; }
           .im-kyc-file-trigger input { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
@@ -176,7 +193,7 @@ export default function KYCFlow() {
           Submit the required details and evidence for a manual review. Documents are encrypted before they are stored and are only available to authorized administrators.
         </p>
 
-        {!loadingStatus && !locked && <section aria-label="Verification completion" style={{ margin: "24px 0 30px", padding: 18, border: "1px solid #26394e", borderRadius: 12, background: "linear-gradient(120deg,rgba(14,165,233,.08),rgba(129,140,248,.06))" }}>
+        {!loadingStatus && !statusUnavailable && !locked && <section aria-label="Verification completion" style={{ margin: "24px 0 30px", padding: 18, border: "1px solid #26394e", borderRadius: 12, background: "linear-gradient(120deg,rgba(14,165,233,.08),rgba(129,140,248,.06))" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
             <strong style={{ color: "#e2e8f0" }}>{progress === 100 ? "Ready to submit" : `${progress}% complete`}</strong>
             <span style={{ color: "#94a3b8", fontSize: 13 }}>{completedRequirements} of {totalRequirements} required items</span>
@@ -195,17 +212,31 @@ export default function KYCFlow() {
         </section>}
 
         {loadingStatus && <p role="status">Loading verification status…</p>}
+        {statusUnavailable && !loadingStatus && <button type="button" onClick={() => { setError(""); setLoadingStatus(true); setStatusAttempt((attempt) => attempt + 1); }} style={{ minHeight: 44, padding: "0 14px", borderRadius: 8, border: "1px solid #334155", background: "#101d30", color: "#7dd3fc", cursor: "pointer" }}>Retry status check</button>}
         {status && (
-          <div role="status" style={{ margin: "20px 0", padding: 16, borderRadius: 10, background: "#111c2f", border: "1px solid #334155" }}>
+          <div role="status" style={{ margin: "20px 0", padding: 18, borderRadius: 10, background: "#111c2f", border: "1px solid #334155" }}>
             <strong>Status: {status.status.replaceAll("_", " ").toUpperCase()}</strong>
-            {status.review_notes && <p style={{ color: "#cbd5e1" }}>Reviewer note: {status.review_notes}</p>}
-            {status.status === "pending" && <p style={{ color: "#94a3b8" }}>Your submission is waiting for an administrator’s review.</p>}
+            <p style={{ color: "#cbd5e1", lineHeight: 1.65, margin: "8px 0" }}>{statusHelp(status.status)}</p>
+            {status.review_notes && <div style={{ marginTop: 12, padding: 13, borderLeft: "3px solid #f1c75b", borderRadius: 6, background: "#0b1220" }}><strong>Reviewer’s note</strong><p style={{ color: "#e2e8f0", whiteSpace: "pre-wrap", margin: "6px 0 0" }}>{status.review_notes}</p></div>}
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 12, color: "#94a3b8", fontSize: 12 }}>
+              {formatDate(status.created_at) && <span>Submitted {formatDate(status.created_at)}</span>}
+              {formatDate(status.reviewed_at) && <span>Reviewed {formatDate(status.reviewed_at)}</span>}
+            </div>
+            {status.status === "approved" && <Link to={isBusiness ? "/business-profile" : "/investor-profile"} style={{ display: "inline-flex", minHeight: 44, alignItems: "center", marginTop: 10, color: "#7dd3fc", fontWeight: 700 }}>Continue to your profile →</Link>}
           </div>
         )}
+        {!loadingStatus && !statusUnavailable && !locked && <p role="status" style={{ color: "#94a3b8", fontSize: 13 }}>
+          {draft.status === "saving" ? "Saving your answers securely…" : draft.status === "saved" || draft.status === "restored" ? "Your answers are saved securely and can be continued later." : draft.status === "save-error" || draft.status === "unavailable" ? "Answers could not be saved. You can still submit this form, but keep this page open until you do." : "Your answers will be saved securely as you work."}
+          {Object.keys(files).length > 0 && " Selected files stay on this device until submission; choose them again if you return later."}
+        </p>}
+        {!loadingStatus && !statusUnavailable && !locked && ["unavailable", "save-error"].includes(draft.status) && <button type="button" onClick={() => draft.status === "unavailable" ? draft.retryLoad() : draft.saveNow().catch(() => {})} style={{ minHeight: 44, margin: "-4px 0 12px", padding: "0 12px", border: "1px solid #334155", borderRadius: 8, background: "#101d30", color: "#7dd3fc", cursor: "pointer" }}>
+          {draft.status === "unavailable" ? "Retry draft connection" : "Retry saving answers"}
+        </button>}
         {error && <p role="alert" style={{ padding: 14, color: "#fecaca", background: "#451a1a", borderRadius: 8 }}>{error}</p>}
         {message && <p role="status" style={{ padding: 14, color: "#bbf7d0", background: "#052e24", borderRadius: 8 }}>{message}</p>}
 
-        {!loadingStatus && !locked && (
+        {!loadingStatus && !statusUnavailable && !locked && draft.status === "loading" && <p role="status">Checking for saved answers…</p>}
+        {!loadingStatus && !statusUnavailable && !locked && draft.status !== "loading" && (
           <form onSubmit={submit}>
             <h2 style={{ marginTop: 30 }}>Your information</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 18 }}>
@@ -236,7 +267,7 @@ export default function KYCFlow() {
             </div>
 
             <h2 style={{ marginTop: 34 }}>Documents</h2>
-            <p style={{ color: "#94a3b8" }}>PDF, JPEG, or PNG; maximum 5 MB per file and 8 files per submission. Uploaded: {uploadedCount}/8.</p>
+            <p style={{ color: "#94a3b8" }}>PDF, JPEG, or PNG; maximum 5 MB per file and 8 files per submission. Uploaded: {uploadedCount}/8. Add clear, current documents that match the name and organization in your application.</p>
             <div style={{ display: "grid", gap: 12 }}>
               {documents.map(([type, title, required]) => (
                 <div key={type} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, padding: 14, background: "#0f172a", border: "1px solid #263449", borderRadius: 10 }}>
